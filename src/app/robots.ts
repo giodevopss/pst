@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { resolvePublicSiteOrigin } from "@/lib/public-site";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://copa2026.store";
+const BASE = resolvePublicSiteOrigin();
 
 export default function robots(): MetadataRoute.Robots {
   return {

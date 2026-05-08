@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
 import "./globals.css";
+import { publicMetadataBase } from "@/lib/public-site";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CartProvider } from "@/lib/cart";
@@ -23,7 +24,7 @@ const bebas = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://copa2026.store"),
+  metadataBase: publicMetadataBase(),
   title: {
     default: "Copa 2026 Store — Álbum oficial e camisetas das seleções",
     template: "%s | Copa 2026 Store",

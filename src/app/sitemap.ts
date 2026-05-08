@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { PRODUTOS } from "@/data/produtos";
+import { resolvePublicSiteOrigin } from "@/lib/public-site";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://copa2026.store";
+const BASE = resolvePublicSiteOrigin();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
