@@ -1,0 +1,24 @@
+node_modules
+.next
+.git
+.gitignore
+.npmrc
+.yarn
+*.log*
+npm-debug.log*
+.DS_Store
+.vscode
+.cursor
+**/agent-transcripts
+coverage
+.turbo
+
+# Secrets (use variáveis do Railway)
+.env
+.env.*
+!.env.example
+
+# Docs (reduz contexto da build)
+README.md
+
+# Docker já é lido por fora do contexto onde necessário

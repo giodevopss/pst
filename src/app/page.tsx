@@ -1,65 +1,238 @@
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, ShieldCheck, Sparkles, Star, Truck } from "lucide-react";
+import { Hero } from "@/components/Hero";
+import { ProductCard } from "@/components/ProductCard";
+import { SectionHeading } from "@/components/SectionHeading";
+import { produtosDestaque, produtosPacotes, getProduto } from "@/data/produtos";
+import { ProductImage } from "@/components/ProductImage";
+import { formatBRL } from "@/lib/utils";
+import { AddToCartButton } from "@/components/AddToCartButton";
+
+const FEATURES = [
+  {
+    icon: ShieldCheck,
+    title: "Coleção Panini oficial",
+    text:
+      "FIFA World Cup 2026™: oficial na Panini (álbum, envelopes, boxes e Adrenalyn XL™).",
+  },
+  {
+    icon: Truck,
+    title: "Envio para todo Brasil",
+    text: "Entrega em até 48h após a confirmação do pagamento.*",
+  },
+  {
+    icon: Sparkles,
+    title: "Pague com PIX",
+    text: "Aprovação instantânea e desconto especial em todo o site.",
+  },
+];
 
 export default function Home() {
+  const destaques = produtosDestaque();
+  const combos = produtosPacotes().slice(0, 3);
+  const albumDuro = getProduto("album-fifa-world-cup-2026-capa-dura-ouro")!;
+  const camisaBrasil = getProduto("camiseta-selecao-brasil")!;
+  const camisaBrasilII = getProduto("camiseta-selecao-brasil-ii")!;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      <Hero />
+
+      <section className="border-y border-border bg-background-elev/40">
+        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-6 md:grid-cols-3 md:px-8 md:py-8">
+          {FEATURES.map((f) => {
+            const Icon = f.icon;
+            return (
+              <div
+                key={f.title}
+                className="group rounded-2xl border border-border/80 bg-background-elev/80 p-5 transition-all hover:-translate-y-0.5 hover:border-brand-yellow/50 hover:bg-surface/80"
+              >
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-brand-yellow/35 bg-brand-yellow/10">
+                  <Icon className="h-5 w-5 text-brand-yellow" />
+                </div>
+                <p className="mt-3 font-display text-lg tracking-wide text-foreground">
+                  {f.title}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-muted">{f.text}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="relative mx-auto max-w-7xl px-4 py-24 md:px-8">
+        <SectionHeading
+          eyebrow="Panini x FIFA World Cup 2026™"
+          title="Mais procurados"
+          description="Destaques da pré-venda FIFA World Cup 2026™ — capa dura ouro, capa cartão, combos e Adrenalyn XL™, mais a camisa do Brasil."
+          cta={{ href: "/album", label: "Ver catálogo" }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {destaques.map((p) => (
+            <ProductCard key={p.id} produto={p} />
+          ))}
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-brand-blue/[0.04] via-transparent to-brand-yellow/[0.05]" />
+        <div className="pointer-events-none absolute -left-20 top-8 h-56 w-56 rounded-full bg-brand-cyan/12 blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-1/3 h-72 w-72 rounded-full bg-brand-magenta/10 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-brand-yellow/12 blur-3xl" />
+        <div className="pointer-events-none absolute inset-0 gradient-conic opacity-10 blur-[90px]" />
+        <div className="relative mx-auto max-w-7xl px-4 pb-24 md:px-8">
+          <SectionHeading
+            title="Combos"
+            description="Seleção de pacotes com camisa do Brasil + álbum + figurinhas/Adrenalyn para comprar tudo de uma vez."
+            cta={{ href: "/pacotes", label: "Ver todos os combos" }}
+          />
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {combos.map((p) => (
+              <ProductCard key={p.id} produto={p} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-brand-yellow/[0.04] to-transparent" />
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-24 md:px-8 lg:grid-cols-2">
+          <div className="relative">
+            <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-brand-yellow/30 via-brand-green/20 to-brand-blue/20 blur-2xl" />
+            <div className="relative">
+              <ProductImage produto={albumDuro} className="aspect-[4/5] rounded-[2rem]" />
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
+              Coleção definitiva
+            </p>
+            <h2 className="mt-3 font-display text-4xl leading-tight tracking-tight md:text-6xl">
+              O álbum mais esperado<br />
+              <span className="gradient-text">já tem dono.</span>
+            </h2>
+            <p className="mt-5 max-w-xl text-base text-muted md:text-lg">
+              Cada página foi criada para eternizar craques, seleções e momentos inesquecíveis da Copa de
+              2026. Dos grandes confrontos aos novos talentos, tudo poderá ser revivido figurinha por
+              figurinha.
+            </p>
+
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+              {albumDuro.destaques.map((d) => (
+                <li key={d} className="flex items-start gap-2 text-sm text-foreground/90">
+                  <span className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-brand-yellow" />
+                  {d}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-8 flex flex-wrap items-baseline gap-3">
+              <span className="font-display text-4xl gradient-text">
+                {formatBRL(albumDuro.preco)}
+              </span>
+              {albumDuro.precoOriginal && (
+                <span className="text-base text-muted line-through">
+                  {formatBRL(albumDuro.precoOriginal)}
+                </span>
+              )}
+              <span className="rounded-full bg-brand-red/15 px-3 py-1 text-xs font-semibold text-brand-red">
+                Pré-venda · {Math.round(((albumDuro.precoOriginal! - albumDuro.preco) / albumDuro.precoOriginal!) * 100)}% OFF
+              </span>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link href="/album" className="btn-primary">
+                Garantir meu álbum
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href={`/camisetas/${camisaBrasil.slug}`} className="btn-secondary">
+                Ver camisa do Brasil
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-24 md:px-8">
+        <SectionHeading
+          eyebrow="Peça exclusiva"
+          title="Camiseta oficial do Brasil 2026 II"
+          description="Versão II da camisa oficial do Brasil, com tecido premium e acabamento especial."
+          cta={{ href: `/camisetas/${camisaBrasilII.slug}`, label: "Ver detalhes da Camiseta II" }}
+        />
+
+        <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_1fr]">
+          <div className="card-surface p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
+              Brasil 2026 II
+            </p>
+            <h3 className="mt-3 font-display text-4xl md:text-5xl">
+              Camiseta II com presença de estádio.
+            </h3>
+            <p className="mt-4 text-muted">
+              Segunda versão da camisa oficial do Brasil: visual alternativo com acabamento premium para
+              completar seu kit de torcedor.
+            </p>
+            <ul className="mt-6 space-y-3">
+              {camisaBrasilII.destaques.map((d) => (
+                <li key={d} className="flex items-center gap-2 text-sm">
+                  <Star className="h-4 w-4 text-brand-yellow" />
+                  {d}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <span className="font-display text-4xl gradient-text">
+                {formatBRL(camisaBrasilII.preco)}
+              </span>
+              <AddToCartButton produto={camisaBrasilII} label="Comprar Camiseta II" />
+            </div>
+          </div>
+          <div className="rounded-3xl border border-border bg-surface/50 p-6">
+            <ProductImage produto={camisaBrasilII} className="aspect-[4/5]" />
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/images/crowd-copa2026.png"
+            alt="Torcida brasileira em estádio"
+            fill
+            className="object-cover blur-[8px] scale-110"
+            sizes="100vw"
+            priority={false}
+          />
+        </div>
+        <div className="absolute inset-0 bg-[#050a14]/72" />
+        <div className="absolute inset-0 gradient-conic opacity-15 blur-3xl" />
+        <div className="relative mx-auto max-w-5xl px-4 py-24 text-center md:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
+            #Copa2026
           </p>
+          <h2 className="mt-3 font-display text-4xl leading-[0.95] tracking-tight md:text-7xl">
+            DA COLEÇÃO PRO ESTÁDIO.<br />
+            <span className="gradient-text">VOCÊ NA TORCIDA.</span>
+          </h2>
+          <p className="mx-auto mt-6 max-w-2xl text-base text-muted md:text-lg">
+            Garanta o álbum e os packs anunciados pela Panini e vista o Brasil — tudo alinhado ao hub oficial
+            FIFA World Cup 2026™ em colecionáveis.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/album" className="btn-primary">
+              Começar pelo álbum
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/camisetas" className="btn-secondary">
+              Comprar camiseta
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+    </>
   );
 }
