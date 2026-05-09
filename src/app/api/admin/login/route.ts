@@ -1,8 +1,11 @@
 import { timingSafeEqual } from "crypto";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE_NAME, createAdminCookieValue } from "@/lib/admin-cookie";
-import { getAdminPanelSecret, getAdminPasswordExpected } from "@/lib/admin-config";
+import {
+  adminSessionCookieOptions,
+  getAdminPanelSecret,
+  getAdminPasswordExpected,
+} from "@/lib/admin-config";
 
 function safeEqualPw(a: string, b: string): boolean {
   const ba = Buffer.from(a);
@@ -36,15 +39,12 @@ export async function POST(req: Request) {
   }
 
   const value = await createAdminCookieValue(secret);
-  const jar = await cookies();
 
-  jar.set(ADMIN_COOKIE_NAME, value, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 2 * 24 * 3600,
-  });
-
-  return NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true });
+  res.cookies.set(
+    ADMIN_COOKIE_NAME,
+    value,
+    adminSessionCookieOptions({ maxAgeSeconds: 2 * 24 * 3600 }),
+  );
+  return res;
 }

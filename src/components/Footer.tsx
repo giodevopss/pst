@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MessageCircle } from "lucide-react";
+import { Mail } from "lucide-react";
 import { Logo } from "./Logo";
 import { InstagramIcon, TiktokIcon } from "./SocialIcons";
 import { STORE_CONFIG } from "@/config/store";
@@ -7,7 +7,6 @@ import { PANINI_FIFA_2026_URL } from "@/config/panini";
 
 export function Footer() {
   const ano = new Date().getFullYear();
-  const wppHref = `https://wa.me/${STORE_CONFIG.whatsapp}`;
 
   return (
     <footer className="relative mt-32 border-t border-border bg-background-elev/60">
@@ -39,15 +38,6 @@ export function Footer() {
               aria-label="TikTok"
             >
               <TiktokIcon className="h-4 w-4" />
-            </Link>
-            <Link
-              href={wppHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted transition hover:border-brand-green hover:text-brand-green"
-              aria-label="WhatsApp"
-            >
-              <MessageCircle className="h-4 w-4" />
             </Link>
             <Link
               href={`mailto:${STORE_CONFIG.email}`}
@@ -83,7 +73,11 @@ export function Footer() {
           <h4 className="font-display text-lg tracking-wider text-foreground">Ajuda</h4>
           <ul className="mt-4 space-y-2 text-sm text-muted">
             <li><Link href="/sobre" className="hover:text-brand-yellow">Sobre a loja</Link></li>
-            <li><Link href={wppHref} target="_blank" className="hover:text-brand-yellow">Falar no WhatsApp</Link></li>
+            <li>
+              <Link href={`mailto:${STORE_CONFIG.email}`} className="hover:text-brand-yellow">
+                Contato por e-mail
+              </Link>
+            </li>
             <li><Link href="/sobre#frete" className="hover:text-brand-yellow">Frete e prazos</Link></li>
             <li><Link href="/sobre#trocas" className="hover:text-brand-yellow">Trocas e devoluções</Link></li>
           </ul>

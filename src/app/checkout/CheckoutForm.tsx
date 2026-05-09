@@ -9,14 +9,13 @@ import {
   CreditCard,
   Loader2,
   LogIn,
-  MessageCircle,
+  Mail,
   QrCode,
   ShoppingBag,
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatBRL } from "@/lib/utils";
 import { STORE_CONFIG } from "@/config/store";
-import { getSelecao } from "@/data/selecoes";
 import { CheckoutCreditCard3D } from "@/components/checkout/CheckoutCreditCard3D";
 import {
   digitsOnly,
@@ -227,60 +226,6 @@ export function CheckoutForm() {
     return okCliente && okCartao;
   }
 
-  function buildMessage(): string {
-    const linhas: string[] = [];
-    linhas.push("*NOVO PEDIDO — COPA 2026 STORE*");
-    linhas.push(`Pedido: ${orderId}`);
-    linhas.push("");
-    linhas.push("*Itens:*");
-    for (const i of items) {
-      const sel = i.selecaoSlug ? getSelecao(i.selecaoSlug) : undefined;
-      const tag = sel ? `${sel.bandeira} ` : "";
-      linhas.push(
-        `• ${tag}${i.nome}${i.tamanho ? ` (Tam ${i.tamanho})` : ""} — ${i.quantidade}x ${formatBRL(i.preco)} = ${formatBRL(i.preco * i.quantidade)}`,
-      );
-    }
-    linhas.push("");
-    linhas.push(`*Subtotal:* ${formatBRL(totalPrice)}`);
-
-    if (paymentModo === "pix") {
-      linhas.push(
-        stripePixEnabled
-          ? "*Pagamento:* PIX (Stripe — QR na página de confirmação)"
-          : "*Pagamento:* PIX",
-      );
-    } else {
-      linhas.push("*Pagamento:* Cartão de crédito");
-      linhas.push(`*Parcelas solicitadas:* ${parcelas}x no cartão`);
-      const u8 = lastEight(cardDigits);
-      if (u8) linhas.push(`_Confira no WhatsApp últimos dígitos do cartão:_ *${u8}*`);
-    }
-
-    linhas.push("");
-    linhas.push("*Cliente:*");
-    linhas.push(`Nome: ${data.nome}`);
-    if (data.email) linhas.push(`E-mail: ${data.email}`);
-    linhas.push(`Telefone: ${data.telefone}`);
-    linhas.push("");
-    linhas.push("*Entrega:*");
-    linhas.push(`CEP: ${data.cep}`);
-    linhas.push(
-      `${data.endereco}, ${data.numero}${data.complemento ? ` — ${data.complemento}` : ""}`,
-    );
-    linhas.push(`${data.bairro} — ${data.cidade}/${data.uf.toUpperCase()}`);
-    if (data.observacoes) {
-      linhas.push("");
-      linhas.push(`*Obs:* ${data.observacoes}`);
-    }
-
-    if (paymentModo === "cartao") {
-      linhas.push("");
-      linhas.push("_Envio seguro_: finalizamos o cartão pelo WhatsApp ou link da operadora conforme combinarmos.");
-    }
-
-    return linhas.join("\n");
-  }
-
   async function persistOrderAndRedirect(pagamento: PagamentoPersistidoSeguro) {
     try {
       const pedido = {
@@ -339,14 +284,10 @@ export function CheckoutForm() {
       }).catch(() => {});
     }
 
-    const msg = encodeURIComponent(buildMessage());
-    const wppUrl = `https://wa.me/${STORE_CONFIG.whatsapp}?text=${msg}`;
-    window.open(wppUrl, "_blank", "noopener,noreferrer");
-
     setTimeout(() => {
       clear();
       router.push(`/pedido/sucesso?id=${encodeURIComponent(orderId)}`);
-    }, 600);
+    }, 400);
   }
 
   async function handleLoginInline() {
@@ -673,7 +614,7 @@ export function CheckoutForm() {
                 className="form-input"
               />
             </Field>
-            <Field label="Telefone (WhatsApp)" required error={errors.telefone}>
+            <Field label="Telefone" required error={errors.telefone}>
               <input
                 type="tel"
                 value={data.telefone}
@@ -811,8 +752,8 @@ export function CheckoutForm() {
         <SectionCard title="Pagamento">
           <p className="text-sm text-muted">
             {stripePixEnabled && paymentModo === "pix"
-              ? "PIX via Stripe: após confirmar, você verá o QR Code nesta loja e na página de confirmação. No WhatsApp acertamos frete e tiramos dúvidas."
-              : "Escolha como quer fechar — no WhatsApp combinamos os detalhes finais da cobrança."}
+              ? "PIX via Stripe: após confirmar, você verá o QR Code nesta loja e na página de confirmação. Frete grátis em todo o Brasil."
+              : "Escolha PIX ou cartão. O frete é grátis; o total do pedido é o valor dos itens."}
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <button
@@ -852,7 +793,7 @@ export function CheckoutForm() {
               </span>
               <span>
                 <span className="block font-display text-lg tracking-wide">Cartão</span>
-                <span className="text-xs text-muted">Parcelamento combinado pela loja</span>
+                <span className="text-xs text-muted">Parcelas no checkout</span>
               </span>
             </button>
           </div>
@@ -926,7 +867,7 @@ export function CheckoutForm() {
                       ))}
                     </select>
                     <span className="mt-2 block text-[11px] text-muted">
-                      Condições e juros finalizamos com você pelo WhatsApp.
+                      Condições de parcelamento conforme o processador de pagamento.
                     </span>
                   </Field>
                 </div>
@@ -1011,7 +952,7 @@ export function CheckoutForm() {
             </div>
             <div className="mt-1 flex items-baseline justify-between">
               <span className="text-sm text-muted">Frete</span>
-              <span className="text-sm text-muted">A combinar</span>
+              <span className="text-sm font-medium text-brand-green">Grátis</span>
             </div>
             <div className="mt-4 flex items-baseline justify-between border-t border-border pt-4">
               <span className="font-display text-lg tracking-wide">Total</span>
@@ -1033,18 +974,18 @@ export function CheckoutForm() {
                 : submitPix
                   ? stripePixEnabled
                     ? "Gerar PIX (Stripe)"
-                    : "PIX e WhatsApp"
-                  : "Cartão via WhatsApp"}
+                    : "Finalizar com PIX"
+                  : "Finalizar com cartão"}
               {!checkoutBusy && <ArrowRight className="h-4 w-4" />}
             </button>
 
             <p className="mt-3 text-center text-[11px] leading-relaxed text-muted">
-              <MessageCircle className="-mt-px mr-1 inline h-3.5 w-3.5 align-middle" />
-              {submitPix
-                ? stripePixEnabled
-                  ? "O QR Code do PIX é gerado pelo Stripe. Também abrimos o WhatsApp com o resumo do pedido."
-                  : "Abrimos o WhatsApp com o resumo para acertar frete e enviar seu QR Code do PIX."
-                : "Na sequência abrimos o WhatsApp para concluir o cartão em ambiente seguro e combinar parcelas/juros."}
+              <Mail className="-mt-px mr-1 inline h-3.5 w-3.5 align-middle" />
+              Dúvidas?{" "}
+              <a href={`mailto:${STORE_CONFIG.email}`} className="text-foreground hover:text-brand-yellow">
+                {STORE_CONFIG.email}
+              </a>
+              . Frete grátis em todo o Brasil.
             </p>
           </div>
         </div>

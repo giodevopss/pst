@@ -83,8 +83,20 @@ function formatData(iso: string) {
 }
 
 export default async function AdminPedidosPage() {
-  const pedidos = await listPedidosRecent(350);
-  const usuarios = await listUsuarios(1000);
+  let pedidos: Awaited<ReturnType<typeof listPedidosRecent>> = [];
+  let usuarios: Awaited<ReturnType<typeof listUsuarios>> = [];
+  let dbError: string | null = null;
+
+  try {
+    [pedidos, usuarios] = await Promise.all([listPedidosRecent(350), listUsuarios(1000)]);
+  } catch (err) {
+    console.error("[admin/pedidos] MongoDB:", err);
+    dbError =
+      err instanceof Error
+        ? err.message
+        : "Não foi possível consultar o MongoDB.";
+  }
+
   const emailsCadastrados = new Set(usuarios.map((u) => u.email));
 
   return (
@@ -97,7 +109,8 @@ export default async function AdminPedidosPage() {
           <h1 className="mt-2 font-display text-4xl tracking-tight md:text-5xl">Pedidos</h1>
           <p className="mt-2 max-w-xl text-sm text-muted">
             Pedidos são gravados no servidor quando o cliente finaliza o checkout. Mais recentes
-            primeiro ({pedidos.length} carregados).
+            primeiro
+            {!dbError ? ` (${pedidos.length} carregados).` : "."}
           </p>
         </div>
         <form action="/api/admin/logout" method="post">
@@ -111,13 +124,28 @@ export default async function AdminPedidosPage() {
         </form>
       </header>
 
-      {pedidos.length === 0 ? (
+      {dbError ? (
+        <div className="mt-10 rounded-3xl border border-brand-red/35 bg-brand-red/10 px-6 py-6 md:px-8">
+          <p className="font-display text-xl text-foreground">Não conseguimos falar com o MongoDB</p>
+          <p className="mt-2 font-mono text-xs text-muted break-all">{dbError}</p>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted">
+            Em produção, confira <code className="text-foreground">MONGODB_URI</code> ou (Railway plugin){" "}
+            <code className="text-foreground">MONGO_URL</code>, e{" "}
+            <code className="text-foreground">MONGODB_DB</code> na hospedeira. No Atlas, libere o acesso de
+            rede (IP público ou <code className="text-foreground">0.0.0.0/0</code> em testes) e confirme usuário/senha
+            na URI. Erros tipo <strong className="text-foreground/90">&quot;socket timed out&quot;</strong> ou{" "}
+            <strong className="text-foreground/90">&quot;Server selection timed out&quot;</strong> são quase sempre
+            firewall ou URI incorreta.
+          </p>
+        </div>
+      ) : pedidos.length === 0 ? (
         <div className="mt-16 flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-border bg-surface/30 px-8 py-20 text-center">
           <Package className="h-12 w-12 text-muted" />
           <p className="font-display text-2xl tracking-wide">Nenhum pedido ainda</p>
           <p className="max-w-md text-sm text-muted">
-            Quando alguém concluir o checkout, o pedido aparece aqui (gravado no MongoDB via{" "}
-            <code className="text-foreground">MONGODB_URI</code>).
+            Quando alguém concluir o checkout, o pedido aparece aqui (MongoDB —
+            variável <code className="text-foreground">MONGODB_URI</code> ou{" "}
+            <code className="text-foreground">MONGO_URL</code> no Railway).
           </p>
           <Link href="/" className="text-sm text-brand-yellow hover:underline">
             Voltar à loja

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Check, CheckCircle2, Copy, CreditCard, MessageCircle, ShieldCheck } from "lucide-react";
+import { Check, CheckCircle2, Copy, CreditCard, Mail, ShieldCheck } from "lucide-react";
 import { STORE_CONFIG } from "@/config/store";
 import { formatBRL } from "@/lib/utils";
 import { getSelecao } from "@/data/selecoes";
@@ -60,14 +60,6 @@ export function SucessoClient() {
 
   const isPix = !pedido?.pagamento || pedido.pagamento.modo === "pix";
 
-  const wppHref = pedido
-    ? `https://wa.me/${STORE_CONFIG.whatsapp}?text=${encodeURIComponent(
-        isPix
-          ? `Olá! Acabei de fazer o pedido ${pedido.id} no site e gostaria de combinar o pagamento e o frete.`
-          : `Olá! Pedido ${pedido.id} — escolhi pagar com cartão. Quero finalizar o pagamento e o frete com vocês.`,
-      )}`
-    : `https://wa.me/${STORE_CONFIG.whatsapp}`;
-
   const stepsPix = [
     {
       title: "Pague com o PIX",
@@ -77,11 +69,11 @@ export function SucessoClient() {
     },
     {
       title: "Envie o comprovante",
-      text: "Mande o comprovante para nós no WhatsApp junto do número do pedido.",
+      text: `Se pagou por PIX, guarde o comprovante. Em caso de dúvida, escreva para ${STORE_CONFIG.email} com o número do pedido.`,
     },
     {
-      title: "Frete combinado",
-      text: "Calculamos o frete pelo seu CEP e te enviamos o valor final.",
+      title: "Frete grátis",
+      text: "O envio para o seu endereço não tem custo adicional nesta loja.",
     },
     {
       title: "Pedido despachado",
@@ -91,16 +83,16 @@ export function SucessoClient() {
 
   const stepsCartao = [
     {
-      title: "Fale com a loja no WhatsApp",
-      text: "Confirmamos os dados do pedido, parcelas e forma segura de pagamento com cartão.",
+      title: "Pedido registrado",
+      text: "Recebemos seu pedido e os dados de entrega. Confira o e-mail se informou um endereço válido.",
     },
     {
-      title: "Finalize o cartão com segurança",
-      text: "Enviamos link ou instruções conforme a operadora — nunca peça senha do cartão fora do fluxo oficial.",
+      title: "Pagamento com cartão",
+      text: "O cartão foi processado no checkout. Guarde a confirmação; em dúvidas, fale conosco pelo e-mail da loja.",
     },
     {
-      title: "Frete combinado",
-      text: "Calculamos o frete pelo seu CEP e fechamos o valor total.",
+      title: "Frete grátis",
+      text: "O envio para o seu endereço não tem custo adicional.",
     },
     {
       title: "Pedido despachado",
@@ -127,21 +119,19 @@ export function SucessoClient() {
                 {pixStripe ? (
                   <>
                     Pagamento via <span className="font-medium text-foreground">Stripe</span>. Use o
-                    QR ou o código abaixo. Também abrimos o WhatsApp para acertar frete e enviar o
-                    comprovante.
+                    QR ou o código abaixo. Frete grátis; guarde o comprovante do PIX.
                   </>
                 ) : (
                   <>
-                    Em alguns segundos abrimos o WhatsApp para acertarmos o frete e o comprovante.
-                    Enquanto isso, você já pode pagar com PIX abaixo.
+                    Frete grátis em todo o Brasil. Pague com PIX usando o QR ou a chave abaixo e
+                    guarde o comprovante.
                   </>
                 )}
               </>
             ) : (
               <>
-                Você escolheu <span className="font-medium text-foreground">cartão</span>. Abrimos o
-                WhatsApp para concluir o pagamento com segurança — não enviamos dados sensíveis pelo
-                chat.
+                Você escolheu <span className="font-medium text-foreground">cartão</span>. O pagamento foi
+                concluído no checkout com os dados protegidos; nunca armazenamos PAN completo nem CVV.
               </>
             )}
           </p>
@@ -221,8 +211,8 @@ export function SucessoClient() {
                   {formatBRL(pedido?.totalPrice ?? 0)}
                 </p>
                 <p className="mx-auto mt-4 max-w-xs text-sm text-muted">
-                  Pedido com cartão: siga no WhatsApp para fechar parcelas e receber o link ou maquininha
-                  conforme combinarmos.
+                  Pedido com cartão registrado no valor abaixo. Para suporte sobre parcelas ou
+                  confirmação, use o e-mail da loja.
                   {pedido?.pagamento?.modo === "cartao" && pedido.pagamento.parcelas ? (
                     <>
                       {" "}
@@ -261,9 +251,9 @@ export function SucessoClient() {
               ))}
             </ol>
 
-            <Link href={wppHref} target="_blank" className="btn-primary mt-7 w-full">
-              <MessageCircle className="h-4 w-4" />
-              {isPix ? "Abrir WhatsApp para enviar comprovante" : "Abrir WhatsApp — finalizar cartão"}
+            <Link href={`mailto:${STORE_CONFIG.email}`} className="btn-primary mt-7 w-full">
+              <Mail className="h-4 w-4" />
+              Falar com a loja por e-mail
             </Link>
 
             <div className="mt-4 flex items-start gap-3 rounded-2xl border border-border bg-surface/40 p-4 text-xs text-muted">

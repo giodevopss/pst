@@ -190,7 +190,7 @@ export function CheckoutCreditCard3D({
                 </div>
               </div>
               <div className="mt-auto pb-3 pt-10 text-[10px] leading-relaxed text-white/42">
-                Pré-visualização 3D. Número completo e CVV não são enviados ao servidor nem ao WhatsApp.
+                Pré-visualização 3D. Número completo e CVV não são enviados ao servidor nesta página.
               </div>
             </div>
           </motion.div>

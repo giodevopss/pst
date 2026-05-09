@@ -160,7 +160,7 @@ export function CartDrawer() {
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-muted">
-                  Frete calculado no próximo passo (a combinar via WhatsApp).
+                  Frete grátis — o valor acima já é seu total no checkout.
                 </p>
                 <Link
                   href="/checkout"

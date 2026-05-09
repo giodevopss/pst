@@ -109,7 +109,7 @@ export function ContaClient({
                 />
               </label>
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-muted">Telefone (WhatsApp)</span>
+                <span className="text-xs font-medium text-muted">Telefone</span>
                 <input
                   type="tel"
                   value={telefone}

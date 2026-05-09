@@ -104,10 +104,7 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
 
           <div className="mt-6 flex items-start gap-3 rounded-2xl border border-border bg-surface/40 p-4 text-sm text-muted">
             <Truck className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
-            <p>
-              Enviamos para todo o Brasil. O frete é combinado via WhatsApp logo após
-              a confirmação do pedido.
-            </p>
+            <p>Enviamos para todo o Brasil com frete grátis nesta loja.</p>
           </div>
         </div>
       </section>

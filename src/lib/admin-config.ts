@@ -22,3 +22,22 @@ export function getAdminPasswordExpected(): string | undefined {
   }
   return undefined;
 }
+
+/** Opções do cookie de sessão admin (login + logout). `ADMIN_COOKIE_INSECURE=1` força sem Secure em prod (só HTTP legacy). */
+export function adminSessionCookieOptions(
+  mode: { maxAgeSeconds: number } | { clear: true },
+): {
+  httpOnly: true;
+  secure: boolean;
+  sameSite: "lax";
+  path: string;
+  maxAge: number;
+} {
+  const secure =
+    process.env.NODE_ENV === "production" && process.env.ADMIN_COOKIE_INSECURE !== "1";
+  const base = { httpOnly: true as const, secure, sameSite: "lax" as const, path: "/" };
+  if ("clear" in mode) {
+    return { ...base, maxAge: 0 };
+  }
+  return { ...base, maxAge: mode.maxAgeSeconds };
+}

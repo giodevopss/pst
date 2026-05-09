@@ -3,9 +3,6 @@ export const STORE_CONFIG = {
   shortName: "Copa 2026",
   tagline: "FIFA World Cup 2026™ com a Panini — e o Brasil na coleção",
 
-  whatsapp: "5511999999999",
-  whatsappDisplay: "(11) 99999-9999",
-
   pix: {
     key: "pix@copa2026.store",
     keyType: "E-mail",
@@ -14,7 +11,7 @@ export const STORE_CONFIG = {
   },
 
   shipping: {
-    note: "Frete a combinar via WhatsApp após confirmação do pedido. Enviamos para todo o Brasil pelos Correios e transportadoras parceiras.",
+    note: "Frete grátis para todo o Brasil. Enviamos pelos Correios e transportadoras parceiras.",
   },
 
   social: {

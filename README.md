@@ -38,10 +38,10 @@ src/
     produto/[slug]/   # página de produto genérica (álbum / kit / figurinhas)
     selecoes/         # grid de seleções
     sobre/            # institucional
-    checkout/         # checkout que abre WhatsApp
+    checkout/         # checkout (PIX Stripe opcional / cartão, frete grátis)
     pedido/sucesso/   # tela com QR Code PIX
   components/         # componentes reutilizáveis
-  config/             # config da loja (WhatsApp, PIX, social, e-mail)
+  config/             # config da loja (PIX, social, e-mail)
   data/               # produtos e seleções (estático, edite à vontade)
   lib/                # carrinho, utils
 ```
@@ -50,7 +50,7 @@ src/
 
 Tudo o que muda no dia a dia está em arquivos simples:
 
-- **Dados da loja** (WhatsApp, chave PIX, e-mail): `src/config/store.ts`
+- **Dados da loja** (PIX, redes sociais, e-mail): `src/config/store.ts`
 - **Produtos e preços**: `src/data/produtos.ts`
 - **Seleções e cores**: `src/data/selecoes.ts`
 - **URL do modelo 3D do hero**: `NEXT_PUBLIC_HERO_MODEL_URL` no `.env.local`
@@ -66,17 +66,11 @@ Tudo o que muda no dia a dia está em arquivos simples:
 ## Fluxo de pedido
 
 1. Cliente monta o carrinho (persistido em `localStorage`).
-2. Em `/checkout` preenche dados e clica em "Pagar com PIX".
-3. Abre o WhatsApp da loja já com a mensagem do pedido pronta.
-4. Cliente é redirecionado para `/pedido/sucesso?id=...` com:
-   - QR Code da chave PIX
-   - Botão para copiar a chave
-   - Botão para abrir o WhatsApp e enviar o comprovante
-   - Resumo do pedido
-5. Você confirma o pagamento manualmente e despacha.
+2. Em `/checkout` preenche dados e escolhe **PIX** (chave da loja ou **Stripe**, se configurado) ou **cartão**.
+3. O pedido é enviado à API (`/api/pedidos`) para registro no MongoDB.
+4. Redirecionamento para `/pedido/sucesso?id=...` com QR/copia-e-cola (PIX), resumo do pedido e frete **grátis** anunciado no site.
 
-> Próxima fase: substituir o fluxo manual por gateway PIX (Mercado Pago / Asaas / Pagar.me)
-> com webhook para confirmação automática.
+> Stripe: webhook em `/api/stripe/webhook` para acompanhar confirmação de PIX onde aplicável.
 
 ## Deploy no Railway
 

@@ -4,7 +4,7 @@ import { CheckoutForm } from "./CheckoutForm";
 export const metadata: Metadata = {
   title: "Finalizar pedido",
   description:
-    "Complete seu pedido na Copa 2026 Store: pagamento via PIX e atendimento humano por WhatsApp.",
+    "Complete seu pedido na Copa 2026 Store: PIX e cartão, frete grátis em todo o Brasil.",
 };
 
 export default function CheckoutPage() {
@@ -18,8 +18,8 @@ export default function CheckoutPage() {
           Quase lá. <span className="gradient-text">Finalizar pedido.</span>
         </h1>
         <p className="mt-3 max-w-2xl text-muted">
-          Preencha seus dados, escolha PIX e em segundos você recebe o QR Code para pagar.
-          O frete é combinado com você no WhatsApp logo após confirmação do pedido.
+          Preencha seus dados e finalize com PIX ou cartão. Frete grátis para todo o Brasil — o total é
+          o valor dos itens, sem custo de envio.
         </p>
       </div>
 

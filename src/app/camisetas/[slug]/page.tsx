@@ -131,7 +131,7 @@ export default async function CamisetaDetalhe({ params }: { params: Promise<Para
             <Truck className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
             <p>
               Enviamos para todo o Brasil pelos Correios e transportadoras parceiras.
-              O valor do frete é combinado via WhatsApp após a confirmação do pedido.
+              Frete grátis em todo o Brasil nesta loja.
             </p>
           </div>
         </div>

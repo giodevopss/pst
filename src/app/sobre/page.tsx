@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, Truck, ShieldCheck, RefreshCcw, CreditCard, Mail, Gift } from "lucide-react";
+import { Truck, ShieldCheck, RefreshCcw, CreditCard, Mail, Gift } from "lucide-react";
 import { STORE_CONFIG } from "@/config/store";
 import { PaniniFaqAccordion } from "@/components/PaniniEditorial";
 
@@ -31,7 +31,7 @@ const SECTIONS = [
     icon: Truck,
     title: "Frete e prazos",
     body:
-      "Enviamos para todo o Brasil pelos Correios e transportadoras parceiras. O frete é calculado pelo seu CEP e combinado no WhatsApp logo após a confirmação do pedido. Despachamos em até 48h úteis após o pagamento confirmado.",
+      "Enviamos para todo o Brasil pelos Correios e transportadoras parceiras com frete grátis. Informe CEP e endereço no checkout. Despachamos em até 48h úteis após o pagamento confirmado.",
   },
   {
     id: "trocas",
@@ -43,8 +43,6 @@ const SECTIONS = [
 ];
 
 export default function SobrePage() {
-  const wppHref = `https://wa.me/${STORE_CONFIG.whatsapp}`;
-
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-20" />
@@ -101,15 +99,20 @@ export default function SobrePage() {
           <aside className="rounded-[2rem] border border-border bg-surface/35 p-6 md:p-8">
             <h3 className="font-display text-3xl tracking-tight">Placar final</h3>
             <p className="mt-3 text-muted">
-              Se quiser acelerar, chame no WhatsApp para confirmarmos o melhor caminho do seu pedido e
-              o frete do seu CEP.
+              Frete grátis para compras nesta loja. Para dúvidas sobre pedido, prazo ou produto,
+              prefira o e-mail — respondemos o quanto antes.
             </p>
             <div className="mt-6 space-y-3">
-              <Link href={wppHref} target="_blank" className="btn-primary w-full justify-center">
-                <MessageCircle className="h-4 w-4" /> Falar no WhatsApp
-              </Link>
-              <Link href={`mailto:${STORE_CONFIG.email}`} className="btn-secondary w-full justify-center">
+              <Link href={`mailto:${STORE_CONFIG.email}`} className="btn-primary w-full justify-center">
                 <Mail className="h-4 w-4" /> Enviar e-mail
+              </Link>
+              <Link
+                href={STORE_CONFIG.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary w-full justify-center"
+              >
+                Instagram
               </Link>
             </div>
 
