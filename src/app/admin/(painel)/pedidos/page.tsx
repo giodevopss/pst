@@ -116,9 +116,8 @@ export default async function AdminPedidosPage() {
           <Package className="h-12 w-12 text-muted" />
           <p className="font-display text-2xl tracking-wide">Nenhum pedido ainda</p>
           <p className="max-w-md text-sm text-muted">
-            Quando alguém concluir o checkout, o pedido aparece aqui. Em produção, monte um volume
-            persistente na pasta <code className="text-foreground">.data</code> ou migre para uma
-            base de dados.
+            Quando alguém concluir o checkout, o pedido aparece aqui (gravado no MongoDB via{" "}
+            <code className="text-foreground">MONGODB_URI</code>).
           </p>
           <Link href="/" className="text-sm text-brand-yellow hover:underline">
             Voltar à loja
@@ -145,6 +144,13 @@ export default async function AdminPedidosPage() {
                           : p.pagamento.ultimos4
                             ? ` · final (legado 4) •••• ${p.pagamento.ultimos4}`
                             : ""}
+                      </>
+                    ) : p.pagamento?.modo === "pix" && p.pagamento.stripePaymentIntentId ? (
+                      <>
+                        PIX · Stripe{" "}
+                        <span className="font-mono text-[10px] text-muted">
+                          ({p.pagamento.stripePaymentIntentId})
+                        </span>
                       </>
                     ) : (
                       "PIX"
@@ -184,6 +190,38 @@ export default async function AdminPedidosPage() {
                     O número completo do cartão e os dígitos do CVV não são armazenados. No admin aparece
                     só a máscara do CVV (3 ou 4 posições), além de titular, validade, trechos do PAN e
                     parcelas.
+                  </p>
+                </div>
+              ) : p.pagamento?.modo === "pix" && p.pagamento.stripePaymentIntentId ? (
+                <div className="border-b border-border bg-surface/25 px-6 py-4 md:px-8">
+                  <p className="font-display text-sm uppercase tracking-[0.2em] text-brand-yellow">
+                    PIX via Stripe
+                  </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <AdminKV k="PaymentIntent" v={p.pagamento.stripePaymentIntentId} />
+                    <AdminKV
+                      k="Expiração (PIX)"
+                      v={
+                        p.pagamento.stripePixExpiresAt != null
+                          ? formatData(
+                              new Date(p.pagamento.stripePixExpiresAt * 1000).toISOString(),
+                            )
+                          : "—"
+                      }
+                    />
+                  </div>
+                  <p className="mt-3 text-[10px] text-muted">
+                    QR e copia e cola foram mostrados ao cliente na confirmação do pedido. Status e
+                    liquidação no{" "}
+                    <a
+                      href={`https://dashboard.stripe.com/payments/${p.pagamento.stripePaymentIntentId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-brand-yellow hover:underline"
+                    >
+                      Stripe Dashboard
+                    </a>
+                    .
                   </p>
                 </div>
               ) : null}

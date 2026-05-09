@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { loadStripe } from "@stripe/stripe-js";
 import {
   ArrowRight,
   CreditCard,
@@ -11,7 +12,6 @@ import {
   MessageCircle,
   QrCode,
   ShoppingBag,
-  UserPlus,
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatBRL } from "@/lib/utils";
@@ -29,6 +29,7 @@ import {
   validateCvvForPan,
 } from "@/lib/credit-card";
 import type { UsuarioPublico } from "@/types/usuario";
+import type { PagamentoPersistidoSeguro } from "@/types/pedido-store";
 
 type FormData = {
   nome: string;
@@ -45,6 +46,16 @@ type FormData = {
 };
 
 type PaymentModo = "pix" | "cartao";
+
+/** Stripe.js typings omit PIX `next_action`; the API returns `pix_display_qr_code`. */
+type StripePixQrNextAction = {
+  type?: string;
+  pix_display_qr_code?: {
+    image_url_png?: string;
+    data?: string;
+    expires_at?: number;
+  };
+};
 
 const EMPTY: FormData = {
   nome: "",
@@ -108,6 +119,11 @@ export function CheckoutForm() {
   const [loginSenha, setLoginSenha] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
+
+  const stripePixEnabled =
+    typeof process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === "string" &&
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.length > 0;
 
   const fillFromUser = useCallback((u: UsuarioPublico) => {
     setData((prev) => {
@@ -174,7 +190,10 @@ export function CheckoutForm() {
     }
     if (data.uf && data.uf.length !== 2) errs.uf = "Use 2 letras (ex: SP)";
     if (data.cep && data.cep.replace(/\D/g, "").length !== 8) errs.cep = "CEP inválido";
-    if (criarConta && !loggedUser) {
+    if (paymentModo === "pix" && stripePixEnabled) {
+      if (!data.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email))
+        errs.email = "E-mail obrigatório para pagar com PIX (Stripe)";
+    } else if (criarConta && !loggedUser) {
       if (!data.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email))
         errs.email = "E-mail obrigatório para criar conta";
     } else if (data.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) {
@@ -225,7 +244,11 @@ export function CheckoutForm() {
     linhas.push(`*Subtotal:* ${formatBRL(totalPrice)}`);
 
     if (paymentModo === "pix") {
-      linhas.push("*Pagamento:* PIX");
+      linhas.push(
+        stripePixEnabled
+          ? "*Pagamento:* PIX (Stripe — QR na página de confirmação)"
+          : "*Pagamento:* PIX",
+      );
     } else {
       linhas.push("*Pagamento:* Cartão de crédito");
       linhas.push(`*Parcelas solicitadas:* ${parcelas}x no cartão`);
@@ -258,135 +281,7 @@ export function CheckoutForm() {
     return linhas.join("\n");
   }
 
-  async function handleLoginInline() {
-    setLoginError("");
-    if (!loginEmail || !loginSenha) {
-      setLoginError("Preencha e-mail e senha");
-      return;
-    }
-    setAuthLoading(true);
-    try {
-      const res = await fetch("/api/usuarios/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: loginEmail.trim().toLowerCase(), senha: loginSenha }),
-        credentials: "same-origin",
-      });
-      const d = await res.json();
-      if (!res.ok) {
-        setLoginError(d.error || "E-mail ou senha incorretos");
-        return;
-      }
-      setLoggedUser(d.usuario);
-      fillFromUser(d.usuario);
-      setAuthMode("none");
-      setLoginSenha("");
-      setLoginEmail("");
-    } catch {
-      setLoginError("Erro de conexão");
-    } finally {
-      setAuthLoading(false);
-    }
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    if (criarConta && !loggedUser) {
-      if (senha.length < 6) {
-        setSenhaError("Senha deve ter no mínimo 6 caracteres");
-        return;
-      }
-      setSenhaError("");
-      try {
-        const regRes = await fetch("/api/usuarios", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: data.email.trim().toLowerCase(),
-            nome: data.nome,
-            telefone: data.telefone,
-            senha,
-            endereco: {
-              cep: data.cep,
-              endereco: data.endereco,
-              numero: data.numero,
-              complemento: data.complemento,
-              bairro: data.bairro,
-              cidade: data.cidade,
-              uf: data.uf,
-            },
-          }),
-          credentials: "same-origin",
-        });
-        const regData = await regRes.json();
-        if (regRes.ok && regData.usuario) {
-          setLoggedUser(regData.usuario);
-        } else if (regRes.status !== 409) {
-          setSenhaError(regData.error || "Erro ao criar conta");
-          return;
-        }
-      } catch {
-        setSenhaError("Erro de conexão ao criar conta");
-        return;
-      }
-    }
-
-    const cvvDigits = digitsOnly(cardCvv);
-
-    // Se for cartão, envia dados sensíveis para fintech ANTES de gravar pedido
-    // CVV nunca é persistido - apenas enviado em trânsito HTTPS
-    if (paymentModo === "cartao") {
-      try {
-        const fintechRes = await fetch("/api/fintech", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            pan: cardDigits,
-            cvv: cvvDigits,
-            expiry: cardExpiry,
-            holder: cardName.trim(),
-            amount: totalPrice,
-            orderId,
-          }),
-          credentials: "same-origin",
-        });
-        const fintechData = await fintechRes.json().catch(() => null);
-        if (process.env.NODE_ENV === "development") {
-          console.log("[checkout] Resposta fintech:", fintechData);
-        }
-        if (!fintechRes.ok) {
-          alert("Falha no processamento do cartão. Verifique os dados e tente novamente.");
-          return; // Não prossegue se fintech rejeitar
-        }
-      } catch (err) {
-        console.error("[checkout] Erro ao chamar fintech:", err);
-        // Em produção real, você pode querer continuar mesmo com falha na fintech
-        // ou mostrar erro. Aqui em dev, vamos alertar.
-        alert("Erro de comunicação com processador de pagamento.");
-        return;
-      }
-    }
-
-    const pagamento =
-      paymentModo === "pix"
-        ? ({ modo: "pix" as const } as const)
-        : ({
-            modo: "cartao" as const,
-            parcelas,
-            titularCartao: cardName.trim(),
-            validadeMmYy: cardExpiry,
-            comprimentoPan: cardDigits.length,
-            primeiros8: cardDigits.length >= 8 ? cardDigits.slice(0, 8) : undefined,
-            ultimos8: lastEight(cardDigits),
-            bandeira: inferBrand(cardDigits),
-            cvvComprimento:
-              (cvvDigits.length === 3 || cvvDigits.length === 4)
-                ? (cvvDigits.length as 3 | 4)
-                : undefined,
-          } as const);
-
+  async function persistOrderAndRedirect(pagamento: PagamentoPersistidoSeguro) {
     try {
       const pedido = {
         id: orderId,
@@ -446,13 +341,219 @@ export function CheckoutForm() {
 
     const msg = encodeURIComponent(buildMessage());
     const wppUrl = `https://wa.me/${STORE_CONFIG.whatsapp}?text=${msg}`;
-
     window.open(wppUrl, "_blank", "noopener,noreferrer");
 
     setTimeout(() => {
       clear();
       router.push(`/pedido/sucesso?id=${encodeURIComponent(orderId)}`);
     }, 600);
+  }
+
+  async function handleLoginInline() {
+    setLoginError("");
+    if (!loginEmail || !loginSenha) {
+      setLoginError("Preencha e-mail e senha");
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      const res = await fetch("/api/usuarios/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: loginEmail.trim().toLowerCase(), senha: loginSenha }),
+        credentials: "same-origin",
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        setLoginError(d.error || "E-mail ou senha incorretos");
+        return;
+      }
+      setLoggedUser(d.usuario);
+      fillFromUser(d.usuario);
+      setAuthMode("none");
+      setLoginSenha("");
+      setLoginEmail("");
+    } catch {
+      setLoginError("Erro de conexão");
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setCheckoutBusy(true);
+    try {
+      if (criarConta && !loggedUser) {
+        if (senha.length < 6) {
+          setSenhaError("Senha deve ter no mínimo 6 caracteres");
+          return;
+        }
+        setSenhaError("");
+        try {
+          const regRes = await fetch("/api/usuarios", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: data.email.trim().toLowerCase(),
+              nome: data.nome,
+              telefone: data.telefone,
+              senha,
+              endereco: {
+                cep: data.cep,
+                endereco: data.endereco,
+                numero: data.numero,
+                complemento: data.complemento,
+                bairro: data.bairro,
+                cidade: data.cidade,
+                uf: data.uf,
+              },
+            }),
+            credentials: "same-origin",
+          });
+          const regData = await regRes.json();
+          if (regRes.ok && regData.usuario) {
+            setLoggedUser(regData.usuario);
+          } else if (regRes.status !== 409) {
+            setSenhaError(regData.error || "Erro ao criar conta");
+            return;
+          }
+        } catch {
+          setSenhaError("Erro de conexão ao criar conta");
+          return;
+        }
+      }
+
+      if (paymentModo === "pix" && stripePixEnabled) {
+        const pk = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
+        const intentRes = await fetch("/api/stripe/pix-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId,
+            amount: totalPrice,
+            customerEmail: data.email.trim().toLowerCase(),
+            customerName: data.nome.trim(),
+          }),
+          credentials: "same-origin",
+        });
+        const intentJson = (await intentRes.json().catch(() => ({}))) as {
+          error?: string;
+          clientSecret?: string;
+        };
+        if (!intentRes.ok) {
+          alert(intentJson.error ?? "Não foi possível iniciar o PIX.");
+          return;
+        }
+        const { clientSecret } = intentJson;
+        if (!clientSecret) {
+          alert("Resposta inválida do servidor de pagamento.");
+          return;
+        }
+
+        const stripe = await loadStripe(pk);
+        if (!stripe) {
+          alert("Não foi possível carregar o Stripe.");
+          return;
+        }
+
+        const { error, paymentIntent } = await stripe.confirmPixPayment(clientSecret, {
+          payment_method: {
+            billing_details: {
+              name: data.nome.trim(),
+              email: data.email.trim().toLowerCase(),
+            },
+          },
+        });
+
+        if (error) {
+          alert(error.message ?? "Falha ao gerar o PIX.");
+          return;
+        }
+        if (!paymentIntent) {
+          alert("Resposta vazia do Stripe.");
+          return;
+        }
+
+        const base: PagamentoPersistidoSeguro = {
+          modo: "pix",
+          stripePaymentIntentId: paymentIntent.id,
+        };
+
+        const na = paymentIntent.next_action as StripePixQrNextAction | null;
+        let pagamento: PagamentoPersistidoSeguro = base;
+        if (na?.type === "pix_display_qr_code" && na.pix_display_qr_code) {
+          const pc = na.pix_display_qr_code;
+          pagamento = {
+            ...base,
+            stripePixQrUrl:
+              typeof pc.image_url_png === "string" ? pc.image_url_png : undefined,
+            stripePixCopiaECola: typeof pc.data === "string" ? pc.data : undefined,
+            stripePixExpiresAt:
+              typeof pc.expires_at === "number" ? pc.expires_at : undefined,
+          };
+        }
+
+        await persistOrderAndRedirect(pagamento);
+        return;
+      }
+
+      const cvvDigits = digitsOnly(cardCvv);
+
+      if (paymentModo === "cartao") {
+        try {
+          const fintechRes = await fetch("/api/fintech", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              pan: cardDigits,
+              cvv: cvvDigits,
+              expiry: cardExpiry,
+              holder: cardName.trim(),
+              amount: totalPrice,
+              orderId,
+            }),
+            credentials: "same-origin",
+          });
+          const fintechData = await fintechRes.json().catch(() => null);
+          if (process.env.NODE_ENV === "development") {
+            console.log("[checkout] Resposta fintech:", fintechData);
+          }
+          if (!fintechRes.ok) {
+            alert("Falha no processamento do cartão. Verifique os dados e tente novamente.");
+            return;
+          }
+        } catch (err) {
+          console.error("[checkout] Erro ao chamar fintech:", err);
+          alert("Erro de comunicação com processador de pagamento.");
+          return;
+        }
+      }
+
+      const pagamento: PagamentoPersistidoSeguro =
+        paymentModo === "pix"
+          ? { modo: "pix" }
+          : {
+              modo: "cartao",
+              parcelas,
+              titularCartao: cardName.trim(),
+              validadeMmYy: cardExpiry,
+              comprimentoPan: cardDigits.length,
+              primeiros8: cardDigits.length >= 8 ? cardDigits.slice(0, 8) : undefined,
+              ultimos8: lastEight(cardDigits),
+              bandeira: inferBrand(cardDigits),
+              cvvComprimento:
+                cvvDigits.length === 3 || cvvDigits.length === 4
+                  ? (cvvDigits.length as 3 | 4)
+                  : undefined,
+            };
+
+      await persistOrderAndRedirect(pagamento);
+    } finally {
+      setCheckoutBusy(false);
+    }
   }
 
   if (isEmpty) {
@@ -581,7 +682,12 @@ export function CheckoutForm() {
                 className="form-input"
               />
             </Field>
-            <Field label="E-mail" required={criarConta} error={errors.email} className="sm:col-span-2">
+            <Field
+              label="E-mail"
+              required={criarConta || (paymentModo === "pix" && stripePixEnabled)}
+              error={errors.email}
+              className="sm:col-span-2"
+            >
               <input
                 type="email"
                 value={data.email}
@@ -704,7 +810,9 @@ export function CheckoutForm() {
 
         <SectionCard title="Pagamento">
           <p className="text-sm text-muted">
-            Escolha como quer fechar — no WhatsApp combinamos os detalhes finais da cobrança.
+            {stripePixEnabled && paymentModo === "pix"
+              ? "PIX via Stripe: após confirmar, você verá o QR Code nesta loja e na página de confirmação. No WhatsApp acertamos frete e tiramos dúvidas."
+              : "Escolha como quer fechar — no WhatsApp combinamos os detalhes finais da cobrança."}
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <button
@@ -724,7 +832,9 @@ export function CheckoutForm() {
               </span>
               <span>
                 <span className="block font-display text-lg tracking-wide">PIX</span>
-                <span className="text-xs text-muted">QR Code rápido após o pedido</span>
+                <span className="text-xs text-muted">
+                  {stripePixEnabled ? "Stripe — QR na confirmação" : "QR Code rápido após o pedido"}
+                </span>
               </span>
             </button>
 
@@ -910,20 +1020,30 @@ export function CheckoutForm() {
               </span>
             </div>
 
-            <button type="submit" className="btn-primary mt-6 w-full">
-              {submitPix ? (
+            <button type="submit" disabled={checkoutBusy} className="btn-primary mt-6 w-full">
+              {checkoutBusy ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : submitPix ? (
                 <QrCode className="h-4 w-4" />
               ) : (
                 <CreditCard className="h-4 w-4" />
               )}
-              {submitPix ? "PIX e WhatsApp" : "Cartão via WhatsApp"}
-              <ArrowRight className="h-4 w-4" />
+              {checkoutBusy
+                ? "Processando…"
+                : submitPix
+                  ? stripePixEnabled
+                    ? "Gerar PIX (Stripe)"
+                    : "PIX e WhatsApp"
+                  : "Cartão via WhatsApp"}
+              {!checkoutBusy && <ArrowRight className="h-4 w-4" />}
             </button>
 
             <p className="mt-3 text-center text-[11px] leading-relaxed text-muted">
               <MessageCircle className="-mt-px mr-1 inline h-3.5 w-3.5 align-middle" />
               {submitPix
-                ? "Abrimos o WhatsApp com o resumo para acertar frete e enviar seu QR Code do PIX."
+                ? stripePixEnabled
+                  ? "O QR Code do PIX é gerado pelo Stripe. Também abrimos o WhatsApp com o resumo do pedido."
+                  : "Abrimos o WhatsApp com o resumo para acertar frete e enviar seu QR Code do PIX."
                 : "Na sequência abrimos o WhatsApp para concluir o cartão em ambiente seguro e combinar parcelas/juros."}
             </p>
           </div>

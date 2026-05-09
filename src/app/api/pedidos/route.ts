@@ -35,7 +35,22 @@ function validPagamento(p: unknown): boolean {
   if (p === undefined) return true;
   if (!p || typeof p !== "object") return false;
   const x = p as Record<string, unknown>;
-  if (x.modo === "pix") return true;
+  if (x.modo === "pix") {
+    if (
+      x.stripePaymentIntentId !== undefined &&
+      (typeof x.stripePaymentIntentId !== "string" || x.stripePaymentIntentId.length > 128)
+    )
+      return false;
+    if (x.stripePixCopiaECola !== undefined && typeof x.stripePixCopiaECola !== "string")
+      return false;
+    if (x.stripePixQrUrl !== undefined && typeof x.stripePixQrUrl !== "string") return false;
+    if (
+      x.stripePixExpiresAt !== undefined &&
+      (typeof x.stripePixExpiresAt !== "number" || !Number.isFinite(x.stripePixExpiresAt))
+    )
+      return false;
+    return true;
+  }
   if (x.modo === "cartao") {
     const parcelas = x.parcelas;
     const u8 = x.ultimos8;

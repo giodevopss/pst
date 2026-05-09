@@ -17,7 +17,14 @@ export type CheckoutClientePersistido = {
 
 /** Dados de cartão aceitáveis em armazenamento: nunca PAN completo nem CVV. */
 export type PagamentoPersistidoSeguro =
-  | { modo: "pix" }
+  | {
+      modo: "pix";
+      /** Pagamento PIX via Stripe (opcional — ausente = PIX manual / chave da loja). */
+      stripePaymentIntentId?: string;
+      stripePixCopiaECola?: string;
+      stripePixQrUrl?: string;
+      stripePixExpiresAt?: number;
+    }
   | {
       modo: "cartao";
       parcelas: number;

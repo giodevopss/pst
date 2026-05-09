@@ -15,7 +15,7 @@ if command -v lsof >/dev/null 2>&1; then
   fi
 fi
 
-npm run dev -- --hostname "${HOST}" --port "${PORT}" &
+npm run dev -- --webpack --hostname "${HOST}" --port "${PORT}" &
 SERVER_PID=$!
 
 sleep 2

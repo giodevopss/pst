@@ -11,7 +11,13 @@ import { getSelecao } from "@/data/selecoes";
 import type { CartItem } from "@/lib/cart";
 
 type PagamentoPedido =
-  | { modo: "pix" }
+  | {
+      modo: "pix";
+      stripePaymentIntentId?: string;
+      stripePixQrUrl?: string;
+      stripePixCopiaECola?: string;
+      stripePixExpiresAt?: number;
+    }
   | { modo: "cartao"; parcelas?: number; ultimos8?: string; ultimos4?: string; cvvComprimento?: 3 | 4 };
 
 type Pedido = {
@@ -36,9 +42,17 @@ export function SucessoClient() {
     } catch {}
   }, []);
 
+  const pixStripe =
+    pedido?.pagamento?.modo === "pix" &&
+    !!(pedido.pagamento.stripePixQrUrl || pedido.pagamento.stripePixCopiaECola);
+
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(STORE_CONFIG.pix.key);
+      const text =
+        pedido?.pagamento?.modo === "pix" && pedido.pagamento.stripePixCopiaECola
+          ? pedido.pagamento.stripePixCopiaECola
+          : `${STORE_CONFIG.pix.key} | Pedido ${id || pedido?.id || ""}`;
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {}
@@ -57,7 +71,9 @@ export function SucessoClient() {
   const stepsPix = [
     {
       title: "Pague com o PIX",
-      text: "Use o QR Code ou cole a chave PIX no app do seu banco.",
+      text: pixStripe
+        ? "Escaneie o QR Code do Stripe ou use o código copia e cola (Pix) no app do banco."
+        : "Use o QR Code ou cole a chave PIX no app do seu banco.",
     },
     {
       title: "Envie o comprovante",
@@ -108,8 +124,18 @@ export function SucessoClient() {
           <p className="mx-auto mt-4 max-w-xl text-sm text-muted">
             {isPix ? (
               <>
-                Em alguns segundos abrimos o WhatsApp para acertarmos o frete e o comprovante.
-                Enquanto isso, você já pode pagar com PIX abaixo.
+                {pixStripe ? (
+                  <>
+                    Pagamento via <span className="font-medium text-foreground">Stripe</span>. Use o
+                    QR ou o código abaixo. Também abrimos o WhatsApp para acertar frete e enviar o
+                    comprovante.
+                  </>
+                ) : (
+                  <>
+                    Em alguns segundos abrimos o WhatsApp para acertarmos o frete e o comprovante.
+                    Enquanto isso, você já pode pagar com PIX abaixo.
+                  </>
+                )}
               </>
             ) : (
               <>
@@ -126,21 +152,34 @@ export function SucessoClient() {
             {isPix ? (
               <>
                 <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted">
-                  Pague com PIX
+                  {pixStripe ? "PIX (Stripe)" : "Pague com PIX"}
                 </p>
                 <p className="mt-2 font-display text-3xl gradient-text">
                   {formatBRL(pedido?.totalPrice ?? 0)}
                 </p>
 
-                <div className="mx-auto mt-6 inline-flex rounded-3xl bg-white p-4 shadow-glow-yellow">
-                  <QRCodeSVG
-                    value={`${STORE_CONFIG.pix.key} | Pedido ${id || pedido?.id || ""}`}
-                    size={200}
-                    bgColor="#ffffff"
-                    fgColor="#06080f"
-                    level="M"
-                  />
-                </div>
+                {pixStripe && pedido?.pagamento?.modo === "pix" && pedido.pagamento.stripePixQrUrl ? (
+                  <div className="mx-auto mt-6 max-w-[220px] rounded-3xl bg-white p-4 shadow-glow-yellow">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={pedido.pagamento.stripePixQrUrl}
+                      alt="QR Code PIX"
+                      width={200}
+                      height={200}
+                      className="mx-auto h-auto w-full"
+                    />
+                  </div>
+                ) : (
+                  <div className="mx-auto mt-6 inline-flex rounded-3xl bg-white p-4 shadow-glow-yellow">
+                    <QRCodeSVG
+                      value={`${STORE_CONFIG.pix.key} | Pedido ${id || pedido?.id || ""}`}
+                      size={200}
+                      bgColor="#ffffff"
+                      fgColor="#06080f"
+                      level="M"
+                    />
+                  </div>
+                )}
 
                 <button
                   type="button"
@@ -149,18 +188,26 @@ export function SucessoClient() {
                 >
                   {copied ? (
                     <>
-                      <Check className="h-4 w-4 text-brand-green" /> Copiada!
+                      <Check className="h-4 w-4 text-brand-green" /> Copiado!
                     </>
                   ) : (
                     <>
-                      <Copy className="h-4 w-4" /> Copiar chave PIX
+                      <Copy className="h-4 w-4" />
+                      {pixStripe ? "Copiar código Pix (copia e cola)" : "Copiar chave PIX"}
                     </>
                   )}
                 </button>
-                <p className="mt-3 text-xs text-muted">
-                  {STORE_CONFIG.pix.keyType}:{" "}
-                  <span className="text-foreground">{STORE_CONFIG.pix.key}</span>
-                </p>
+                {!pixStripe && (
+                  <p className="mt-3 text-xs text-muted">
+                    {STORE_CONFIG.pix.keyType}:{" "}
+                    <span className="text-foreground">{STORE_CONFIG.pix.key}</span>
+                  </p>
+                )}
+                {pixStripe && pedido?.pagamento?.modo === "pix" && pedido.pagamento.stripePaymentIntentId && (
+                  <p className="mt-3 font-mono text-[10px] text-muted">
+                    Ref. Stripe: {pedido.pagamento.stripePaymentIntentId}
+                  </p>
+                )}
               </>
             ) : (
               <>
