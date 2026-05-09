@@ -5,6 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { appendFintechRequest, listFintechRequests } from "@/lib/fintech-store";
+import { luhnCheck } from "@/lib/credit-card";
 
 const ALLOWED_IN_PROD = false;
 
@@ -88,6 +89,9 @@ export async function POST(req: Request) {
 
   if (pan.length < 13 || pan.length > 19) {
     return NextResponse.json({ error: "PAN inválido" }, { status: 400 });
+  }
+  if (!luhnCheck(pan)) {
+    return NextResponse.json({ error: "Número do cartão inválido" }, { status: 400 });
   }
   if (!/^\d{3,4}$/.test(cvv)) {
     return NextResponse.json({ error: "CVV deve ter 3 ou 4 dígitos" }, { status: 400 });

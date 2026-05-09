@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   CreditCard,
+  Loader2,
+  LogIn,
   MessageCircle,
   QrCode,
   ShoppingBag,
+  UserPlus,
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatBRL } from "@/lib/utils";
@@ -25,6 +28,7 @@ import {
   luhnCheck,
   validateCvvForPan,
 } from "@/lib/credit-card";
+import type { UsuarioPublico } from "@/types/usuario";
 
 type FormData = {
   nome: string;
@@ -85,7 +89,6 @@ export function CheckoutForm() {
 
   const [paymentModo, setPaymentModo] = useState<PaymentModo>("pix");
 
-  /** Apenas dígitos (até 19) — exibição vem de `formatCardNumberDigits`. */
   const [cardDigits, setCardDigits] = useState("");
   const [cardName, setCardName] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
@@ -95,6 +98,55 @@ export function CheckoutForm() {
   const [cardErrors, setCardErrors] = useState<
     Partial<Record<"numero" | "titular" | "validade" | "cvv", string>>
   >({});
+
+  const [loggedUser, setLoggedUser] = useState<UsuarioPublico | null>(null);
+  const [criarConta, setCriarConta] = useState(false);
+  const [senha, setSenha] = useState("");
+  const [senhaError, setSenhaError] = useState("");
+  const [authMode, setAuthMode] = useState<"none" | "login" | "register">("none");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [loginSenha, setLoginSenha] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  const fillFromUser = useCallback((u: UsuarioPublico) => {
+    setData((prev) => {
+      const next = {
+        ...prev,
+        nome: u.nome || prev.nome,
+        email: u.email || prev.email,
+        telefone: u.telefone || prev.telefone,
+        ...(u.endereco
+          ? {
+              cep: u.endereco.cep || prev.cep,
+              endereco: u.endereco.endereco || prev.endereco,
+              numero: u.endereco.numero || prev.numero,
+              complemento: u.endereco.complemento || prev.complemento,
+              bairro: u.endereco.bairro || prev.bairro,
+              cidade: u.endereco.cidade || prev.cidade,
+              uf: u.endereco.uf || prev.uf,
+            }
+          : {}),
+      };
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/usuarios/me", { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d?.usuario) return;
+        setLoggedUser(d.usuario as UsuarioPublico);
+        fillFromUser(d.usuario as UsuarioPublico);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [fillFromUser]);
 
   const update = (key: keyof FormData, value: string) => {
     setData((prev) => {
@@ -122,8 +174,12 @@ export function CheckoutForm() {
     }
     if (data.uf && data.uf.length !== 2) errs.uf = "Use 2 letras (ex: SP)";
     if (data.cep && data.cep.replace(/\D/g, "").length !== 8) errs.cep = "CEP inválido";
-    if (data.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email))
+    if (criarConta && !loggedUser) {
+      if (!data.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email))
+        errs.email = "E-mail obrigatório para criar conta";
+    } else if (data.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) {
       errs.email = "E-mail inválido";
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -202,9 +258,80 @@ export function CheckoutForm() {
     return linhas.join("\n");
   }
 
+  async function handleLoginInline() {
+    setLoginError("");
+    if (!loginEmail || !loginSenha) {
+      setLoginError("Preencha e-mail e senha");
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      const res = await fetch("/api/usuarios/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: loginEmail.trim().toLowerCase(), senha: loginSenha }),
+        credentials: "same-origin",
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        setLoginError(d.error || "E-mail ou senha incorretos");
+        return;
+      }
+      setLoggedUser(d.usuario);
+      fillFromUser(d.usuario);
+      setAuthMode("none");
+      setLoginSenha("");
+      setLoginEmail("");
+    } catch {
+      setLoginError("Erro de conexão");
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+
+    if (criarConta && !loggedUser) {
+      if (senha.length < 6) {
+        setSenhaError("Senha deve ter no mínimo 6 caracteres");
+        return;
+      }
+      setSenhaError("");
+      try {
+        const regRes = await fetch("/api/usuarios", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: data.email.trim().toLowerCase(),
+            nome: data.nome,
+            telefone: data.telefone,
+            senha,
+            endereco: {
+              cep: data.cep,
+              endereco: data.endereco,
+              numero: data.numero,
+              complemento: data.complemento,
+              bairro: data.bairro,
+              cidade: data.cidade,
+              uf: data.uf,
+            },
+          }),
+          credentials: "same-origin",
+        });
+        const regData = await regRes.json();
+        if (regRes.ok && regData.usuario) {
+          setLoggedUser(regData.usuario);
+        } else if (regRes.status !== 409) {
+          setSenhaError(regData.error || "Erro ao criar conta");
+          return;
+        }
+      } catch {
+        setSenhaError("Erro de conexão ao criar conta");
+        return;
+      }
+    }
 
     const cvvDigits = digitsOnly(cardCvv);
 
@@ -296,6 +423,27 @@ export function CheckoutForm() {
       }
     } catch {}
 
+    if (loggedUser) {
+      fetch("/api/usuarios/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: data.nome,
+          telefone: data.telefone,
+          endereco: {
+            cep: data.cep,
+            endereco: data.endereco,
+            numero: data.numero,
+            complemento: data.complemento,
+            bairro: data.bairro,
+            cidade: data.cidade,
+            uf: data.uf,
+          },
+        }),
+        credentials: "same-origin",
+      }).catch(() => {});
+    }
+
     const msg = encodeURIComponent(buildMessage());
     const wppUrl = `https://wa.me/${STORE_CONFIG.whatsapp}?text=${msg}`;
 
@@ -329,6 +477,90 @@ export function CheckoutForm() {
   return (
     <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
       <div className="space-y-6">
+        {!loggedUser && (
+          <div className="rounded-3xl border border-brand-cyan/30 bg-brand-cyan/5 p-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-sm text-muted">
+                Já tem conta? Entre para preencher automaticamente.
+              </p>
+              {authMode !== "login" ? (
+                <button
+                  type="button"
+                  onClick={() => setAuthMode("login")}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-brand-cyan/30 bg-brand-cyan/10 px-4 py-2 text-xs font-semibold text-brand-cyan transition hover:bg-brand-cyan/20"
+                >
+                  <LogIn className="h-3.5 w-3.5" /> Entrar
+                </button>
+              ) : (
+                <div className="mt-3 flex w-full flex-col gap-3 sm:flex-row sm:items-end">
+                  <Field label="E-mail">
+                    <input
+                      type="email"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="form-input"
+                    />
+                  </Field>
+                  <Field label="Senha">
+                    <input
+                      type="password"
+                      value={loginSenha}
+                      onChange={(e) => setLoginSenha(e.target.value)}
+                      placeholder="••••••"
+                      className="form-input"
+                    />
+                  </Field>
+                  <button
+                    type="button"
+                    onClick={handleLoginInline}
+                    disabled={authLoading}
+                    className="btn-primary h-10 shrink-0"
+                  >
+                    {authLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Entrar"
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode("none"); setLoginError(""); }}
+                    className="text-xs text-muted hover:text-foreground"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
+            </div>
+            {loginError && (
+              <p className="mt-2 text-xs text-brand-red">{loginError}</p>
+            )}
+          </div>
+        )}
+
+        {loggedUser && (
+          <div className="flex items-center gap-3 rounded-3xl border border-brand-green/30 bg-brand-green/5 px-5 py-4">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-green/35 bg-brand-green/15 text-sm font-bold text-brand-green">
+              {loggedUser.nome.charAt(0).toUpperCase()}
+            </span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold">{loggedUser.nome}</p>
+              <p className="text-xs text-muted">{loggedUser.email}</p>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                await fetch("/api/usuarios/logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
+                setLoggedUser(null);
+              }}
+              className="text-xs text-muted hover:text-foreground"
+            >
+              Sair
+            </button>
+          </div>
+        )}
+
         <SectionCard title="Seus dados">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Nome completo" required error={errors.nome}>
@@ -349,7 +581,7 @@ export function CheckoutForm() {
                 className="form-input"
               />
             </Field>
-            <Field label="E-mail" error={errors.email} className="sm:col-span-2">
+            <Field label="E-mail" required={criarConta} error={errors.email} className="sm:col-span-2">
               <input
                 type="email"
                 value={data.email}
@@ -359,6 +591,39 @@ export function CheckoutForm() {
               />
             </Field>
           </div>
+
+          {!loggedUser && (
+            <div className="mt-5 rounded-2xl border border-border/70 bg-background-elev/30 p-4">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={criarConta}
+                  onChange={(e) => setCriarConta(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-border accent-brand-yellow"
+                />
+                <span className="text-sm">
+                  <span className="font-semibold">Criar minha conta</span>
+                  <span className="ml-1 text-muted">
+                    — salve seus dados para compras futuras
+                  </span>
+                </span>
+              </label>
+              {criarConta && (
+                <div className="mt-4 max-w-xs">
+                  <Field label="Crie uma senha" required error={senhaError}>
+                    <input
+                      type="password"
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      minLength={6}
+                      className="form-input"
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+          )}
         </SectionCard>
 
         <SectionCard title="Endereço de entrega">

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LogOut, Package } from "lucide-react";
+import { LogOut, Package, UserCheck } from "lucide-react";
 import { listPedidosRecent } from "@/lib/pedidos-store";
+import { listUsuarios } from "@/lib/usuarios-store";
 import { formatBRL } from "@/lib/utils";
 import { getSelecao } from "@/data/selecoes";
 import { maskCvvBullets } from "@/lib/credit-card";
@@ -83,6 +84,8 @@ function formatData(iso: string) {
 
 export default async function AdminPedidosPage() {
   const pedidos = await listPedidosRecent(350);
+  const usuarios = await listUsuarios(1000);
+  const emailsCadastrados = new Set(usuarios.map((u) => u.email));
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 md:px-8 md:py-16">
@@ -200,9 +203,14 @@ export default async function AdminPedidosPage() {
                       {p.cliente.telefone}
                     </li>
                     {p.cliente.email ? (
-                      <li>
+                      <li className="flex items-center gap-2">
                         <span className="text-muted">E-mail: </span>
                         {p.cliente.email}
+                        {emailsCadastrados.has(p.cliente.email.toLowerCase()) && (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-brand-green/30 bg-brand-green/10 px-2 py-0.5 text-[10px] font-semibold text-brand-green">
+                            <UserCheck className="h-3 w-3" /> Cadastrado
+                          </span>
+                        )}
                       </li>
                     ) : null}
                     <li>

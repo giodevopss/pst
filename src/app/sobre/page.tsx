@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, Truck, ShieldCheck, RefreshCcw, CreditCard, Mail } from "lucide-react";
+import { MessageCircle, Truck, ShieldCheck, RefreshCcw, CreditCard, Mail, Gift } from "lucide-react";
 import { STORE_CONFIG } from "@/config/store";
 import { PaniniFaqAccordion } from "@/components/PaniniEditorial";
 
@@ -122,6 +123,76 @@ export default function SobrePage() {
               </p>
             </div>
           </aside>
+        </div>
+
+        <div
+          id="promocao"
+          className="mt-10 scroll-mt-24 rounded-[2rem] border-2 border-brand-yellow/40 bg-gradient-to-br from-brand-yellow/5 via-background-elev/60 to-brand-green/5 p-8 md:p-10"
+        >
+          <div className="flex flex-col gap-8 md:flex-row md:items-center">
+            <div className="flex-1 space-y-4">
+              <span className="inline-flex items-center gap-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-brand-yellow">
+                <Gift className="h-3.5 w-3.5" /> Promoção ativa
+              </span>
+              <h2 className="font-display text-4xl tracking-tight md:text-5xl">
+                Concorra a uma viagem para a <span className="gradient-text">Final da Copa 2026</span>
+              </h2>
+              <p className="text-base leading-relaxed text-muted">
+                Em compras acima de <strong className="text-foreground">R$&nbsp;500</strong> você
+                está automaticamente concorrendo ao sorteio de um pacote completo para assistir à
+                grande final do FIFA World Cup 2026™. Sem cadastro extra — basta finalizar o pedido.
+              </p>
+
+              <div className="rounded-2xl border border-brand-green/25 bg-brand-green/5 p-5">
+                <p className="mb-3 text-sm font-bold uppercase tracking-widest text-brand-green">
+                  O que você ganha
+                </p>
+                <ul className="space-y-2.5 text-sm text-muted">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                    <span><strong className="text-foreground">2 passagens aéreas</strong> ida e volta para a cidade da final</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                    <span><strong className="text-foreground">Hospedagem inclusa</strong> — hotel durante os dias do evento</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                    <span><strong className="text-foreground">2 ingressos</strong> para assistir à final da Copa do Mundo</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-border/70 bg-background-elev/30 p-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-brand-yellow">
+                  Como participar
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  Faça uma compra de R$&nbsp;500 ou mais na nossa loja e pronto — você já está
+                  concorrendo. Cada pedido acima desse valor gera uma participação. Quanto mais
+                  pedidos, mais chances.
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <Link href="/" className="btn-primary inline-flex items-center justify-center">
+                  Comprar e concorrer
+                </Link>
+              </div>
+            </div>
+
+            <div className="w-full shrink-0 md:w-[340px]">
+              <div className="overflow-hidden rounded-2xl border border-brand-yellow/25 shadow-lg">
+                <Image
+                  src="/images/promo-final-modal.png"
+                  alt="Banner da promoção final da Copa 2026"
+                  width={680}
+                  height={453}
+                  className="h-auto w-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="mt-12 rounded-3xl border border-border bg-surface/30 p-6 md:p-8">

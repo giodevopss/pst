@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
 import { useCart } from "@/lib/cart";
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
   const { totalItems, open } = useCart();
 
   useEffect(() => {
@@ -24,6 +25,13 @@ export function Header() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/usuarios/me", { credentials: "same-origin" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.usuario) setLoggedIn(true); })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -59,6 +67,18 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/conta"
+            aria-label="Minha conta"
+            className={cn(
+              "relative inline-flex h-11 w-11 items-center justify-center rounded-full border bg-surface/60 transition",
+              loggedIn
+                ? "border-brand-green text-brand-green hover:bg-brand-green/10"
+                : "border-border text-foreground hover:border-brand-yellow hover:text-brand-yellow",
+            )}
+          >
+            <User className="h-5 w-5" />
+          </Link>
           <button
             type="button"
             onClick={open}
@@ -97,6 +117,14 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href="/conta"
+              onClick={() => setMobileOpen(false)}
+              className="mt-1 flex items-center gap-2 rounded-xl border-t border-border/50 px-4 py-3 text-base font-medium text-foreground/90 transition hover:bg-white/5 hover:text-brand-yellow"
+            >
+              <User className="h-4 w-4" />
+              {loggedIn ? "Minha conta" : "Entrar / Criar conta"}
+            </Link>
           </nav>
         </div>
       )}

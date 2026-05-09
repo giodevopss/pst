@@ -1,5 +1,4 @@
-import { mkdir, appendFile, readFile } from "fs/promises";
-import path from "path";
+import { getDb } from "./mongodb";
 
 export type FintechRequest = {
   id: string;
@@ -16,32 +15,20 @@ export type FintechRequest = {
   transactionId?: string;
 };
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const FINTECH_FILE = path.join(DATA_DIR, "fintech.ndjson");
+const COLLECTION = "fintech";
 
 export async function appendFintechRequest(request: FintechRequest): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
-  await appendFile(FINTECH_FILE, `${JSON.stringify(request)}\n`, "utf8");
+  const db = await getDb();
+  await db.collection(COLLECTION).insertOne({ ...request });
 }
 
 export async function listFintechRequests(): Promise<FintechRequest[]> {
-  try {
-    const raw = await readFile(FINTECH_FILE, "utf8");
-    const lines = raw
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
+  const db = await getDb();
+  const docs = await db
+    .collection(COLLECTION)
+    .find({})
+    .sort({ timestamp: -1 })
+    .toArray();
 
-    const parsed: FintechRequest[] = [];
-    for (const line of lines) {
-      try {
-        parsed.push(JSON.parse(line) as FintechRequest);
-      } catch {
-        // skip corrupt line
-      }
-    }
-    return parsed.reverse(); // most recent first
-  } catch {
-    return [];
-  }
+  return docs.map(({ _id, ...rest }) => rest as unknown as FintechRequest);
 }
