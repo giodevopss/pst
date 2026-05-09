@@ -59,8 +59,8 @@ Tudo o que muda no dia a dia está em arquivos simples:
 
 - O hero usa `react-three-fiber` (`src/components/HeroAlbum3D.tsx`).
 - Para usar 3D nativo estável, aponte `NEXT_PUBLIC_HERO_MODEL_URL` para um `.glb` direto.
-- Melhor opção: colocar o arquivo em `public/models/album-copa-2026.glb` e usar:
-  - `NEXT_PUBLIC_HERO_MODEL_URL=/models/album-copa-2026.glb`
+- O repositório inclui `public/models/album-copa-2026.glb` (hero por padrão). Para outro arquivo:
+  - `NEXT_PUBLIC_HERO_MODEL_URL=/models/seu-modelo.glb`
 - Se o link não for GLB válido, o site cai automaticamente no viewer da Meshy como fallback.
 
 ## Fluxo de pedido
@@ -88,7 +88,7 @@ O app usa **`output: "standalone"`** no Next.js, imagem **Docker** multi-stage (
 2. Se for por GitHub, conecte o repositório e escolha a branch. O arquivo **`railway.json`** define builder **DOCKERFILE**.
 3. Em **Variables** (mesmo antes do primeiro deploy bem-sucedido), configure pelo menos:
    - **`NEXT_PUBLIC_SITE_URL`** — URL canônica pública, ex.: `https://seudominio.up.railway.app` (sem barra final). Usada em `metadataBase`, `sitemap` e `robots`.
-   - Opcional: **`NEXT_PUBLIC_HERO_MODEL_URL`** — `.glb` ou caminho sob `/public` (ex.: `/models/3dcopa.glb`).
+   - Opcional: **`NEXT_PUBLIC_HERO_MODEL_URL`** — `.glb` ou caminho sob `/public` (ex.: `/models/album-copa-2026.glb`). Deixe sem definir se quiser usar o arquivo padrão no repositório.
 4. **Networking → Generate Domain** (ou domínio customizado).
 5. Faça um **Redeploy** após mudar qualquer `NEXT_PUBLIC_*`, pois são embutidas no bundle no **`next build`**.
 

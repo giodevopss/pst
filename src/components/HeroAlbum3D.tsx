@@ -7,9 +7,16 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { Bounds, ContactShadows, Environment, Float, OrbitControls, useGLTF } from "@react-three/drei";
 import { cn } from "@/lib/utils";
 
-const MODEL_URL =
-  process.env.NEXT_PUBLIC_HERO_MODEL_URL ??
-  "/models/3dcopa.glb";
+/** GLB default: `album-copa-2026.glb`. Ignora env vazio (evita useGLTF("")). */
+function resolveHeroModelUrl(): string {
+  const fallback = "/models/album-copa-2026.glb";
+  const raw = process.env.NEXT_PUBLIC_HERO_MODEL_URL?.trim();
+  if (!raw) return fallback;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return raw.startsWith("/") ? raw : `/${raw}`;
+}
+
+const MODEL_URL = resolveHeroModelUrl();
 const FALLBACK_VIEWER = "https://www.meshy.ai/s/HWk5NQ";
 
 function WebglContextGuard({ onContextLost }: { onContextLost: () => void }) {
@@ -69,7 +76,7 @@ function ModelErrorOverlay() {
     <div className="pointer-events-none absolute inset-0 z-[3] flex flex-col justify-end bg-gradient-to-t from-background/95 via-background/40 to-transparent p-4 text-center md:p-6">
       <p className="text-xs text-foreground/90 md:text-sm">
         Modelo 3D indisponível. Coloque{" "}
-        <span className="font-mono text-[10px] text-brand-cyan">public/models/3dcopa.glb</span>.
+        <span className="font-mono text-[10px] text-brand-cyan">public/models/album-copa-2026.glb</span>.
       </p>
       <Link
         href={FALLBACK_VIEWER}

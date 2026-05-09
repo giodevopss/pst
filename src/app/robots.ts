@@ -5,7 +5,9 @@ const BASE = resolvePublicSiteOrigin();
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/checkout", "/pedido"] }],
+    rules: [
+      { userAgent: "*", allow: "/", disallow: ["/checkout", "/pedido", "/admin"] },
+    ],
     sitemap: `${BASE}/sitemap.xml`,
     host: BASE,
   };

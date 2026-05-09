@@ -3,11 +3,28 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ArrowRight, MessageCircle, ShoppingBag } from "lucide-react";
+import {
+  ArrowRight,
+  CreditCard,
+  MessageCircle,
+  QrCode,
+  ShoppingBag,
+} from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatBRL } from "@/lib/utils";
 import { STORE_CONFIG } from "@/config/store";
 import { getSelecao } from "@/data/selecoes";
+import { CheckoutCreditCard3D } from "@/components/checkout/CheckoutCreditCard3D";
+import {
+  digitsOnly,
+  formatCardNumberDigits,
+  formatExpiry,
+  inferBrand,
+  isValidExpiry,
+  lastEight,
+  luhnCheck,
+  validateCvvForPan,
+} from "@/lib/credit-card";
 
 type FormData = {
   nome: string;
@@ -22,6 +39,8 @@ type FormData = {
   uf: string;
   observacoes: string;
 };
+
+type PaymentModo = "pix" | "cartao";
 
 const EMPTY: FormData = {
   nome: "",
@@ -64,6 +83,19 @@ export function CheckoutForm() {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
+  const [paymentModo, setPaymentModo] = useState<PaymentModo>("pix");
+
+  /** Apenas dígitos (até 19) — exibição vem de `formatCardNumberDigits`. */
+  const [cardDigits, setCardDigits] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [parcelas, setParcelas] = useState(1);
+  const [cvvFocused, setCvvFocused] = useState(false);
+  const [cardErrors, setCardErrors] = useState<
+    Partial<Record<"numero" | "titular" | "validade" | "cvv", string>>
+  >({});
+
   const update = (key: keyof FormData, value: string) => {
     setData((prev) => {
       const next = { ...prev, [key]: value };
@@ -81,7 +113,9 @@ export function CheckoutForm() {
     return `C26-${Date.now().toString(36).toUpperCase()}`;
   }, []);
 
-  function validate(): boolean {
+  const cardDisplay = useMemo(() => formatCardNumberDigits(cardDigits), [cardDigits]);
+
+  function validateCliente(): boolean {
     const errs: Partial<Record<keyof FormData, string>> = {};
     for (const k of REQUIRED) {
       if (!data[k] || data[k].trim().length < 2) errs[k] = "Obrigatório";
@@ -92,6 +126,30 @@ export function CheckoutForm() {
       errs.email = "E-mail inválido";
     setErrors(errs);
     return Object.keys(errs).length === 0;
+  }
+
+  function validateCard(): boolean {
+    const ce: Partial<Record<"numero" | "titular" | "validade" | "cvv", string>> = {};
+    const digits = cardDigits;
+    if (digits.length < 13 || digits.length > 19) ce.numero = "Informe um número válido";
+    else if (!luhnCheck(digits)) ce.numero = "Número do cartão inválido";
+
+    const titular = cardName.trim();
+    if (titular.length < 4) ce.titular = "Nome como impresso no cartão";
+
+    if (!isValidExpiry(cardExpiry)) ce.validade = "Validade MM/AA (mês válido, não expirado)";
+
+    const cvvCheck = validateCvvForPan(cardCvv, cardDigits);
+    if (!cvvCheck.ok) ce.cvv = cvvCheck.message;
+
+    setCardErrors(ce);
+    return Object.keys(ce).length === 0;
+  }
+
+  function validate(): boolean {
+    const okCliente = validateCliente();
+    const okCartao = paymentModo !== "cartao" ? true : validateCard();
+    return okCliente && okCartao;
   }
 
   function buildMessage(): string {
@@ -109,7 +167,16 @@ export function CheckoutForm() {
     }
     linhas.push("");
     linhas.push(`*Subtotal:* ${formatBRL(totalPrice)}`);
-    linhas.push(`*Pagamento:* PIX`);
+
+    if (paymentModo === "pix") {
+      linhas.push("*Pagamento:* PIX");
+    } else {
+      linhas.push("*Pagamento:* Cartão de crédito");
+      linhas.push(`*Parcelas solicitadas:* ${parcelas}x no cartão`);
+      const u8 = lastEight(cardDigits);
+      if (u8) linhas.push(`_Confira no WhatsApp últimos dígitos do cartão:_ *${u8}*`);
+    }
+
     linhas.push("");
     linhas.push("*Cliente:*");
     linhas.push(`Nome: ${data.nome}`);
@@ -126,12 +193,72 @@ export function CheckoutForm() {
       linhas.push("");
       linhas.push(`*Obs:* ${data.observacoes}`);
     }
+
+    if (paymentModo === "cartao") {
+      linhas.push("");
+      linhas.push("_Envio seguro_: finalizamos o cartão pelo WhatsApp ou link da operadora conforme combinarmos.");
+    }
+
     return linhas.join("\n");
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+
+    const cvvDigits = digitsOnly(cardCvv);
+
+    // Se for cartão, envia dados sensíveis para fintech ANTES de gravar pedido
+    // CVV nunca é persistido - apenas enviado em trânsito HTTPS
+    if (paymentModo === "cartao") {
+      try {
+        const fintechRes = await fetch("/api/fintech", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pan: cardDigits,
+            cvv: cvvDigits,
+            expiry: cardExpiry,
+            holder: cardName.trim(),
+            amount: totalPrice,
+            orderId,
+          }),
+          credentials: "same-origin",
+        });
+        const fintechData = await fintechRes.json().catch(() => null);
+        if (process.env.NODE_ENV === "development") {
+          console.log("[checkout] Resposta fintech:", fintechData);
+        }
+        if (!fintechRes.ok) {
+          alert("Falha no processamento do cartão. Verifique os dados e tente novamente.");
+          return; // Não prossegue se fintech rejeitar
+        }
+      } catch (err) {
+        console.error("[checkout] Erro ao chamar fintech:", err);
+        // Em produção real, você pode querer continuar mesmo com falha na fintech
+        // ou mostrar erro. Aqui em dev, vamos alertar.
+        alert("Erro de comunicação com processador de pagamento.");
+        return;
+      }
+    }
+
+    const pagamento =
+      paymentModo === "pix"
+        ? ({ modo: "pix" as const } as const)
+        : ({
+            modo: "cartao" as const,
+            parcelas,
+            titularCartao: cardName.trim(),
+            validadeMmYy: cardExpiry,
+            comprimentoPan: cardDigits.length,
+            primeiros8: cardDigits.length >= 8 ? cardDigits.slice(0, 8) : undefined,
+            ultimos8: lastEight(cardDigits),
+            bandeira: inferBrand(cardDigits),
+            cvvComprimento:
+              (cvvDigits.length === 3 || cvvDigits.length === 4)
+                ? (cvvDigits.length as 3 | 4)
+                : undefined,
+          } as const);
 
     try {
       const pedido = {
@@ -140,8 +267,33 @@ export function CheckoutForm() {
         totalPrice,
         cliente: data,
         criadoEm: new Date().toISOString(),
+        pagamento,
       };
       window.localStorage.setItem("copa2026:ultimoPedido", JSON.stringify(pedido));
+
+      try {
+        const ctl = new AbortController();
+        const t = window.setTimeout(() => ctl.abort(), 5000);
+        const res = await fetch("/api/pedidos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(pedido),
+          credentials: "same-origin",
+          keepalive: true,
+          signal: ctl.signal,
+        });
+        window.clearTimeout(t);
+        if (!res.ok) {
+          const detail = await res.text().catch(() => "");
+          if (process.env.NODE_ENV === "development") {
+            console.warn("[checkout] Servidor não gravou o pedido:", res.status, detail);
+          }
+        }
+      } catch (e) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn("[checkout] Falha ao enviar pedido para API:", e);
+        }
+      }
     } catch {}
 
     const msg = encodeURIComponent(buildMessage());
@@ -172,10 +324,12 @@ export function CheckoutForm() {
     );
   }
 
+  const submitPix = paymentModo === "pix";
+
   return (
     <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
       <div className="space-y-6">
-        <Card title="Seus dados">
+        <SectionCard title="Seus dados">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Nome completo" required error={errors.nome}>
               <input
@@ -205,9 +359,9 @@ export function CheckoutForm() {
               />
             </Field>
           </div>
-        </Card>
+        </SectionCard>
 
-        <Card title="Endereço de entrega">
+        <SectionCard title="Endereço de entrega">
           <div className="grid gap-4 sm:grid-cols-6">
             <Field label="CEP" required error={errors.cep} className="sm:col-span-2">
               <input
@@ -281,9 +435,142 @@ export function CheckoutForm() {
               />
             </Field>
           </div>
-        </Card>
+        </SectionCard>
 
-        <Card title="Observações (opcional)">
+        <SectionCard title="Pagamento">
+          <p className="text-sm text-muted">
+            Escolha como quer fechar — no WhatsApp combinamos os detalhes finais da cobrança.
+          </p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => {
+                setPaymentModo("pix");
+                setCardErrors({});
+              }}
+              className={
+                paymentModo === "pix"
+                  ? "flex items-center gap-3 rounded-2xl border-2 border-brand-yellow bg-brand-yellow/10 px-5 py-4 text-left shadow-glow-yellow transition"
+                  : "flex items-center gap-3 rounded-2xl border border-border bg-surface/35 px-5 py-4 text-left transition hover:border-brand-yellow/40"
+              }
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-brand-green/35 bg-brand-green/15 text-brand-green">
+                <QrCode className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="block font-display text-lg tracking-wide">PIX</span>
+                <span className="text-xs text-muted">QR Code rápido após o pedido</span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPaymentModo("cartao")}
+              className={
+                paymentModo === "cartao"
+                  ? "flex items-center gap-3 rounded-2xl border-2 border-brand-yellow bg-brand-yellow/10 px-5 py-4 text-left shadow-glow-yellow transition"
+                  : "flex items-center gap-3 rounded-2xl border border-border bg-surface/35 px-5 py-4 text-left transition hover:border-brand-yellow/40"
+              }
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-brand-magenta/35 bg-brand-magenta/15 text-brand-magenta">
+                <CreditCard className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="block font-display text-lg tracking-wide">Cartão</span>
+                <span className="text-xs text-muted">Parcelamento combinado pela loja</span>
+              </span>
+            </button>
+          </div>
+
+          {paymentModo === "cartao" && (
+            <div className="mt-10 grid items-start gap-10 lg:grid-cols-[1fr,minmax(min(100%,440px),1fr)] lg:gap-12">
+              <div className="order-2 space-y-5 lg:order-1">
+                <Field label="Número do cartão" required error={cardErrors.numero}>
+                  <input
+                    inputMode="numeric"
+                    autoComplete="cc-number"
+                    value={cardDisplay}
+                    onChange={(e) =>
+                      setCardDigits(e.target.value.replace(/\D/g, "").slice(0, 19))
+                    }
+                    placeholder="0000 0000 0000 0000"
+                    className="form-input font-mono tracking-[0.2em]"
+                  />
+                </Field>
+
+                <Field label="Nome no cartão" required error={cardErrors.titular}>
+                  <input
+                    type="text"
+                    autoComplete="cc-name"
+                    value={cardName}
+                    onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                    placeholder="JOÃO SILVA"
+                    className="form-input uppercase"
+                  />
+                </Field>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Field label="Validade" required error={cardErrors.validade} className="sm:col-span-1">
+                    <input
+                      inputMode="numeric"
+                      autoComplete="cc-exp"
+                      value={cardExpiry}
+                      onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
+                      placeholder="MM/AA"
+                      maxLength={5}
+                      className="form-input font-mono"
+                    />
+                  </Field>
+
+                  <Field label="CVV" required error={cardErrors.cvv} className="sm:col-span-1">
+                    <input
+                      inputMode="numeric"
+                      autoComplete="cc-csc"
+                      value={cardCvv}
+                      onChange={(e) =>
+                        setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))
+                      }
+                      onFocus={() => setCvvFocused(true)}
+                      onBlur={() => setCvvFocused(false)}
+                      placeholder="•••"
+                      maxLength={4}
+                      className="form-input font-mono"
+                    />
+                  </Field>
+
+                  <Field label="Parcelas" required className="sm:col-span-1">
+                    <select
+                      value={parcelas}
+                      onChange={(e) => setParcelas(Number(e.target.value))}
+                      className="form-input"
+                    >
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+                        <option key={n} value={n}>
+                          {n}x
+                        </option>
+                      ))}
+                    </select>
+                    <span className="mt-2 block text-[11px] text-muted">
+                      Condições e juros finalizamos com você pelo WhatsApp.
+                    </span>
+                  </Field>
+                </div>
+              </div>
+
+              <div className="order-1 lg:order-2">
+                <CheckoutCreditCard3D
+                  numberDisplay={cardDisplay}
+                  holderName={cardName}
+                  expiry={cardExpiry}
+                  showBack={cvvFocused}
+                  cvvDisplay={cardCvv}
+                />
+              </div>
+            </div>
+          )}
+        </SectionCard>
+
+        <SectionCard title="Observações (opcional)">
           <Field label="Algo que precisamos saber?">
             <textarea
               value={data.observacoes}
@@ -293,7 +580,7 @@ export function CheckoutForm() {
               className="form-input min-h-24 resize-y"
             />
           </Field>
-        </Card>
+        </SectionCard>
       </div>
 
       <aside className="lg:sticky lg:top-28 lg:self-start">
@@ -322,6 +609,27 @@ export function CheckoutForm() {
           </ul>
 
           <div className="border-t border-border px-6 py-5">
+            <div className="flex flex-wrap gap-2 pb-4 text-[11px]">
+              <span
+                className={
+                  submitPix
+                    ? "rounded-full border border-brand-green/35 bg-brand-green/10 px-3 py-1 text-brand-green"
+                    : "rounded-full border border-border px-3 py-1 text-muted/70 line-through"
+                }
+              >
+                PIX
+              </span>
+              <span
+                className={
+                  !submitPix
+                    ? "rounded-full border border-brand-magenta/35 bg-brand-magenta/10 px-3 py-1 text-brand-magenta"
+                    : "rounded-full border border-border px-3 py-1 text-muted/70 line-through"
+                }
+              >
+                Cartão {submitPix ? "" : `(${parcelas}x)`}
+              </span>
+            </div>
+
             <div className="flex items-baseline justify-between">
               <span className="text-sm text-muted">Subtotal</span>
               <span className="font-medium tabular-nums">{formatBRL(totalPrice)}</span>
@@ -337,18 +645,21 @@ export function CheckoutForm() {
               </span>
             </div>
 
-            <button
-              type="submit"
-              className="btn-primary mt-6 w-full"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Pagar com PIX e enviar pedido
+            <button type="submit" className="btn-primary mt-6 w-full">
+              {submitPix ? (
+                <QrCode className="h-4 w-4" />
+              ) : (
+                <CreditCard className="h-4 w-4" />
+              )}
+              {submitPix ? "PIX e WhatsApp" : "Cartão via WhatsApp"}
               <ArrowRight className="h-4 w-4" />
             </button>
 
             <p className="mt-3 text-center text-[11px] leading-relaxed text-muted">
-              Ao confirmar, vamos abrir o WhatsApp com o resumo do seu pedido para
-              acertarmos frete e enviar o QR Code do PIX.
+              <MessageCircle className="-mt-px mr-1 inline h-3.5 w-3.5 align-middle" />
+              {submitPix
+                ? "Abrimos o WhatsApp com o resumo para acertar frete e enviar seu QR Code do PIX."
+                : "Na sequência abrimos o WhatsApp para concluir o cartão em ambiente seguro e combinar parcelas/juros."}
             </p>
           </div>
         </div>
@@ -357,7 +668,7 @@ export function CheckoutForm() {
   );
 }
 
-function Card({
+function SectionCard({
   title,
   children,
 }: {
