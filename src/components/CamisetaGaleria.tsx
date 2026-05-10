@@ -11,9 +11,15 @@ type Props = {
   produto: Produto;
   className?: string;
   showBadges?: boolean;
+  showPromoBadges?: boolean;
 };
 
-export function CamisetaGaleria({ produto, className, showBadges = true }: Props) {
+export function CamisetaGaleria({
+  produto,
+  className,
+  showBadges = true,
+  showPromoBadges = true,
+}: Props) {
   const selecao = produto.selecaoSlug ? getSelecao(produto.selecaoSlug) : undefined;
   const imgs = produto.galeria?.length ? produto.galeria : [];
   const [idx, setIdx] = useState(0);
@@ -56,7 +62,7 @@ export function CamisetaGaleria({ produto, className, showBadges = true }: Props
             {produto.badge}
           </span>
         )}
-        {showBadges && (
+        {showBadges && showPromoBadges && (
           <div className="absolute right-3 top-3 max-w-[min(96vw,20rem)]">
             <PromoBadgesPair size="compact" />
           </div>

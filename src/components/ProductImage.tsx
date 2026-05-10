@@ -8,6 +8,8 @@ type Props = {
   produto: Produto;
   className?: string;
   showBadges?: boolean;
+  /** −% loja + PIX na foto; desligue quando o mesmo par aparece ao lado do preço (evita duplicar). */
+  showPromoBadges?: boolean;
   /** Larguras responsivas para o otimizador (default mais alto para telas retina) */
   sizes?: string;
   quality?: number;
@@ -20,6 +22,7 @@ export function ProductImage({
   produto,
   className,
   showBadges = true,
+  showPromoBadges = true,
   sizes = DEFAULT_IMG_SIZES,
   quality = DEFAULT_IMG_QUALITY,
 }: Props) {
@@ -108,7 +111,7 @@ export function ProductImage({
             {produto.badge}
           </span>
         )}
-        {showBadges && (
+        {showBadges && showPromoBadges && (
           <div className="absolute right-3 top-3 max-w-[min(96vw,20rem)]">
             <PromoBadgesPair size="compact" />
           </div>
@@ -151,7 +154,7 @@ export function ProductImage({
           {produto.badge}
         </span>
       )}
-      {showBadges && (
+      {showBadges && showPromoBadges && (
         <div className="absolute right-3 top-3 max-w-[min(96vw,20rem)]">
           <PromoBadgesPair size="compact" />
         </div>

@@ -7,7 +7,6 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { produtosDestaque, produtosPacotes, getProduto } from "@/data/produtos";
 import { ProductImage } from "@/components/ProductImage";
 import { formatBRL } from "@/lib/utils";
-import { PromoBadgesPair } from "@/components/PromoPriceBadges";
 import {
   PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
   SITE_WIDE_DISCOUNT_PERCENT,
@@ -144,7 +143,6 @@ export default function Home() {
               {albumStrike > albumSale + 1e-9 && (
                 <span className="text-base text-muted line-through">{formatBRL(albumStrike)}</span>
               )}
-              <PromoBadgesPair badgeClassName="px-3 py-1 text-xs" />
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -190,7 +188,6 @@ export default function Home() {
             </ul>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <span className="font-display text-4xl gradient-text">{formatBRL(camisaIISale)}</span>
-              <PromoBadgesPair />
               <AddToCartButton produto={camisaBrasilII} label="Comprar Camiseta II" />
             </div>
           </div>

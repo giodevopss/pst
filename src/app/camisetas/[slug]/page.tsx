@@ -61,12 +61,18 @@ export default async function CamisetaDetalhe({ params }: { params: Promise<Para
           <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-brand-yellow/20 via-brand-green/15 to-brand-blue/20 blur-2xl" />
           <div className="relative">
             {produto.galeria && produto.galeria.length > 0 ? (
-              <CamisetaGaleria produto={produto} className="aspect-[4/5] rounded-[2rem]" showBadges />
+              <CamisetaGaleria
+                produto={produto}
+                className="aspect-[4/5] rounded-[2rem]"
+                showBadges
+                showPromoBadges={false}
+              />
             ) : (
               <ProductImage
                 produto={produto}
                 className="aspect-[4/5] rounded-[2rem]"
                 showBadges
+                showPromoBadges={false}
                 sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 640px"
                 quality={95}
               />
