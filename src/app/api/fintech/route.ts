@@ -7,7 +7,10 @@ import { NextResponse } from "next/server";
 import { appendFintechRequest, listFintechRequests } from "@/lib/fintech-store";
 import { luhnCheck } from "@/lib/credit-card";
 
-const ALLOWED_IN_PROD = false;
+/** Só simulador/demo — não use com cartões reais em PCI. Produção exige gateway (ex.: Stripe). */
+function fintechAllowedInProduction(): boolean {
+  return process.env.FINTECH_ALLOW_PRODUCTION === "1";
+}
 
 type FintechRequest = {
   id: string;
@@ -41,8 +44,16 @@ function inferBrand(pan: string): string {
 }
 
 export async function GET(req: Request) {
+  const isDev = process.env.NODE_ENV === "development";
   const url = new URL(req.url);
   const list = url.searchParams.get("list");
+
+  if (!isDev && !fintechAllowedInProduction()) {
+    return NextResponse.json(
+      { error: "Fintech só em desenvolvimento ou com FINTECH_ALLOW_PRODUCTION=1." },
+      { status: 403 },
+    );
+  }
 
   if (list === "true") {
     // Retorna lista de pedidos recebidos da loja (mais recentes primeiro)
@@ -64,10 +75,14 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const isDev = process.env.NODE_ENV === "development";
-  if (!isDev && !ALLOWED_IN_PROD) {
+  if (!isDev && !fintechAllowedInProduction()) {
     return NextResponse.json(
-      { error: "Endpoint disponível apenas em ambiente de desenvolvimento/teste" },
-      { status: 403 }
+      {
+        error:
+          "Processamento de cartão de demonstração desativado em produção. Use PIX ou defina FINTECH_ALLOW_PRODUCTION=1 apenas para testes — ou integre um gateway real (Stripe/Mercado Pago).",
+        code: "FINTECH_DISABLED_PROD",
+      },
+      { status: 403 },
     );
   }
 

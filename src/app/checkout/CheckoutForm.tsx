@@ -458,12 +458,18 @@ export function CheckoutForm() {
             }),
             credentials: "same-origin",
           });
-          const fintechData = await fintechRes.json().catch(() => null);
+          const fintechData = (await fintechRes.json().catch(() => null)) as {
+            error?: string;
+            status?: string;
+          } | null;
           if (process.env.NODE_ENV === "development") {
             console.log("[checkout] Resposta fintech:", fintechData);
           }
           if (!fintechRes.ok) {
-            alert("Falha no processamento do cartão. Verifique os dados e tente novamente.");
+            alert(
+              fintechData?.error ??
+                "Falha no processamento do cartão. Verifique os dados ou tente outro método de pagamento.",
+            );
             return;
           }
         } catch (err) {
