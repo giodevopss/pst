@@ -17,6 +17,10 @@ type PagamentoPedido =
       stripePixQrUrl?: string;
       stripePixCopiaECola?: string;
       stripePixExpiresAt?: number;
+      mercadoPagoPaymentId?: string;
+      mercadoPagoPixCopiaECola?: string;
+      mercadoPagoPixQrDataUrl?: string;
+      mercadoPagoExpiresAt?: string;
     }
   | { modo: "cartao"; parcelas?: number; ultimos8?: string; ultimos4?: string; cvvComprimento?: 3 | 4 };
 
@@ -46,12 +50,22 @@ export function SucessoClient() {
     pedido?.pagamento?.modo === "pix" &&
     !!(pedido.pagamento.stripePixQrUrl || pedido.pagamento.stripePixCopiaECola);
 
+  const pixMercadoPago =
+    pedido?.pagamento?.modo === "pix" &&
+    !!(
+      pedido.pagamento.mercadoPagoPaymentId ||
+      pedido.pagamento.mercadoPagoPixCopiaECola ||
+      pedido.pagamento.mercadoPagoPixQrDataUrl
+    );
+
   const copy = async () => {
     try {
-      const text =
-        pedido?.pagamento?.modo === "pix" && pedido.pagamento.stripePixCopiaECola
-          ? pedido.pagamento.stripePixCopiaECola
-          : `${STORE_CONFIG.pix.key} | Pedido ${id || pedido?.id || ""}`;
+      const pag = pedido?.pagamento;
+      let text = `${STORE_CONFIG.pix.key} | Pedido ${id || pedido?.id || ""}`;
+      if (pag?.modo === "pix") {
+        if (pag.mercadoPagoPixCopiaECola) text = pag.mercadoPagoPixCopiaECola;
+        else if (pag.stripePixCopiaECola) text = pag.stripePixCopiaECola;
+      }
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
@@ -63,9 +77,11 @@ export function SucessoClient() {
   const stepsPix = [
     {
       title: "Pague com o PIX",
-      text: pixStripe
-        ? "Escaneie o QR Code do Stripe ou use o código copia e cola (Pix) no app do banco."
-        : "Use o QR Code ou cole a chave PIX no app do seu banco.",
+      text: pixMercadoPago
+        ? "Escaneie o QR do Mercado Pago ou use o código copia e cola no app do banco."
+        : pixStripe
+          ? "Escaneie o QR Code do Stripe ou use o código copia e cola (Pix) no app do banco."
+          : "Use o QR Code ou cole a chave PIX no app do seu banco.",
     },
     {
       title: "Envie o comprovante",
@@ -116,7 +132,13 @@ export function SucessoClient() {
           <p className="mx-auto mt-4 max-w-xl text-sm text-muted">
             {isPix ? (
               <>
-                {pixStripe ? (
+                {pixMercadoPago ? (
+                  <>
+                    Pagamento via{" "}
+                    <span className="font-medium text-foreground">Mercado Pago</span>. Use o QR ou o
+                    código abaixo. Frete grátis; guarde o comprovante do PIX.
+                  </>
+                ) : pixStripe ? (
                   <>
                     Pagamento via <span className="font-medium text-foreground">Stripe</span>. Use o
                     QR ou o código abaixo. Frete grátis; guarde o comprovante do PIX.
@@ -142,13 +164,28 @@ export function SucessoClient() {
             {isPix ? (
               <>
                 <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted">
-                  {pixStripe ? "PIX (Stripe)" : "Pague com PIX"}
+                  {pixMercadoPago ? "PIX (Mercado Pago)" : pixStripe ? "PIX (Stripe)" : "Pague com PIX"}
                 </p>
                 <p className="mt-2 font-display text-3xl gradient-text">
                   {formatBRL(pedido?.totalPrice ?? 0)}
                 </p>
 
-                {pixStripe && pedido?.pagamento?.modo === "pix" && pedido.pagamento.stripePixQrUrl ? (
+                {pixMercadoPago &&
+                pedido?.pagamento?.modo === "pix" &&
+                pedido.pagamento.mercadoPagoPixQrDataUrl ? (
+                  <div className="mx-auto mt-6 max-w-[220px] rounded-3xl bg-white p-4 shadow-glow-yellow">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={pedido.pagamento.mercadoPagoPixQrDataUrl}
+                      alt="QR Code PIX"
+                      width={200}
+                      height={200}
+                      className="mx-auto h-auto w-full"
+                    />
+                  </div>
+                ) : pixStripe &&
+                  pedido?.pagamento?.modo === "pix" &&
+                  pedido.pagamento.stripePixQrUrl ? (
                   <div className="mx-auto mt-6 max-w-[220px] rounded-3xl bg-white p-4 shadow-glow-yellow">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -162,7 +199,15 @@ export function SucessoClient() {
                 ) : (
                   <div className="mx-auto mt-6 inline-flex rounded-3xl bg-white p-4 shadow-glow-yellow">
                     <QRCodeSVG
-                      value={`${STORE_CONFIG.pix.key} | Pedido ${id || pedido?.id || ""}`}
+                      value={
+                        pedido?.pagamento?.modo === "pix" &&
+                        (pedido.pagamento.mercadoPagoPixCopiaECola ||
+                          pedido.pagamento.stripePixCopiaECola)
+                          ? (pedido.pagamento.mercadoPagoPixCopiaECola ??
+                            pedido.pagamento.stripePixCopiaECola ??
+                            "")
+                          : `${STORE_CONFIG.pix.key} | Pedido ${id || pedido?.id || ""}`
+                      }
                       size={200}
                       bgColor="#ffffff"
                       fgColor="#06080f"
@@ -183,16 +228,25 @@ export function SucessoClient() {
                   ) : (
                     <>
                       <Copy className="h-4 w-4" />
-                      {pixStripe ? "Copiar código Pix (copia e cola)" : "Copiar chave PIX"}
+                      {pixMercadoPago || pixStripe
+                        ? "Copiar código Pix (copia e cola)"
+                        : "Copiar chave PIX"}
                     </>
                   )}
                 </button>
-                {!pixStripe && (
+                {!pixStripe && !pixMercadoPago && (
                   <p className="mt-3 text-xs text-muted">
                     {STORE_CONFIG.pix.keyType}:{" "}
                     <span className="text-foreground">{STORE_CONFIG.pix.key}</span>
                   </p>
                 )}
+                {pixMercadoPago &&
+                  pedido?.pagamento?.modo === "pix" &&
+                  pedido.pagamento.mercadoPagoPaymentId && (
+                    <p className="mt-3 font-mono text-[10px] text-muted">
+                      Ref. Mercado Pago: {pedido.pagamento.mercadoPagoPaymentId}
+                    </p>
+                  )}
                 {pixStripe && pedido?.pagamento?.modo === "pix" && pedido.pagamento.stripePaymentIntentId && (
                   <p className="mt-3 font-mono text-[10px] text-muted">
                     Ref. Stripe: {pedido.pagamento.stripePaymentIntentId}

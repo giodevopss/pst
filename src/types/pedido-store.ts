@@ -24,6 +24,13 @@ export type PagamentoPersistidoSeguro =
       stripePixCopiaECola?: string;
       stripePixQrUrl?: string;
       stripePixExpiresAt?: number;
+      /** PIX via Mercado Pago (API de pagamentos). */
+      mercadoPagoPaymentId?: string;
+      mercadoPagoPixCopiaECola?: string;
+      /** `data:image/png;base64,...` quando a API devolve QR em base64. */
+      mercadoPagoPixQrDataUrl?: string;
+      /** ISO 8601 (`date_of_expiration` do MP), se existir. */
+      mercadoPagoExpiresAt?: string;
     }
   | {
       modo: "cartao";

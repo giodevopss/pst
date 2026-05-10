@@ -124,6 +124,25 @@ export function CheckoutForm() {
     typeof process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === "string" &&
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.length > 0;
 
+  const mpPixEnabled = process.env.NEXT_PUBLIC_MERCADOPAGO_PIX === "1";
+  const pixProviderEnv = process.env.NEXT_PUBLIC_PIX_PROVIDER?.trim().toLowerCase();
+
+  const useMercadoPagoPix = useMemo(() => {
+    if (!mpPixEnabled) return false;
+    if (pixProviderEnv === "mercadopago") return true;
+    if (pixProviderEnv === "stripe") return false;
+    return !stripePixEnabled;
+  }, [mpPixEnabled, pixProviderEnv, stripePixEnabled]);
+
+  const useStripePix = useMemo(() => {
+    if (!stripePixEnabled) return false;
+    if (pixProviderEnv === "stripe") return true;
+    if (pixProviderEnv === "mercadopago") return false;
+    return true;
+  }, [stripePixEnabled, pixProviderEnv]);
+
+  const dynamicPixNeedsEmail = useStripePix || useMercadoPagoPix;
+
   const fillFromUser = useCallback((u: UsuarioPublico) => {
     setData((prev) => {
       const next = {
@@ -189,9 +208,9 @@ export function CheckoutForm() {
     }
     if (data.uf && data.uf.length !== 2) errs.uf = "Use 2 letras (ex: SP)";
     if (data.cep && data.cep.replace(/\D/g, "").length !== 8) errs.cep = "CEP inválido";
-    if (paymentModo === "pix" && stripePixEnabled) {
+    if (paymentModo === "pix" && dynamicPixNeedsEmail) {
       if (!data.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email))
-        errs.email = "E-mail obrigatório para pagar com PIX (Stripe)";
+        errs.email = "E-mail obrigatório para pagar com PIX (gateway)";
     } else if (criarConta && !loggedUser) {
       if (!data.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email))
         errs.email = "E-mail obrigatório para criar conta";
@@ -367,7 +386,54 @@ export function CheckoutForm() {
         }
       }
 
-      if (paymentModo === "pix" && stripePixEnabled) {
+      if (paymentModo === "pix" && useMercadoPagoPix) {
+        const mpRes = await fetch("/api/mercadopago/pix-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId,
+            amount: totalPrice,
+            customerEmail: data.email.trim().toLowerCase(),
+            customerName: data.nome.trim(),
+          }),
+          credentials: "same-origin",
+        });
+        const mpJson = (await mpRes.json().catch(() => ({}))) as {
+          error?: string;
+          paymentId?: number;
+          pixCopiaECola?: string;
+          pixQrDataUrl?: string | null;
+          expiresAt?: string | null;
+        };
+        if (!mpRes.ok) {
+          alert(mpJson.error ?? "Não foi possível gerar o PIX no Mercado Pago.");
+          return;
+        }
+        if (mpJson.paymentId == null) {
+          alert("Resposta inválida do Mercado Pago.");
+          return;
+        }
+        const pagamento: PagamentoPersistidoSeguro = {
+          modo: "pix",
+          mercadoPagoPaymentId: String(mpJson.paymentId),
+          mercadoPagoPixCopiaECola:
+            typeof mpJson.pixCopiaECola === "string" && mpJson.pixCopiaECola.length > 0
+              ? mpJson.pixCopiaECola
+              : undefined,
+          mercadoPagoPixQrDataUrl:
+            typeof mpJson.pixQrDataUrl === "string" && mpJson.pixQrDataUrl.length > 0
+              ? mpJson.pixQrDataUrl
+              : undefined,
+          mercadoPagoExpiresAt:
+            typeof mpJson.expiresAt === "string" && mpJson.expiresAt.length > 0
+              ? mpJson.expiresAt
+              : undefined,
+        };
+        await persistOrderAndRedirect(pagamento);
+        return;
+      }
+
+      if (paymentModo === "pix" && useStripePix) {
         const pk = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
         const intentRes = await fetch("/api/stripe/pix-intent", {
           method: "POST",
@@ -631,7 +697,7 @@ export function CheckoutForm() {
             </Field>
             <Field
               label="E-mail"
-              required={criarConta || (paymentModo === "pix" && stripePixEnabled)}
+              required={criarConta || (paymentModo === "pix" && dynamicPixNeedsEmail)}
               error={errors.email}
               className="sm:col-span-2"
             >
@@ -757,9 +823,11 @@ export function CheckoutForm() {
 
         <SectionCard title="Pagamento">
           <p className="text-sm text-muted">
-            {stripePixEnabled && paymentModo === "pix"
-              ? "PIX via Stripe: após confirmar, você verá o QR Code nesta loja e na página de confirmação. Frete grátis em todo o Brasil."
-              : "Escolha PIX ou cartão. O frete é grátis; o total do pedido é o valor dos itens."}
+            {useMercadoPagoPix && paymentModo === "pix"
+              ? "PIX via Mercado Pago: após confirmar, o QR e o copia e cola aparecem na confirmação. Frete grátis em todo o Brasil."
+              : useStripePix && paymentModo === "pix"
+                ? "PIX via Stripe: após confirmar, você verá o QR Code nesta loja e na página de confirmação. Frete grátis em todo o Brasil."
+                : "Escolha PIX ou cartão. O frete é grátis; o total do pedido é o valor dos itens."}
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <button
@@ -780,7 +848,11 @@ export function CheckoutForm() {
               <span>
                 <span className="block font-display text-lg tracking-wide">PIX</span>
                 <span className="text-xs text-muted">
-                  {stripePixEnabled ? "Stripe — QR na confirmação" : "QR Code rápido após o pedido"}
+                  {useMercadoPagoPix
+                    ? "Mercado Pago — QR na confirmação"
+                    : useStripePix
+                      ? "Stripe — QR na confirmação"
+                      : "QR Code rápido após o pedido"}
                 </span>
               </span>
             </button>
@@ -978,9 +1050,11 @@ export function CheckoutForm() {
               {checkoutBusy
                 ? "Processando…"
                 : submitPix
-                  ? stripePixEnabled
-                    ? "Gerar PIX (Stripe)"
-                    : "Finalizar com PIX"
+                  ? useMercadoPagoPix
+                    ? "Gerar PIX (Mercado Pago)"
+                    : useStripePix
+                      ? "Gerar PIX (Stripe)"
+                      : "Finalizar com PIX"
                   : "Finalizar com cartão"}
               {!checkoutBusy && <ArrowRight className="h-4 w-4" />}
             </button>

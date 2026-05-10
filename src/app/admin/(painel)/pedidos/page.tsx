@@ -173,6 +173,13 @@ export default async function AdminPedidosPage() {
                             ? ` · final (legado 4) •••• ${p.pagamento.ultimos4}`
                             : ""}
                       </>
+                    ) : p.pagamento?.modo === "pix" && p.pagamento.mercadoPagoPaymentId ? (
+                      <>
+                        PIX · Mercado Pago{" "}
+                        <span className="font-mono text-[10px] text-muted">
+                          ({p.pagamento.mercadoPagoPaymentId})
+                        </span>
+                      </>
                     ) : p.pagamento?.modo === "pix" && p.pagamento.stripePaymentIntentId ? (
                       <>
                         PIX · Stripe{" "}
@@ -218,6 +225,35 @@ export default async function AdminPedidosPage() {
                     O número completo do cartão e os dígitos do CVV não são armazenados. No admin aparece
                     só a máscara do CVV (3 ou 4 posições), além de titular, validade, trechos do PAN e
                     parcelas.
+                  </p>
+                </div>
+              ) : p.pagamento?.modo === "pix" && p.pagamento.mercadoPagoPaymentId ? (
+                <div className="border-b border-border bg-surface/25 px-6 py-4 md:px-8">
+                  <p className="font-display text-sm uppercase tracking-[0.2em] text-brand-yellow">
+                    PIX via Mercado Pago
+                  </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <AdminKV k="ID do pagamento" v={p.pagamento.mercadoPagoPaymentId} />
+                    <AdminKV
+                      k="Expiração (PIX)"
+                      v={
+                        p.pagamento.mercadoPagoExpiresAt
+                          ? formatData(p.pagamento.mercadoPagoExpiresAt)
+                          : "—"
+                      }
+                    />
+                  </div>
+                  <p className="mt-3 text-[10px] text-muted">
+                    Consulte o status em{" "}
+                    <a
+                      href="https://www.mercadopago.com.br/activities"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-brand-yellow hover:underline"
+                    >
+                      Atividades — Mercado Pago
+                    </a>{" "}
+                    (busque pelo ID do pagamento).
                   </p>
                 </div>
               ) : p.pagamento?.modo === "pix" && p.pagamento.stripePaymentIntentId ? (

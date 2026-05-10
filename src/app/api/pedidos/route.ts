@@ -49,6 +49,26 @@ function validPagamento(p: unknown): boolean {
       (typeof x.stripePixExpiresAt !== "number" || !Number.isFinite(x.stripePixExpiresAt))
     )
       return false;
+    if (
+      x.mercadoPagoPaymentId !== undefined &&
+      (typeof x.mercadoPagoPaymentId !== "string" || x.mercadoPagoPaymentId.length > 48)
+    )
+      return false;
+    if (
+      x.mercadoPagoPixCopiaECola !== undefined &&
+      (typeof x.mercadoPagoPixCopiaECola !== "string" || x.mercadoPagoPixCopiaECola.length > 20_000)
+    )
+      return false;
+    if (
+      x.mercadoPagoPixQrDataUrl !== undefined &&
+      (typeof x.mercadoPagoPixQrDataUrl !== "string" || x.mercadoPagoPixQrDataUrl.length > 2_500_000)
+    )
+      return false;
+    if (
+      x.mercadoPagoExpiresAt !== undefined &&
+      (typeof x.mercadoPagoExpiresAt !== "string" || x.mercadoPagoExpiresAt.length > 128)
+    )
+      return false;
     return true;
   }
   if (x.modo === "cartao") {
