@@ -12,6 +12,8 @@ export type CartItem = {
   precoOriginal?: number;
   /** Valor de lista antes do desconto da loja (tachado no carrinho). */
   precoCatalogoLoja?: number;
+  /** Miniatura do anúncio (/public…) para checkout e carrinho. */
+  imagemSrc?: string;
   categoria: string;
   selecaoSlug?: string;
   tamanho?: Tamanho;
@@ -34,7 +36,7 @@ type CartContextValue = {
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
-const STORAGE_KEY = "copa2026:cart:v4";
+const STORAGE_KEY = "copa2026:cart:v5";
 
 function loadFromStorage(): CartItem[] {
   if (typeof window === "undefined") return [];
@@ -95,6 +97,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           preco: sitePromoUnitSale(produto),
           precoOriginal: produto.precoOriginal,
           precoCatalogoLoja: catalogStrikePrice(produto),
+          imagemSrc: produto.imagemSrc,
           categoria: produto.categoria,
           selecaoSlug: produto.selecaoSlug,
           tamanho,

@@ -18,6 +18,7 @@ import { formatBRL } from "@/lib/utils";
 import { STORE_CONFIG } from "@/config/store";
 import { CheckoutCreditCard3D } from "@/components/checkout/CheckoutCreditCard3D";
 import { CheckoutEnvelopeUpsell } from "@/components/checkout/CheckoutEnvelopeUpsell";
+import { CartLineThumb } from "@/components/CartLineThumb";
 import {
   digitsOnly,
   formatCardNumberDigits,
@@ -1057,15 +1058,19 @@ export function CheckoutForm() {
             {items.map((i) => (
               <li
                 key={`${i.produtoId}-${i.tamanho ?? "x"}`}
-                className="flex justify-between gap-3 py-3 text-sm"
+                className="flex items-center gap-3 py-3 text-sm"
               >
-                <span className="text-foreground/90">
-                  {i.quantidade}× {i.nome}
-                  {i.tamanho && (
-                    <span className="ml-1 text-muted">(Tam {i.tamanho})</span>
-                  )}
-                </span>
-                <span className="font-medium tabular-nums">
+                <CartLineThumb item={i} className="h-14 w-14" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-foreground/90">
+                    <span className="font-semibold text-brand-yellow">{i.quantidade}×</span>{" "}
+                    {i.nome}
+                    {i.tamanho && (
+                      <span className="ml-1 text-muted">(Tam {i.tamanho})</span>
+                    )}
+                  </p>
+                </div>
+                <span className="shrink-0 font-medium tabular-nums">
                   {formatBRL(i.preco * i.quantidade)}
                 </span>
               </li>

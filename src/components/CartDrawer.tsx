@@ -6,7 +6,7 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatBRL } from "@/lib/utils";
 import { useEffect } from "react";
-import { getSelecao } from "@/data/selecoes";
+import { CartLineThumb } from "@/components/CartLineThumb";
 import {
   PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
   SITE_WIDE_DISCOUNT_PERCENT,
@@ -83,22 +83,12 @@ export function CartDrawer() {
               ) : (
                 <ul className="space-y-3">
                   {items.map((item) => {
-                    const selecao = item.selecaoSlug ? getSelecao(item.selecaoSlug) : undefined;
                     return (
                       <li
                         key={`${item.produtoId}-${item.tamanho ?? "x"}`}
                         className="flex gap-3 rounded-xl border border-border bg-surface/60 p-3"
                       >
-                        <div
-                          className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg text-2xl"
-                          style={{
-                            background: selecao
-                              ? `linear-gradient(135deg, ${selecao.cores.primaria} 0%, ${selecao.cores.secundaria} 100%)`
-                              : "linear-gradient(135deg, var(--brand-green) 0%, var(--brand-yellow) 100%)",
-                          }}
-                        >
-                          <span className="drop-shadow">{selecao?.bandeira ?? "🏆"}</span>
-                        </div>
+                        <CartLineThumb item={item} className="h-20 w-20" />
                         <div className="flex flex-1 flex-col">
                           <div className="flex items-start justify-between gap-2">
                             <div>
