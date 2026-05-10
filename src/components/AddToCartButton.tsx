@@ -15,6 +15,8 @@ type Props = {
   label?: string;
   fullWidth?: boolean;
   requiresSize?: boolean;
+  /** Chamado logo após o item entrar no carrinho (ex.: upsell). */
+  afterAdd?: () => void;
 };
 
 export function AddToCartButton({
@@ -26,6 +28,7 @@ export function AddToCartButton({
   label = "Adicionar ao carrinho",
   fullWidth = false,
   requiresSize = false,
+  afterAdd,
 }: Props) {
   const { add } = useCart();
   const [added, setAdded] = useState(false);
@@ -38,6 +41,7 @@ export function AddToCartButton({
     }
     setError(null);
     add(produto, { tamanho, quantidade });
+    afterAdd?.();
     setAdded(true);
     setTimeout(() => setAdded(false), 1600);
   };

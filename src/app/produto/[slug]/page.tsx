@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Star, Truck } from "lucide-react";
 import { ProductImage } from "@/components/ProductImage";
 import { ProductCard } from "@/components/ProductCard";
-import { AddToCartButton } from "@/components/AddToCartButton";
+import { ProductAlbumAddZone } from "@/components/ProductAlbumAddZone";
 import { SectionHeading } from "@/components/SectionHeading";
 import { getProduto, PRODUTOS } from "@/data/produtos";
 import { PacoteDetalheClient } from "@/components/PacoteDetalheClient";
@@ -99,7 +99,7 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
             {produto.categoria === "pacote" ? (
               <PacoteDetalheClient produto={produto} />
             ) : (
-              <AddToCartButton produto={produto} fullWidth />
+              <ProductAlbumAddZone produto={produto} fullWidth />
             )}
           </div>
 

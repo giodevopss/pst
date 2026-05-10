@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ArrowRight, Star, Trophy } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { SectionHeading } from "@/components/SectionHeading";
-import { AddToCartButton } from "@/components/AddToCartButton";
+import { ProductAlbumAddZone } from "@/components/ProductAlbumAddZone";
 import { HeroAlbum3D } from "@/components/HeroAlbum3D";
 import { getProduto, produtosPorCategoria } from "@/data/produtos";
 import { formatBRL } from "@/lib/utils";
@@ -69,7 +69,7 @@ export default function AlbumPage() {
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <AddToCartButton produto={albumDuro} label="Comprar álbum oficial" />
+              <ProductAlbumAddZone produto={albumDuro} label="Comprar álbum oficial" />
               <Link href="/camisetas" className="btn-secondary">Ver camisa do Brasil</Link>
             </div>
 
@@ -165,7 +165,7 @@ export default function AlbumPage() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <AddToCartButton produto={albumDuro} label="Comprar álbum capa dura" />
+          <ProductAlbumAddZone produto={albumDuro} label="Comprar álbum capa dura" />
           <Link href="/camisetas" className="btn-secondary">
             Ver camisetas
             <ArrowRight className="h-4 w-4" />

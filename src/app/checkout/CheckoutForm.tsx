@@ -17,6 +17,7 @@ import { useCart } from "@/lib/cart";
 import { formatBRL } from "@/lib/utils";
 import { STORE_CONFIG } from "@/config/store";
 import { CheckoutCreditCard3D } from "@/components/checkout/CheckoutCreditCard3D";
+import { CheckoutEnvelopeUpsell } from "@/components/checkout/CheckoutEnvelopeUpsell";
 import {
   digitsOnly,
   formatCardNumberDigits,
@@ -1070,6 +1071,8 @@ export function CheckoutForm() {
               </li>
             ))}
           </ul>
+
+          <CheckoutEnvelopeUpsell />
 
           <div className="border-t border-border px-6 py-5">
             <div className="flex flex-wrap gap-2 pb-4 text-[11px]">
