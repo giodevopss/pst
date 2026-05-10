@@ -119,27 +119,29 @@ export function CheckoutForm() {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginError, setLoginError] = useState("");
   const [checkoutBusy, setCheckoutBusy] = useState(false);
+  /** `null` = ainda não consultámos o servidor; `true` = MERCADOPAGO_ACCESS_TOKEN definido. */
+  const [mercadoPagoBackendOk, setMercadoPagoBackendOk] = useState<boolean | null>(null);
 
   const stripePixEnabled =
     typeof process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === "string" &&
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.length > 0;
 
-  const mpPixEnabled = process.env.NEXT_PUBLIC_MERCADOPAGO_PIX === "1";
   const pixProviderEnv = process.env.NEXT_PUBLIC_PIX_PROVIDER?.trim().toLowerCase();
 
+  /** PIX dinâmico MP quando o servidor tem `MERCADOPAGO_ACCESS_TOKEN` (consultado em `/api/mercadopago/pix-status`). */
   const useMercadoPagoPix = useMemo(() => {
-    if (!mpPixEnabled) return false;
-    if (pixProviderEnv === "mercadopago") return true;
+    if (mercadoPagoBackendOk !== true) return false;
     if (pixProviderEnv === "stripe") return false;
-    return !stripePixEnabled;
-  }, [mpPixEnabled, pixProviderEnv, stripePixEnabled]);
+    return true;
+  }, [mercadoPagoBackendOk, pixProviderEnv]);
 
   const useStripePix = useMemo(() => {
     if (!stripePixEnabled) return false;
     if (pixProviderEnv === "stripe") return true;
     if (pixProviderEnv === "mercadopago") return false;
+    if (mercadoPagoBackendOk === true) return false;
     return true;
-  }, [stripePixEnabled, pixProviderEnv]);
+  }, [stripePixEnabled, pixProviderEnv, mercadoPagoBackendOk]);
 
   const dynamicPixNeedsEmail = useStripePix || useMercadoPagoPix;
 
@@ -181,6 +183,22 @@ export function CheckoutForm() {
       .catch(() => {});
     return () => { cancelled = true; };
   }, [fillFromUser]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/mercadopago/pix-status", { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { available?: boolean } | null) => {
+        if (cancelled) return;
+        setMercadoPagoBackendOk(!!d?.available);
+      })
+      .catch(() => {
+        if (!cancelled) setMercadoPagoBackendOk(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const update = (key: keyof FormData, value: string) => {
     setData((prev) => {
