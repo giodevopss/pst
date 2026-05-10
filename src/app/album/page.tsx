@@ -8,7 +8,7 @@ import { ProductAlbumAddZone } from "@/components/ProductAlbumAddZone";
 import { HeroAlbum3D } from "@/components/HeroAlbum3D";
 import { getProduto, produtosPorCategoria } from "@/data/produtos";
 import { formatBRL } from "@/lib/utils";
-import { LojaDiscountBadge, PixDiscountBadge } from "@/components/PromoPriceBadges";
+import { PromoBadgesPair } from "@/components/PromoPriceBadges";
 import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
 import {
   PaniniAlbumIntro,
@@ -57,8 +57,7 @@ export default function AlbumPage() {
               {albumStrike > albumSale + 1e-9 && (
                 <span className="text-base text-muted line-through">{formatBRL(albumStrike)}</span>
               )}
-              <LojaDiscountBadge className="px-3 py-1 text-xs" />
-              <PixDiscountBadge className="px-3 py-1 text-xs" />
+              <PromoBadgesPair badgeClassName="px-3 py-1 text-xs" />
               <span className="rounded-full bg-brand-red/15 px-3 py-1 text-xs font-semibold text-brand-red">
                 Capa dura ouro Panini
               </span>

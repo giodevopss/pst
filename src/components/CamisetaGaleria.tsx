@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { Produto } from "@/data/produtos";
 import { getSelecao } from "@/data/selecoes";
 import { cn } from "@/lib/utils";
-import { LojaDiscountBadge, PixDiscountBadge } from "@/components/PromoPriceBadges";
+import { PromoBadgesPair } from "@/components/PromoPriceBadges";
 
 type Props = {
   produto: Produto;
@@ -57,9 +57,8 @@ export function CamisetaGaleria({ produto, className, showBadges = true }: Props
           </span>
         )}
         {showBadges && (
-          <div className="absolute right-3 top-3 flex max-w-[min(92vw,12rem)] flex-col items-end gap-1">
-            <LojaDiscountBadge size="compact" className="shadow-md" />
-            <PixDiscountBadge size="compact" className="shadow-md" />
+          <div className="absolute right-3 top-3 max-w-[min(96vw,20rem)]">
+            <PromoBadgesPair size="compact" />
           </div>
         )}
       </div>
