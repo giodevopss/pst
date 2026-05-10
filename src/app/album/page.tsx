@@ -8,7 +8,11 @@ import { AddToCartButton } from "@/components/AddToCartButton";
 import { HeroAlbum3D } from "@/components/HeroAlbum3D";
 import { getProduto, produtosPorCategoria } from "@/data/produtos";
 import { formatBRL } from "@/lib/utils";
-import { catalogStrikePrice, priceAfterSiteDiscount } from "@/lib/store-pricing";
+import {
+  SITE_WIDE_DISCOUNT_PERCENT,
+  catalogStrikePrice,
+  sitePromoUnitSale,
+} from "@/lib/store-pricing";
 import {
   PaniniAlbumIntro,
   PaniniEditionHighlights,
@@ -23,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function AlbumPage() {
   const albumDuro = getProduto("album-fifa-world-cup-2026-capa-dura-ouro")!;
-  const albumSale = priceAfterSiteDiscount(albumDuro.preco);
+  const albumSale = sitePromoUnitSale(albumDuro);
   const albumStrike = catalogStrikePrice(albumDuro);
   const produtosAlbum = produtosPorCategoria("album");
   const figurinhas = produtosAlbum.filter((p) => !p.id.startsWith("adrenalyn-xl-"));
@@ -57,7 +61,7 @@ export default function AlbumPage() {
                 <span className="text-base text-muted line-through">{formatBRL(albumStrike)}</span>
               )}
               <span className="rounded-full bg-brand-green/15 px-3 py-1 text-xs font-semibold text-brand-green">
-                −20% na loja
+                −{SITE_WIDE_DISCOUNT_PERCENT}% na loja
               </span>
               <span className="rounded-full bg-brand-red/15 px-3 py-1 text-xs font-semibold text-brand-red">
                 Capa dura ouro Panini

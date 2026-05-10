@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Produto } from "@/data/produtos";
+import { SITE_WIDE_DISCOUNT_PERCENT } from "@/lib/store-pricing";
 import { getSelecao } from "@/data/selecoes";
 import { cn } from "@/lib/utils";
 
@@ -107,9 +108,9 @@ export function ProductImage({
             {produto.badge}
           </span>
         )}
-        {showBadges && produto.precoOriginal && produto.precoOriginal > produto.preco && (
+        {showBadges && (
           <span className="absolute right-3 top-3 rounded-full bg-brand-red px-3 py-1 font-display text-[10px] tracking-[0.2em] text-white">
-            {Math.round(((produto.precoOriginal - produto.preco) / produto.precoOriginal) * 100)}% OFF
+            {SITE_WIDE_DISCOUNT_PERCENT}% OFF
           </span>
         )}
       </div>
@@ -150,9 +151,9 @@ export function ProductImage({
           {produto.badge}
         </span>
       )}
-      {showBadges && produto.precoOriginal && produto.precoOriginal > produto.preco && (
+      {showBadges && (
         <span className="absolute right-3 top-3 rounded-full bg-brand-red px-3 py-1 font-display text-[10px] tracking-[0.2em] text-white">
-          {Math.round(((produto.precoOriginal - produto.preco) / produto.precoOriginal) * 100)}% OFF
+          {SITE_WIDE_DISCOUNT_PERCENT}% OFF
         </span>
       )}
     </div>

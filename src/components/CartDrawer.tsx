@@ -7,6 +7,10 @@ import { useCart } from "@/lib/cart";
 import { formatBRL } from "@/lib/utils";
 import { useEffect } from "react";
 import { getSelecao } from "@/data/selecoes";
+import {
+  PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
+  SITE_WIDE_DISCOUNT_PERCENT,
+} from "@/lib/store-pricing";
 
 export function CartDrawer() {
   const { items, isOpen, close, totalItems, totalPrice, updateQty, remove, clear } = useCart();
@@ -168,7 +172,8 @@ export function CartDrawer() {
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-muted">
-                  Preços com −20% na loja. No PIX, mais −20% no checkout. Frete grátis.
+                  Preços com −{SITE_WIDE_DISCOUNT_PERCENT}% na loja. No PIX, mais −
+                  {PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no checkout. Frete grátis.
                 </p>
                 <Link
                   href="/checkout"

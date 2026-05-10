@@ -29,7 +29,15 @@ import {
 } from "@/lib/credit-card";
 import type { UsuarioPublico } from "@/types/usuario";
 import type { PagamentoPersistidoSeguro } from "@/types/pedido-store";
-import { totalAfterPixExtraDiscount } from "@/lib/store-pricing";
+import {
+  PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
+  SITE_WIDE_DISCOUNT_PERCENT,
+  totalAfterPixExtraDiscount,
+} from "@/lib/store-pricing";
+import {
+  REMARKETING_CHECKOUT_CONVERTIDO_KEY,
+  useCheckoutAbandonBeacon,
+} from "@/hooks/use-checkout-abandon-beacon";
 
 type FormData = {
   nome: string;
@@ -211,6 +219,22 @@ export function CheckoutForm() {
     return { subtotalLoja, descontoPixCheckout, totalPagar };
   }, [paymentModo, totalPrice]);
 
+  useCheckoutAbandonBeacon({
+    items,
+    data: {
+      email: data.email,
+      nome: data.nome,
+      telefone: data.telefone,
+      cep: data.cep,
+      cidade: data.cidade,
+      uf: data.uf,
+    },
+    paymentModo,
+    subtotalLoja: checkoutTotals.subtotalLoja,
+    totalComPagamentoEscolhido: checkoutTotals.totalPagar,
+    checkoutBusy,
+  });
+
   const update = (key: keyof FormData, value: string) => {
     setData((prev) => {
       const next = { ...prev, [key]: value };
@@ -276,6 +300,12 @@ export function CheckoutForm() {
 
   async function persistOrderAndRedirect(pagamento: PagamentoPersistidoSeguro, totalPagar: number) {
     try {
+      try {
+        sessionStorage.setItem(REMARKETING_CHECKOUT_CONVERTIDO_KEY, "1");
+      } catch {
+        /* ignore */
+      }
+
       const pedido = {
         id: orderId,
         items,
@@ -879,9 +909,14 @@ export function CheckoutForm() {
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-brand-green/35 bg-brand-green/15 text-brand-green">
                 <QrCode className="h-5 w-5" />
               </span>
-              <span>
-                <span className="block font-display text-lg tracking-wide">PIX</span>
-                <span className="text-xs text-muted">
+              <span className="min-w-0 flex-1">
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="font-display text-lg tracking-wide">PIX</span>
+                  <span className="rounded-full border border-brand-green/35 bg-brand-green/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-green">
+                    +{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% de desconto
+                  </span>
+                </span>
+                <span className="mt-0.5 block text-xs text-muted">
                   {useMercadoPagoPix
                     ? "Mercado Pago — QR na confirmação"
                     : useStripePix
@@ -1059,12 +1094,16 @@ export function CheckoutForm() {
             </div>
 
             <div className="flex items-baseline justify-between">
-              <span className="text-sm text-muted">Subtotal (loja −20%)</span>
+              <span className="text-sm text-muted">
+                Subtotal (loja −{SITE_WIDE_DISCOUNT_PERCENT}%)
+              </span>
               <span className="font-medium tabular-nums">{formatBRL(checkoutTotals.subtotalLoja)}</span>
             </div>
             {checkoutTotals.descontoPixCheckout > 0 && (
               <div className="mt-2 flex items-baseline justify-between text-brand-green">
-                <span className="text-sm">Desconto PIX (−20%)</span>
+                <span className="text-sm">
+                  Desconto PIX (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}%)
+                </span>
                 <span className="font-medium tabular-nums">
                   − {formatBRL(checkoutTotals.descontoPixCheckout)}
                 </span>

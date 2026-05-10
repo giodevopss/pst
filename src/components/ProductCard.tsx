@@ -1,12 +1,16 @@
 import Link from "next/link";
 import type { Produto } from "@/data/produtos";
 import { formatBRL } from "@/lib/utils";
-import { catalogStrikePrice, priceAfterSiteDiscount } from "@/lib/store-pricing";
+import {
+  SITE_WIDE_DISCOUNT_PERCENT,
+  catalogStrikePrice,
+  sitePromoUnitSale,
+} from "@/lib/store-pricing";
 import { ProductImage } from "./ProductImage";
 import { ArrowUpRight } from "lucide-react";
 
 export function ProductCard({ produto }: { produto: Produto }) {
-  const salePrice = priceAfterSiteDiscount(produto.preco);
+  const salePrice = sitePromoUnitSale(produto);
   const strikePrice = catalogStrikePrice(produto);
   const href =
     produto.categoria === "camiseta"
@@ -36,7 +40,7 @@ export function ProductCard({ produto }: { produto: Produto }) {
             <span className="text-sm text-muted line-through">{formatBRL(strikePrice)}</span>
           )}
           <span className="rounded-full bg-brand-green/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-green">
-            −20% na loja
+            −{SITE_WIDE_DISCOUNT_PERCENT}% na loja
           </span>
         </div>
 

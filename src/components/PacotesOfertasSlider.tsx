@@ -8,7 +8,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Produto } from "@/data/produtos";
 import { visualSlidePacote } from "@/lib/pacote-slide-visual";
 import { cn, formatBRL } from "@/lib/utils";
-import { catalogStrikePrice, priceAfterSiteDiscount } from "@/lib/store-pricing";
+import {
+  SITE_WIDE_DISCOUNT_PERCENT,
+  catalogStrikePrice,
+  sitePromoUnitSale,
+} from "@/lib/store-pricing";
 
 type Props = {
   pacotes: Produto[];
@@ -106,14 +110,12 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
             {produto.nome}
           </h2>
           <div className="mt-4 flex flex-wrap items-baseline gap-3">
-            <span className="font-display text-4xl gradient-text">
-              {formatBRL(priceAfterSiteDiscount(produto.preco))}
-            </span>
-            {catalogStrikePrice(produto) > priceAfterSiteDiscount(produto.preco) + 1e-9 && (
+            <span className="font-display text-4xl gradient-text">{formatBRL(sitePromoUnitSale(produto))}</span>
+            {catalogStrikePrice(produto) > sitePromoUnitSale(produto) + 1e-9 && (
               <span className="text-base text-muted line-through">{formatBRL(catalogStrikePrice(produto))}</span>
             )}
             <span className="rounded-full bg-brand-green/15 px-2 py-0.5 text-[10px] font-bold uppercase text-brand-green">
-              −20% loja
+              −{SITE_WIDE_DISCOUNT_PERCENT}% loja
             </span>
           </div>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">{produto.descricao}</p>
