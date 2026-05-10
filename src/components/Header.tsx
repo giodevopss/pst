@@ -44,16 +44,18 @@ export function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 w-full transition-all duration-300",
+        "sticky top-0 z-40 w-full min-w-0 transition-all duration-300",
         scrolled
           ? "border-b border-border bg-background/85 backdrop-blur-xl"
           : "bg-transparent",
       )}
     >
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-8">
-        <Logo />
+      <div className="mx-auto flex min-h-16 max-w-7xl items-center gap-2 px-3 sm:min-h-20 sm:gap-3 sm:px-4 md:px-8">
+        <div className="min-w-0 flex-1">
+          <Logo />
+        </div>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden shrink-0 items-center gap-1 md:flex">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
@@ -66,28 +68,28 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <Link
             href="/conta"
             aria-label="Minha conta"
             className={cn(
-              "relative inline-flex h-11 w-11 items-center justify-center rounded-full border bg-surface/60 transition",
+              "relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-surface/60 transition sm:h-11 sm:w-11",
               loggedIn
                 ? "border-brand-green text-brand-green hover:bg-brand-green/10"
                 : "border-border text-foreground hover:border-brand-yellow hover:text-brand-yellow",
             )}
           >
-            <User className="h-5 w-5" />
+            <User className="h-[1.15rem] w-[1.15rem] sm:h-5 sm:w-5" />
           </Link>
           <button
             type="button"
             onClick={open}
             aria-label="Abrir carrinho"
-            className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface/60 text-foreground transition hover:border-brand-yellow hover:text-brand-yellow"
+            className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface/60 text-foreground transition hover:border-brand-yellow hover:text-brand-yellow sm:h-11 sm:w-11"
           >
-            <ShoppingBag className="h-5 w-5" />
+            <ShoppingBag className="h-[1.15rem] w-[1.15rem] sm:h-5 sm:w-5" />
             {totalItems > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-yellow px-1 text-[11px] font-bold text-[#06080f]">
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-yellow px-0.5 text-[10px] font-bold text-[#06080f] sm:-right-1.5 sm:-top-1.5 sm:h-5 sm:min-w-5 sm:px-1 sm:text-[11px]">
                 {totalItems}
               </span>
             )}
@@ -95,38 +97,48 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMobileOpen((v) => !v)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface/60 text-foreground md:hidden"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface/60 text-foreground sm:h-11 sm:w-11 md:hidden"
             aria-label="Abrir menu"
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? <X className="h-[1.15rem] w-[1.15rem] sm:h-5 sm:w-5" /> : <Menu className="h-[1.15rem] w-[1.15rem] sm:h-5 sm:w-5" />}
           </button>
         </div>
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-border bg-background/95 px-4 pb-6 pt-2 backdrop-blur-xl md:hidden">
-          <nav className="flex flex-col">
-            {NAV_ITEMS.map((item) => (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-[44] bg-black/50 backdrop-blur-[2px] md:hidden"
+            aria-label="Fechar menu"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="fixed inset-x-0 bottom-0 z-[45] max-h-[min(85dvh,calc(100dvh-env(safe-area-inset-top)-2rem))] overflow-y-auto overscroll-y-contain border-t border-border bg-background/98 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl md:hidden">
+            <nav className="mx-auto flex max-w-7xl flex-col">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-xl px-3 py-3.5 text-base font-medium text-foreground/90 transition hover:bg-white/5 hover:text-brand-yellow active:bg-white/10"
+                >
+                  {item.label}
+                </Link>
+              ))}
               <Link
-                key={item.href}
-                href={item.href}
+                href="/conta"
                 onClick={() => setMobileOpen(false)}
-                className="rounded-xl px-4 py-3 text-base font-medium text-foreground/90 transition hover:bg-white/5 hover:text-brand-yellow"
+                className="mt-1 flex items-center gap-2 rounded-xl border-t border-border/50 px-3 py-3.5 text-base font-medium text-foreground/90 transition hover:bg-white/5 hover:text-brand-yellow"
               >
-                {item.label}
+                <User className="h-4 w-4 shrink-0" />
+                <span className="min-w-0 leading-snug">
+                  {loggedIn ? "Minha conta" : "Entrar / Criar conta"}
+                </span>
               </Link>
-            ))}
-            <Link
-              href="/conta"
-              onClick={() => setMobileOpen(false)}
-              className="mt-1 flex items-center gap-2 rounded-xl border-t border-border/50 px-4 py-3 text-base font-medium text-foreground/90 transition hover:bg-white/5 hover:text-brand-yellow"
-            >
-              <User className="h-4 w-4" />
-              {loggedIn ? "Minha conta" : "Entrar / Criar conta"}
-            </Link>
-          </nav>
-        </div>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );
