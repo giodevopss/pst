@@ -1,5 +1,5 @@
 /** Desconto fixo de vitrine/carrinho sobre o valor de lista (strike Panini/catálogo). */
-export const SITE_WIDE_DISCOUNT_FRACTION = 0.5;
+export const SITE_WIDE_DISCOUNT_FRACTION = 0.3;
 
 export const SITE_WIDE_DISCOUNT_PERCENT = Math.round(SITE_WIDE_DISCOUNT_FRACTION * 100);
 

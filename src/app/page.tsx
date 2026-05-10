@@ -7,7 +7,9 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { produtosDestaque, produtosPacotes, getProduto } from "@/data/produtos";
 import { ProductImage } from "@/components/ProductImage";
 import { formatBRL } from "@/lib/utils";
+import { LojaDiscountBadge, PixDiscountBadge } from "@/components/PromoPriceBadges";
 import {
+  PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
   SITE_WIDE_DISCOUNT_PERCENT,
   catalogStrikePrice,
   sitePromoUnitSale,
@@ -29,7 +31,7 @@ const FEATURES = [
   {
     icon: Sparkles,
     title: "Pague com PIX",
-    text: "50% na loja e mais 20% no total ao pagar com PIX.",
+    text: `${SITE_WIDE_DISCOUNT_PERCENT}% na loja e mais ${PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no total ao pagar com PIX.`,
   },
 ];
 
@@ -142,9 +144,8 @@ export default function Home() {
               {albumStrike > albumSale + 1e-9 && (
                 <span className="text-base text-muted line-through">{formatBRL(albumStrike)}</span>
               )}
-              <span className="rounded-full bg-brand-green/15 px-3 py-1 text-xs font-semibold text-brand-green">
-                −{SITE_WIDE_DISCOUNT_PERCENT}% na loja
-              </span>
+              <LojaDiscountBadge className="px-3 py-1 text-xs" />
+              <PixDiscountBadge className="px-3 py-1 text-xs" />
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -190,9 +191,8 @@ export default function Home() {
             </ul>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <span className="font-display text-4xl gradient-text">{formatBRL(camisaIISale)}</span>
-              <span className="rounded-full bg-brand-green/15 px-2 py-0.5 text-[10px] font-bold uppercase text-brand-green">
-                −{SITE_WIDE_DISCOUNT_PERCENT}% loja
-              </span>
+              <LojaDiscountBadge />
+              <PixDiscountBadge />
               <AddToCartButton produto={camisaBrasilII} label="Comprar Camiseta II" />
             </div>
           </div>

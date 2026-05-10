@@ -9,11 +9,8 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { getProduto, PRODUTOS } from "@/data/produtos";
 import { PacoteDetalheClient } from "@/components/PacoteDetalheClient";
 import { formatBRL } from "@/lib/utils";
-import {
-  SITE_WIDE_DISCOUNT_PERCENT,
-  catalogStrikePrice,
-  sitePromoUnitSale,
-} from "@/lib/store-pricing";
+import { LojaDiscountBadge, PixDiscountBadge } from "@/components/PromoPriceBadges";
+import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
 
 type Params = { slug: string };
 
@@ -76,9 +73,8 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
             {strikePrice > salePrice + 1e-9 && (
               <span className="text-base text-muted line-through">{formatBRL(strikePrice)}</span>
             )}
-            <span className="rounded-full bg-brand-green/15 px-3 py-1 text-xs font-semibold text-brand-green">
-              −{SITE_WIDE_DISCOUNT_PERCENT}% na loja
-            </span>
+            <LojaDiscountBadge className="px-3 py-1 text-xs" />
+            <PixDiscountBadge className="px-3 py-1 text-xs" />
           </div>
 
           <p className="mt-5 text-base leading-relaxed text-muted">{produto.descricao}</p>

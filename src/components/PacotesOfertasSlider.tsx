@@ -8,11 +8,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Produto } from "@/data/produtos";
 import { visualSlidePacote } from "@/lib/pacote-slide-visual";
 import { cn, formatBRL } from "@/lib/utils";
-import {
-  SITE_WIDE_DISCOUNT_PERCENT,
-  catalogStrikePrice,
-  sitePromoUnitSale,
-} from "@/lib/store-pricing";
+import { LojaDiscountBadge, PixDiscountBadge } from "@/components/PromoPriceBadges";
+import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
 
 type Props = {
   pacotes: Produto[];
@@ -114,9 +111,8 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
             {catalogStrikePrice(produto) > sitePromoUnitSale(produto) + 1e-9 && (
               <span className="text-base text-muted line-through">{formatBRL(catalogStrikePrice(produto))}</span>
             )}
-            <span className="rounded-full bg-brand-green/15 px-2 py-0.5 text-[10px] font-bold uppercase text-brand-green">
-              −{SITE_WIDE_DISCOUNT_PERCENT}% loja
-            </span>
+            <LojaDiscountBadge />
+            <PixDiscountBadge />
           </div>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">{produto.descricao}</p>
           <Link href={`/produto/${produto.slug}`} className="btn-primary mt-6 inline-flex">

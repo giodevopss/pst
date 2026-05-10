@@ -9,11 +9,8 @@ import { ProductImage } from "@/components/ProductImage";
 import { ProductCard } from "@/components/ProductCard";
 import { CamisetaDetalheClient } from "./CamisetaDetalheClient";
 import { formatBRL } from "@/lib/utils";
-import {
-  SITE_WIDE_DISCOUNT_PERCENT,
-  catalogStrikePrice,
-  sitePromoUnitSale,
-} from "@/lib/store-pricing";
+import { LojaDiscountBadge, PixDiscountBadge } from "@/components/PromoPriceBadges";
+import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
 import { SectionHeading } from "@/components/SectionHeading";
 
 type Params = { slug: string };
@@ -106,9 +103,8 @@ export default async function CamisetaDetalhe({ params }: { params: Promise<Para
             {strikePrice > salePrice + 1e-9 && (
               <span className="text-base text-muted line-through">{formatBRL(strikePrice)}</span>
             )}
-            <span className="rounded-full bg-brand-green/15 px-3 py-1 text-xs font-semibold text-brand-green">
-              −{SITE_WIDE_DISCOUNT_PERCENT}% na loja
-            </span>
+            <LojaDiscountBadge className="px-3 py-1 text-xs" />
+            <PixDiscountBadge className="px-3 py-1 text-xs" />
           </div>
 
           <p className="mt-5 text-base leading-relaxed text-muted">

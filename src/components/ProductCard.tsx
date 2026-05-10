@@ -1,11 +1,8 @@
 import Link from "next/link";
 import type { Produto } from "@/data/produtos";
 import { formatBRL } from "@/lib/utils";
-import {
-  SITE_WIDE_DISCOUNT_PERCENT,
-  catalogStrikePrice,
-  sitePromoUnitSale,
-} from "@/lib/store-pricing";
+import { LojaDiscountBadge, PixDiscountBadge } from "@/components/PromoPriceBadges";
+import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
 import { ProductImage } from "./ProductImage";
 import { ArrowUpRight } from "lucide-react";
 
@@ -39,9 +36,8 @@ export function ProductCard({ produto }: { produto: Produto }) {
           {strikePrice > salePrice + 1e-9 && (
             <span className="text-sm text-muted line-through">{formatBRL(strikePrice)}</span>
           )}
-          <span className="rounded-full bg-brand-green/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-green">
-            −{SITE_WIDE_DISCOUNT_PERCENT}% na loja
-          </span>
+          <LojaDiscountBadge />
+          <PixDiscountBadge />
         </div>
 
         <span className="text-[11px] font-medium uppercase tracking-widest text-muted">

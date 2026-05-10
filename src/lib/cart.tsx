@@ -10,7 +10,7 @@ export type CartItem = {
   nome: string;
   preco: number;
   precoOriginal?: number;
-  /** Valor de lista antes do −50% da loja (para tachado no carrinho). */
+  /** Valor de lista antes do desconto da loja (tachado no carrinho). */
   precoCatalogoLoja?: number;
   categoria: string;
   selecaoSlug?: string;
@@ -34,7 +34,7 @@ type CartContextValue = {
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
-const STORAGE_KEY = "copa2026:cart:v3";
+const STORAGE_KEY = "copa2026:cart:v4";
 
 function loadFromStorage(): CartItem[] {
   if (typeof window === "undefined") return [];
