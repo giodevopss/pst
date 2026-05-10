@@ -39,20 +39,28 @@ export function CountdownCopa({ compact = false }: { compact?: boolean }) {
     <div
       className={
         compact
-          ? "inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-2 text-xs"
-          : "inline-flex items-center gap-3 rounded-2xl border border-border bg-surface/60 p-4 backdrop-blur"
+          ? "inline-flex flex-col gap-2 rounded-full border border-border bg-surface/60 px-4 py-2 text-xs sm:flex-row sm:items-center"
+          : "inline-flex flex-col gap-3 rounded-2xl border border-border bg-surface/60 p-4 backdrop-blur md:gap-2"
       }
     >
-      <span
-        className={
-          compact
-            ? "text-[10px] font-semibold uppercase tracking-widest text-muted"
-            : "text-xs font-semibold uppercase tracking-widest text-muted"
-        }
+      {!compact && (
+        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-brand-yellow/95 md:text-xs">
+          Copa do Mundo FIFA 2026™ — abertura
+        </p>
+      )}
+      <div
+        className={`flex flex-wrap items-end gap-x-3 gap-y-1 ${compact ? "" : "md:items-baseline"}`}
       >
-        Falta
-      </span>
-      <div className="flex items-baseline gap-2">
+        <span
+          className={
+            compact
+              ? "max-w-[11rem] text-[10px] font-semibold uppercase leading-tight tracking-wider text-muted"
+              : "shrink-0 text-xs font-semibold uppercase tracking-widest text-muted"
+          }
+        >
+          {compact ? "Falta p/ a Copa" : "Falta para a Copa"}
+        </span>
+        <div className="flex flex-wrap items-baseline gap-2">
         {LABELS.map(([key, label], i) => (
           <div key={key} className="flex items-baseline gap-1">
             <span
@@ -77,6 +85,7 @@ export function CountdownCopa({ compact = false }: { compact?: boolean }) {
             {i < LABELS.length - 1 && <span className="text-muted">·</span>}
           </div>
         ))}
+        </div>
       </div>
     </div>
   );
