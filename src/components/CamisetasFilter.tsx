@@ -6,6 +6,7 @@ import { ProductCard } from "./ProductCard";
 import { SELECOES, getSelecao } from "@/data/selecoes";
 import type { Produto } from "@/data/produtos";
 import { cn } from "@/lib/utils";
+import { priceAfterSiteDiscount } from "@/lib/store-pricing";
 
 type SortKey = "destaque" | "preco-asc" | "preco-desc";
 
@@ -33,9 +34,13 @@ export function CamisetasFilter({ produtos }: { produtos: Produto[] }) {
         : produtos.filter((p) => p.selecaoSlug === selecaoSlug);
 
     if (sort === "preco-asc") {
-      arr = [...arr].sort((a, b) => a.preco - b.preco);
+      arr = [...arr].sort(
+        (a, b) => priceAfterSiteDiscount(a.preco) - priceAfterSiteDiscount(b.preco),
+      );
     } else if (sort === "preco-desc") {
-      arr = [...arr].sort((a, b) => b.preco - a.preco);
+      arr = [...arr].sort(
+        (a, b) => priceAfterSiteDiscount(b.preco) - priceAfterSiteDiscount(a.preco),
+      );
     } else {
       arr = [...arr].sort((a, b) => {
         const sa = a.selecaoSlug ? getSelecao(a.selecaoSlug)?.popularidade ?? 0 : 0;

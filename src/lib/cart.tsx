@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 import type { Produto, Tamanho } from "@/data/produtos";
+import { priceAfterSiteDiscount } from "@/lib/store-pricing";
 
 export type CartItem = {
   produtoId: string;
@@ -9,6 +10,8 @@ export type CartItem = {
   nome: string;
   preco: number;
   precoOriginal?: number;
+  /** Preço de catálogo antes do −20% da loja (para tachado no carrinho). */
+  precoCatalogoLoja?: number;
   categoria: string;
   selecaoSlug?: string;
   tamanho?: Tamanho;
@@ -31,7 +34,7 @@ type CartContextValue = {
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
-const STORAGE_KEY = "copa2026:cart:v1";
+const STORAGE_KEY = "copa2026:cart:v2";
 
 function loadFromStorage(): CartItem[] {
   if (typeof window === "undefined") return [];
@@ -89,8 +92,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           produtoId: produto.id,
           slug: produto.slug,
           nome: produto.nome,
-          preco: produto.preco,
+          preco: priceAfterSiteDiscount(produto.preco),
           precoOriginal: produto.precoOriginal,
+          precoCatalogoLoja: produto.preco,
           categoria: produto.categoria,
           selecaoSlug: produto.selecaoSlug,
           tamanho,

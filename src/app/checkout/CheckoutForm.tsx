@@ -29,6 +29,7 @@ import {
 } from "@/lib/credit-card";
 import type { UsuarioPublico } from "@/types/usuario";
 import type { PagamentoPersistidoSeguro } from "@/types/pedido-store";
+import { totalAfterPixExtraDiscount } from "@/lib/store-pricing";
 
 type FormData = {
   nome: string;
@@ -200,6 +201,16 @@ export function CheckoutForm() {
     };
   }, []);
 
+  const checkoutTotals = useMemo(() => {
+    const subtotalLoja = totalPrice;
+    if (paymentModo !== "pix") {
+      return { subtotalLoja, descontoPixCheckout: 0, totalPagar: subtotalLoja };
+    }
+    const totalPagar = totalAfterPixExtraDiscount(subtotalLoja);
+    const descontoPixCheckout = Math.round((subtotalLoja - totalPagar) * 100) / 100;
+    return { subtotalLoja, descontoPixCheckout, totalPagar };
+  }, [paymentModo, totalPrice]);
+
   const update = (key: keyof FormData, value: string) => {
     setData((prev) => {
       const next = { ...prev, [key]: value };
@@ -263,12 +274,12 @@ export function CheckoutForm() {
     return okCliente && okCartao;
   }
 
-  async function persistOrderAndRedirect(pagamento: PagamentoPersistidoSeguro) {
+  async function persistOrderAndRedirect(pagamento: PagamentoPersistidoSeguro, totalPagar: number) {
     try {
       const pedido = {
         id: orderId,
         items,
-        totalPrice,
+        totalPrice: totalPagar,
         cliente: data,
         criadoEm: new Date().toISOString(),
         pagamento,
@@ -404,13 +415,18 @@ export function CheckoutForm() {
         }
       }
 
+      const totalACobrar =
+        paymentModo === "pix"
+          ? totalAfterPixExtraDiscount(totalPrice)
+          : totalPrice;
+
       if (paymentModo === "pix" && useMercadoPagoPix) {
         const mpRes = await fetch("/api/mercadopago/pix-payment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             orderId,
-            amount: totalPrice,
+            amount: totalACobrar,
             customerEmail: data.email.trim().toLowerCase(),
             customerName: data.nome.trim(),
           }),
@@ -447,7 +463,7 @@ export function CheckoutForm() {
               ? mpJson.expiresAt
               : undefined,
         };
-        await persistOrderAndRedirect(pagamento);
+        await persistOrderAndRedirect(pagamento, totalACobrar);
         return;
       }
 
@@ -458,7 +474,7 @@ export function CheckoutForm() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             orderId,
-            amount: totalPrice,
+            amount: totalACobrar,
             customerEmail: data.email.trim().toLowerCase(),
             customerName: data.nome.trim(),
           }),
@@ -521,7 +537,7 @@ export function CheckoutForm() {
           };
         }
 
-        await persistOrderAndRedirect(pagamento);
+        await persistOrderAndRedirect(pagamento, totalACobrar);
         return;
       }
 
@@ -581,7 +597,7 @@ export function CheckoutForm() {
                   : undefined,
             };
 
-      await persistOrderAndRedirect(pagamento);
+      await persistOrderAndRedirect(pagamento, totalACobrar);
     } finally {
       setCheckoutBusy(false);
     }
@@ -1043,9 +1059,17 @@ export function CheckoutForm() {
             </div>
 
             <div className="flex items-baseline justify-between">
-              <span className="text-sm text-muted">Subtotal</span>
-              <span className="font-medium tabular-nums">{formatBRL(totalPrice)}</span>
+              <span className="text-sm text-muted">Subtotal (loja −20%)</span>
+              <span className="font-medium tabular-nums">{formatBRL(checkoutTotals.subtotalLoja)}</span>
             </div>
+            {checkoutTotals.descontoPixCheckout > 0 && (
+              <div className="mt-2 flex items-baseline justify-between text-brand-green">
+                <span className="text-sm">Desconto PIX (−20%)</span>
+                <span className="font-medium tabular-nums">
+                  − {formatBRL(checkoutTotals.descontoPixCheckout)}
+                </span>
+              </div>
+            )}
             <div className="mt-1 flex items-baseline justify-between">
               <span className="text-sm text-muted">Frete</span>
               <span className="text-sm font-medium text-brand-green">Grátis</span>
@@ -1053,7 +1077,7 @@ export function CheckoutForm() {
             <div className="mt-4 flex items-baseline justify-between border-t border-border pt-4">
               <span className="font-display text-lg tracking-wide">Total</span>
               <span className="font-display text-3xl gradient-text">
-                {formatBRL(totalPrice)}
+                {formatBRL(checkoutTotals.totalPagar)}
               </span>
             </div>
 

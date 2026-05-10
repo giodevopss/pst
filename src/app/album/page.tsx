@@ -8,6 +8,7 @@ import { AddToCartButton } from "@/components/AddToCartButton";
 import { HeroAlbum3D } from "@/components/HeroAlbum3D";
 import { getProduto, produtosPorCategoria } from "@/data/produtos";
 import { formatBRL } from "@/lib/utils";
+import { catalogStrikePrice, priceAfterSiteDiscount } from "@/lib/store-pricing";
 import {
   PaniniAlbumIntro,
   PaniniEditionHighlights,
@@ -22,6 +23,8 @@ export const metadata: Metadata = {
 
 export default function AlbumPage() {
   const albumDuro = getProduto("album-fifa-world-cup-2026-capa-dura-ouro")!;
+  const albumSale = priceAfterSiteDiscount(albumDuro.preco);
+  const albumStrike = catalogStrikePrice(albumDuro);
   const produtosAlbum = produtosPorCategoria("album");
   const figurinhas = produtosAlbum.filter((p) => !p.id.startsWith("adrenalyn-xl-"));
   const adrenalynLinha = produtosAlbum.filter((p) => p.id.startsWith("adrenalyn-xl-"));
@@ -49,14 +52,13 @@ export default function AlbumPage() {
             </p>
 
             <div className="mt-8 flex flex-wrap items-baseline gap-3">
-              <span className="font-display text-5xl gradient-text">
-                {formatBRL(albumDuro.preco)}
-              </span>
-              {albumDuro.precoOriginal && (
-                <span className="text-base text-muted line-through">
-                  {formatBRL(albumDuro.precoOriginal)}
-                </span>
+              <span className="font-display text-5xl gradient-text">{formatBRL(albumSale)}</span>
+              {albumStrike > albumSale + 1e-9 && (
+                <span className="text-base text-muted line-through">{formatBRL(albumStrike)}</span>
               )}
+              <span className="rounded-full bg-brand-green/15 px-3 py-1 text-xs font-semibold text-brand-green">
+                −20% na loja
+              </span>
               <span className="rounded-full bg-brand-red/15 px-3 py-1 text-xs font-semibold text-brand-red">
                 Capa dura ouro Panini
               </span>

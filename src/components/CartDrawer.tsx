@@ -139,9 +139,17 @@ export function CartDrawer() {
                                 <Plus className="h-3.5 w-3.5" />
                               </button>
                             </div>
-                            <span className="font-display text-base tracking-wide text-brand-yellow">
-                              {formatBRL(item.preco * item.quantidade)}
-                            </span>
+                            <div className="text-right">
+                              {item.precoCatalogoLoja != null &&
+                                item.precoCatalogoLoja > item.preco + 1e-9 && (
+                                  <span className="mr-2 text-xs text-muted line-through">
+                                    {formatBRL(item.precoCatalogoLoja * item.quantidade)}
+                                  </span>
+                                )}
+                              <span className="font-display text-base tracking-wide text-brand-yellow">
+                                {formatBRL(item.preco * item.quantidade)}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </li>
@@ -160,7 +168,7 @@ export function CartDrawer() {
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-muted">
-                  Frete grátis — o valor acima já é seu total no checkout.
+                  Preços com −20% na loja. No PIX, mais −20% no checkout. Frete grátis.
                 </p>
                 <Link
                   href="/checkout"

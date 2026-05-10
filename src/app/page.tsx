@@ -7,6 +7,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { produtosDestaque, produtosPacotes, getProduto } from "@/data/produtos";
 import { ProductImage } from "@/components/ProductImage";
 import { formatBRL } from "@/lib/utils";
+import { catalogStrikePrice, priceAfterSiteDiscount } from "@/lib/store-pricing";
 import { AddToCartButton } from "@/components/AddToCartButton";
 
 const FEATURES = [
@@ -24,7 +25,7 @@ const FEATURES = [
   {
     icon: Sparkles,
     title: "Pague com PIX",
-    text: "Aprovação instantânea e desconto especial em todo o site.",
+    text: "20% em todo o site e mais 20% no total ao pagar com PIX.",
   },
 ];
 
@@ -33,7 +34,10 @@ export default function Home() {
   const combos = produtosPacotes().slice(0, 3);
   const albumDuro = getProduto("album-fifa-world-cup-2026-capa-dura-ouro")!;
   const camisaBrasil = getProduto("camiseta-selecao-brasil")!;
+  const albumSale = priceAfterSiteDiscount(albumDuro.preco);
+  const albumStrike = catalogStrikePrice(albumDuro);
   const camisaBrasilII = getProduto("camiseta-selecao-brasil-ii")!;
+  const camisaIISale = priceAfterSiteDiscount(camisaBrasilII.preco);
 
   return (
     <>
@@ -130,17 +134,23 @@ export default function Home() {
             </ul>
 
             <div className="mt-8 flex flex-wrap items-baseline gap-3">
-              <span className="font-display text-4xl gradient-text">
-                {formatBRL(albumDuro.preco)}
-              </span>
-              {albumDuro.precoOriginal && (
-                <span className="text-base text-muted line-through">
-                  {formatBRL(albumDuro.precoOriginal)}
-                </span>
+              <span className="font-display text-4xl gradient-text">{formatBRL(albumSale)}</span>
+              {albumStrike > albumSale + 1e-9 && (
+                <span className="text-base text-muted line-through">{formatBRL(albumStrike)}</span>
               )}
-              <span className="rounded-full bg-brand-red/15 px-3 py-1 text-xs font-semibold text-brand-red">
-                Pré-venda · {Math.round(((albumDuro.precoOriginal! - albumDuro.preco) / albumDuro.precoOriginal!) * 100)}% OFF
+              <span className="rounded-full bg-brand-green/15 px-3 py-1 text-xs font-semibold text-brand-green">
+                −20% na loja
               </span>
+              {albumDuro.precoOriginal &&
+                albumDuro.precoOriginal > albumDuro.preco && (
+                  <span className="rounded-full bg-brand-red/15 px-3 py-1 text-xs font-semibold text-brand-red">
+                    Pré-venda Panini ·{" "}
+                    {Math.round(
+                      ((albumDuro.precoOriginal - albumDuro.preco) / albumDuro.precoOriginal) * 100,
+                    )}
+                    %
+                  </span>
+                )}
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -185,8 +195,9 @@ export default function Home() {
               ))}
             </ul>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <span className="font-display text-4xl gradient-text">
-                {formatBRL(camisaBrasilII.preco)}
+              <span className="font-display text-4xl gradient-text">{formatBRL(camisaIISale)}</span>
+              <span className="rounded-full bg-brand-green/15 px-2 py-0.5 text-[10px] font-bold uppercase text-brand-green">
+                −20% loja
               </span>
               <AddToCartButton produto={camisaBrasilII} label="Comprar Camiseta II" />
             </div>

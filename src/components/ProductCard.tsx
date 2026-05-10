@@ -1,10 +1,13 @@
 import Link from "next/link";
 import type { Produto } from "@/data/produtos";
 import { formatBRL } from "@/lib/utils";
+import { catalogStrikePrice, priceAfterSiteDiscount } from "@/lib/store-pricing";
 import { ProductImage } from "./ProductImage";
 import { ArrowUpRight } from "lucide-react";
 
 export function ProductCard({ produto }: { produto: Produto }) {
+  const salePrice = priceAfterSiteDiscount(produto.preco);
+  const strikePrice = catalogStrikePrice(produto);
   const href =
     produto.categoria === "camiseta"
       ? `/camisetas/${produto.slug}`
@@ -25,15 +28,16 @@ export function ProductCard({ produto }: { produto: Produto }) {
           <ArrowUpRight className="h-4 w-4 shrink-0 text-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-yellow" />
         </div>
 
-        <div className="mt-1 flex items-baseline gap-2">
+        <div className="mt-1 flex flex-wrap items-baseline gap-2">
           <span className="font-display text-2xl tracking-wide text-foreground">
-            {formatBRL(produto.preco)}
+            {formatBRL(salePrice)}
           </span>
-          {produto.precoOriginal && produto.precoOriginal > produto.preco && (
-            <span className="text-sm text-muted line-through">
-              {formatBRL(produto.precoOriginal)}
-            </span>
+          {strikePrice > salePrice + 1e-9 && (
+            <span className="text-sm text-muted line-through">{formatBRL(strikePrice)}</span>
           )}
+          <span className="rounded-full bg-brand-green/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-green">
+            −20% na loja
+          </span>
         </div>
 
         <span className="text-[11px] font-medium uppercase tracking-widest text-muted">
