@@ -343,7 +343,7 @@ export function SucessoClient() {
                         )}
                       </span>
                     </span>
-                    <span className="font-medium tabular-nums">
+                    <span className="font-display font-medium tabular-nums gradient-text">
                       {formatBRL(i.preco * i.quantidade)}
                     </span>
                   </li>

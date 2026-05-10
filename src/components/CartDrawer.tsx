@@ -140,7 +140,7 @@ export function CartDrawer() {
                                     {formatBRL(item.precoCatalogoLoja * item.quantidade)}
                                   </span>
                                 )}
-                              <span className="font-display text-base tracking-wide text-brand-yellow">
+                              <span className="font-display text-base tracking-wide tabular-nums gradient-text">
                                 {formatBRL(item.preco * item.quantidade)}
                               </span>
                             </div>

@@ -29,7 +29,7 @@ export function ProductCard({ produto }: { produto: Produto }) {
         </div>
 
         <div className="mt-1 flex flex-wrap items-baseline gap-2">
-          <span className="font-display text-2xl tracking-wide text-foreground">
+          <span className="font-display text-2xl tracking-wide tabular-nums gradient-text">
             {formatBRL(salePrice)}
           </span>
           {strikePrice > salePrice + 1e-9 && (

@@ -1070,7 +1070,7 @@ export function CheckoutForm() {
                     )}
                   </p>
                 </div>
-                <span className="shrink-0 font-medium tabular-nums">
+                <span className="shrink-0 font-display text-base font-medium tabular-nums gradient-text">
                   {formatBRL(i.preco * i.quantidade)}
                 </span>
               </li>
