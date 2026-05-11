@@ -74,7 +74,7 @@ export default function Home() {
         <SectionHeading
           eyebrow="Panini x FIFA World Cup 2026™"
           title="Mais procurados"
-          description="Destaques da pré-venda FIFA World Cup 2026™ — capa dura ouro, capa cartão, combos e Adrenalyn XL™, mais a camisa do Brasil."
+          description="Destaques FIFA World Cup 2026™ — capa dura ouro, capa cartão, combos e Adrenalyn XL™, mais a camisa do Brasil. Tudo disponível."
           cta={{ href: "/album", label: "Ver catálogo" }}
         />
 

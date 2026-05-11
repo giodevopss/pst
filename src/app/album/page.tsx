@@ -39,7 +39,7 @@ export default function AlbumPage() {
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 md:px-8 md:py-28 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
-              Parceria Panini Brasil · pré-venda FIFA World Cup 2026™
+              Parceria Panini Brasil · FIFA World Cup 2026™ — Disponível
             </p>
             <h1 className="mt-4 font-display text-5xl leading-[0.95] tracking-tight md:text-7xl">
               O ÁLBUM OFICIAL<br />

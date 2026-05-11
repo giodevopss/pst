@@ -18,7 +18,7 @@ export type Produto = {
   descricao: string;
   destaques: string[];
   tamanhos?: Tamanho[];
-  estoque: "em_estoque" | "ultimas_unidades" | "pre_venda";
+  estoque: "em_estoque" | "ultimas_unidades";
   badge?: string;
 };
 
@@ -67,9 +67,8 @@ export const PRODUTOS: Produto[] = [
     preco: 108.9,
     descricao:
       "Combo oficial para iniciar a coleção: álbum versão capa cartão mais 12 envelopes de figurinhas da Copa do Mundo FIFA 2026™.",
-    destaques: ["Pré-venda Panini — mesmo lançamento", "Álbum capa cartão + 12 envelopes", "7 figurinhas por envelope"],
-    estoque: "pre_venda",
-    badge: "Pré-venda",
+    destaques: ["Lançamento oficial Panini", "Álbum capa cartão + 12 envelopes", "7 figurinhas por envelope"],
+    estoque: "em_estoque",
   },
   {
     id: "box-sacola-cartao-mais-30-envelopes",
@@ -81,7 +80,7 @@ export const PRODUTOS: Produto[] = [
     descricao:
       "Box em formato sacola com álbum capa cartão e 30 envelopes — volume forte para escalar a coleção.",
     destaques: ["Formato BOX Sacola", "30 envelopes num pacote só", "Foco total na Copa 2026"],
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "BOX",
   },
   {
@@ -94,8 +93,7 @@ export const PRODUTOS: Produto[] = [
     descricao:
       "Pacote médio oficial: álbum capa cartão e 24 envelopes para avançar rápido nas páginas.",
     destaques: ["24 envelopes no combo", "Entrada ideal para coleção rápida", "Coleção FIFA World Cup 2026™"],
-    estoque: "pre_venda",
-    badge: "Pré-venda",
+    estoque: "em_estoque",
   },
   {
     id: "album-capa-dura-ouro",
@@ -107,7 +105,7 @@ export const PRODUTOS: Produto[] = [
     descricao:
       "Edição especial capa dura ouro para colecionar a maior Copa com acabamento premium.",
     destaques: ["Capa dura ouro", "112 páginas oficiais", "980 espaços (+ 68 cromos especiais)", "Ícone entre colecionadores"],
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Colecionador",
   },
   {
@@ -120,7 +118,7 @@ export const PRODUTOS: Produto[] = [
     descricao:
       "Só envelopes: 12 pacotes para repor figurinhas e alimentar trocas com a galera.",
     destaques: ["Reposição rápida", "12 envelopes oficiais", "7 figurinhas em cada pacote"],
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Kit",
   },
   {
@@ -147,7 +145,7 @@ export const PRODUTOS: Produto[] = [
     descricao:
       "Capa dura prata com acabamento diferenciado e o mesmo conteúdo de páginas da edição oficial.",
     destaques: ["Capa dura prata", "Versão oficial intermediária", "980 cromos no álbum"],
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata",
   },
   {
@@ -159,8 +157,8 @@ export const PRODUTOS: Produto[] = [
     preco: 24.9,
     descricao:
       "Álbum versão tradicional capa cartão — porta clássica para completar página a página.",
-    destaques: ["Versão mais acessível", "Pré-venda", "Álbum oficial do torneio"],
-    estoque: "pre_venda",
+    destaques: ["Versão mais acessível", "Disponível", "Álbum oficial do torneio"],
+    estoque: "em_estoque",
     badge: "Entrada",
   },
   {
@@ -173,7 +171,7 @@ export const PRODUTOS: Produto[] = [
     descricao:
       "Álbum oficial em capa dura padrão (acabamento clássico resistente, sem variante ouro/prata).",
     destaques: ["Capa dura oficial", "Proteção acima da capa cartão", "Álbum Copa 2026"],
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Capa dura",
   },
   {
@@ -186,7 +184,7 @@ export const PRODUTOS: Produto[] = [
     descricao:
       "Pacote inicial da coleção oficial de cartas Adrenalyn XL™ inspirada na Copa FIFA 2026™.",
     destaques: ["Linha Adrenalyn XL™ oficial", "Pronto pra jogar e colecionar", "SKU Panini mesmo anúncio"],
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Adrenalyn",
   },
   {
@@ -229,7 +227,7 @@ export const PRODUTOS: Produto[] = [
       "Camisa oficial da seleção com o álbum FIFA World Cup 2026™ capa dura ouro Panini e 12 envelopes/pacotes oficiais de figurinhas (7 por envelope, coleção Copa 2026™). Preço combinado frente aos itens avulsos.",
     destaques: ["Camisa Brasil (P a XGG)", "Álbum capa ouro", "12 envelopes figurinhas Copa 2026™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Ouro · 12",
   },
   {
@@ -245,7 +243,7 @@ export const PRODUTOS: Produto[] = [
       "Versão intermediária: mesma camisa oficial e álbum ouro Panini FIFA 2026™, com mais volume até a Copa — 24 pacotes envelopes oficiais de figurinha.",
     destaques: ["Camisa oficial Brasil", "Álbum ouro coleção Copa", "24 envelopes oficiais"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Ouro · 24",
   },
   {
@@ -261,7 +259,7 @@ export const PRODUTOS: Produto[] = [
       "Pacote forte de colecionar: camisa oficial, álbum capa ouro e 50 pacotes oficial Panini Copa 2026™ — alto volume já na primeira leva antes do Mundial.",
     destaques: ["Camisa oficial", "Álbum ouro símbolo 2026", "50 envelopes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Ouro · 50",
   },
   {
@@ -277,7 +275,7 @@ export const PRODUTOS: Produto[] = [
       "Equipando o mesmo kit da vitrine oficial: camisa Brasil, edição álbum Panini FIFA 2026™ capa prata premium e entrada com 12 pacotes envelopes de figurinhas.",
     destaques: ["Camisa oficial Brasil", "Álbum capa prata oficial", "12 sobres Copa 2026™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata · 12",
   },
   {
@@ -293,7 +291,7 @@ export const PRODUTOS: Produto[] = [
       "Um passo à frente no volume das figurinhas (24 pacotes oficial), mantendo a camisa oficial e álbum edição Panini FIFA 2026™ capa prata.",
     destaques: ["Camisa oficial", "Álbum prata", "24 envelopes oficiais"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata · 24",
   },
   {
@@ -309,7 +307,7 @@ export const PRODUTOS: Produto[] = [
       "Colecionista acelerado: camisa oficial Brasil, álbum capa prata Panini Copa 2026™ e 50 pacotes oficiais de figurinha em um mesmo pedido.",
     destaques: ["Camisa oficial", "Álbum prata", "50 envelopes figurinha"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata · 50",
   },
   {
@@ -325,7 +323,7 @@ export const PRODUTOS: Produto[] = [
       "Ótimo custo‑benefício mantendo resistência ao álbum oficial capa dura (versão Panini Copa 2026™ padrão) com 12 envelopes de figurinhas e sua camisa do Brasil.",
     destaques: ["Camisa Brasil", "Álbum capa dura oficial FIFA 2026™", "12 pacotes figurinha"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Capa dura · 12",
   },
   {
@@ -341,7 +339,7 @@ export const PRODUTOS: Produto[] = [
       "Camisa oficial + mesmo álbum capa dura padrão da edição Copa 2026™ com o dobro de sobres oficial — pacote forte para coleção rápida.",
     destaques: ["Camisa oficial", "Álbum capa dura padrão", "24 envelopes oficiais"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Capa dura · 24",
   },
   {
@@ -357,7 +355,7 @@ export const PRODUTOS: Produto[] = [
       "Pacote alto volume figurinhas (50 envelopes oficiais) comprovando o lado colecionador + camisa oficial e álbum capa dura padrão Panini Copa 2026™.",
     destaques: ["Camisa oficial", "Capa dura", "50 pacotes figurinha"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Capa dura · 50",
   },
   {
@@ -373,7 +371,7 @@ export const PRODUTOS: Produto[] = [
       "Entrada acessível: camisa oficial com o ícone porta‑figurinhas capa cartão Panini FIFA 2026™ e primeira leva oficial de figurinhas (12 envelopes).",
     destaques: ["Camisa oficial Brasil", "Álbum capa cartão", "12 envelopes Copa 2026™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Cartão · 12",
   },
   {
@@ -389,7 +387,7 @@ export const PRODUTOS: Produto[] = [
       "Amplia coleção rápido com entrada capa cartão mas dobrando sobres oficial + camisa oficial em um único SKU montado pela loja parceira.",
     destaques: ["Camisa oficial", "Capa cartão Panini oficial", "24 pacotes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Cartão · 24",
   },
   {
@@ -405,7 +403,7 @@ export const PRODUTOS: Produto[] = [
       "Máximo volume sem subir para capa dura: camisa oficial, álbum capa cartão FIFA 2026™ e 50 pacotes envelopes oficiais Panini — pedido completo de bancada.",
     destaques: ["Camisa oficial", "Capa cartão", "50 sobres oficiais"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Cartão · 50",
   },
   // Camisa II (segunda versão) + álbum + pacotes figurinhas
@@ -422,7 +420,7 @@ export const PRODUTOS: Produto[] = [
       "Camiseta II oficial da seleção com o álbum FIFA World Cup 2026™ capa dura ouro Panini e 12 envelopes/pacotes oficiais de figurinhas (7 por envelope, coleção Copa 2026™). Preço combinado frente aos itens avulsos.",
     destaques: ["Camiseta II", "Álbum capa ouro", "12 envelopes figurinhas Copa 2026™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Ouro II · 12",
   },
   {
@@ -438,7 +436,7 @@ export const PRODUTOS: Produto[] = [
       "Versão intermediária com Camiseta II oficial e álbum ouro Panini FIFA 2026™: mais volume até a Copa — 24 pacotes envelopes oficiais de figurinha.",
     destaques: ["Camiseta II", "Álbum ouro", "24 pacotes envelopes oficiais"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Ouro II · 24",
   },
   {
@@ -454,7 +452,7 @@ export const PRODUTOS: Produto[] = [
       "Pacote forte de colecionar com Camiseta II oficial: álbum capa ouro e 50 pacotes oficiais Panini Copa 2026™ — alto volume já na primeira leva antes do Mundial.",
     destaques: ["Camiseta II", "Álbum ouro", "50 pacotes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Ouro II · 50",
   },
 
@@ -471,7 +469,7 @@ export const PRODUTOS: Produto[] = [
       "Camiseta II oficial da seleção com edição álbum Panini FIFA 2026™ capa prata premium e entrada com 12 pacotes envelopes de figurinhas (Copa 2026™).",
     destaques: ["Camiseta II", "Álbum prata", "12 pacotes envelopes oficiais"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata II · 12",
   },
   {
@@ -487,7 +485,7 @@ export const PRODUTOS: Produto[] = [
       "Volume acima da média com Camiseta II oficial e álbum edição Panini FIFA 2026™ capa prata — 24 pacotes envelopes oficiais de figurinha.",
     destaques: ["Camiseta II", "Álbum prata", "24 pacotes envelopes oficiais"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata II · 24",
   },
   {
@@ -503,7 +501,7 @@ export const PRODUTOS: Produto[] = [
       "Colecionista acelerado com Camiseta II oficial: álbum capa prata Panini Copa 2026™ e 50 pacotes oficiais de figurinhas em um mesmo pedido.",
     destaques: ["Camiseta II", "Álbum prata", "50 pacotes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata II · 50",
   },
 
@@ -520,7 +518,7 @@ export const PRODUTOS: Produto[] = [
       "Camiseta II oficial com álbum capa dura Panini FIFA 2026™ (padrão) e 12 envelopes de figurinhas — custo‑benefício pra turbinar o começo.",
     destaques: ["Camiseta II", "Álbum capa dura", "12 pacotes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Dura II · 12",
   },
   {
@@ -536,7 +534,7 @@ export const PRODUTOS: Produto[] = [
       "Camisa II com álbum capa dura padrão Copa 2026™ e mais volume: 24 envelopes oficiais de figurinhas.",
     destaques: ["Camiseta II", "Álbum capa dura", "24 pacotes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Dura II · 24",
   },
   {
@@ -552,7 +550,7 @@ export const PRODUTOS: Produto[] = [
       "Pacote alto volume para quem não para: Camiseta II, álbum capa dura padrão Panini Copa 2026™ e 50 pacotes de figurinhas.",
     destaques: ["Camiseta II", "Álbum capa dura", "50 pacotes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Dura II · 50",
   },
 
@@ -569,7 +567,7 @@ export const PRODUTOS: Produto[] = [
       "Entrada acessível com Camiseta II oficial, álbum capa cartão Panini FIFA 2026™ e 12 pacotes envelopes de figurinhas.",
     destaques: ["Camiseta II", "Álbum capa cartão", "12 pacotes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Cartão II · 12",
   },
   {
@@ -585,7 +583,7 @@ export const PRODUTOS: Produto[] = [
       "Amplia rápido a coleção com Camiseta II e álbum capa cartão Panini FIFA 2026™: 24 pacotes envelopes oficiais.",
     destaques: ["Camiseta II", "Álbum capa cartão", "24 pacotes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Cartão II · 24",
   },
   {
@@ -601,7 +599,7 @@ export const PRODUTOS: Produto[] = [
       "Máximo volume sem trocar de acabamento: Camiseta II, álbum capa cartão FIFA 2026™ e 50 pacotes envelopes oficiais de figurinhas.",
     destaques: ["Camiseta II", "Álbum capa cartão", "50 pacotes figurinhas"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Cartão II · 50",
   },
   // Camisa + álbum + N envelopes Adrenalyn XL™ (8 cards + cupom cada, ref. preço envelope avulso Panini)
@@ -618,7 +616,7 @@ export const PRODUTOS: Produto[] = [
       "Kit híbrido: camisa oficial + álbum fotográfico Copa 2026™ capa prata e expansão paralela com 12 envelopes oficiais Adrenalyn XL™ (8 cartas + cupom cada), alinhados ao anúncio Panini.",
     destaques: ["Camisa oficial", "Álbum prata figurinhas", "12 envelopes Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata · Adr 12",
   },
   {
@@ -634,7 +632,7 @@ export const PRODUTOS: Produto[] = [
       "Dobrar o booster Adrenalyn XL™ em cima da base figura‑álbum Panini capa prata e da camisa oficial — 24 envelopes oficiais de cartas Copa 2026™.",
     destaques: ["Camisa oficial", "Álbum prata", "24 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata · Adr 24",
   },
   {
@@ -650,7 +648,7 @@ export const PRODUTOS: Produto[] = [
       "Volume Adrenalyn XL™ (30 envelopes oficiais) somado ao álbum edição Panini FIFA 2026™ capa prata e camisa Brasil — pacote torcedor que mistura campo e deck.",
     destaques: ["Camisa oficial", "Álbum prata", "30 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata · Adr 30",
   },
   {
@@ -666,7 +664,7 @@ export const PRODUTOS: Produto[] = [
       "Camisa oficial com álbum capa dura padrão FIFA 2026™ e 12 envelopes oficiais Adrenalyn XL™ — duas frentes da mesma Copa em um pedido.",
     destaques: ["Camisa oficial", "Capa dura figurinhas", "12 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Dura · Adr 12",
   },
   {
@@ -682,7 +680,7 @@ export const PRODUTOS: Produto[] = [
       "Refino no volume de cartas: 24 envelopes Adrenalyn XL™ oficiais + camisa oficial e álbum capa dura padrão Panini Copa 2026™.",
     destaques: ["Camisa oficial", "Capa dura", "24 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Dura · Adr 24",
   },
   {
@@ -698,7 +696,7 @@ export const PRODUTOS: Produto[] = [
       "Linha forte em cards paralelos: camisa oficial, álbum capa dura Panini figurinhas e 30 envelopes oficiais Adrenalyn XL™ FIFA World Cup 2026™.",
     destaques: ["Camisa oficial", "Capa dura", "30 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Dura · Adr 30",
   },
   // Camisa II + álbum + N envelopes Adrenalyn XL™
@@ -715,7 +713,7 @@ export const PRODUTOS: Produto[] = [
       "Camiseta II oficial com álbum capa prata e 12 envelopes oficiais Adrenalyn XL™ — duas frentes da mesma Copa em um pedido.",
     destaques: ["Camiseta II", "Álbum prata figurinhas", "12 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata II · Adr 12",
   },
   {
@@ -731,7 +729,7 @@ export const PRODUTOS: Produto[] = [
       "Dobrar o booster Adrenalyn XL™ com a Camiseta II e o álbum capa prata Panini Copa 2026™: 24 envelopes oficiais de cartas.",
     destaques: ["Camiseta II", "Álbum prata", "24 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata II · Adr 24",
   },
   {
@@ -747,7 +745,7 @@ export const PRODUTOS: Produto[] = [
       "Volume Adrenalyn XL™ (30 envelopes oficiais) + Camiseta II e álbum capa prata — pacote torcedor para quem curte deck e coleção.",
     destaques: ["Camiseta II", "Álbum prata", "30 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Prata II · Adr 30",
   },
   {
@@ -763,7 +761,7 @@ export const PRODUTOS: Produto[] = [
       "Camiseta II com álbum capa dura padrão FIFA 2026™ e 12 envelopes oficiais Adrenalyn XL™ — duas frentes no mesmo pedido.",
     destaques: ["Camiseta II", "Capa dura figurinhas", "12 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Dura II · Adr 12",
   },
   {
@@ -779,7 +777,7 @@ export const PRODUTOS: Produto[] = [
       "Refino no volume de cartas com Camiseta II: 24 envelopes oficiais Adrenalyn XL™ + álbum capa dura e camisa no pedido.",
     destaques: ["Camiseta II", "Capa dura", "24 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Dura II · Adr 24",
   },
   {
@@ -795,7 +793,7 @@ export const PRODUTOS: Produto[] = [
       "Camiseta II e álbum capa dura para acelerar no campo com 30 envelopes oficiais Adrenalyn XL™ FIFA World Cup 2026™.",
     destaques: ["Camiseta II", "Capa dura", "30 Adrenalyn XL™"],
     tamanhos: TAMANHOS,
-    estoque: "pre_venda",
+    estoque: "em_estoque",
     badge: "Dura II · Adr 30",
   },
   {

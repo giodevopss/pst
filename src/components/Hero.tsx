@@ -23,7 +23,7 @@ export function Hero() {
             className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-muted backdrop-blur"
           >
             <Sparkles className="h-3.5 w-3.5 text-brand-yellow" />
-            <span>Parceria Panini · pré-venda FIFA World Cup 2026™</span>
+            <span>Parceria Panini · FIFA World Cup 2026™ — Disponível</span>
           </motion.div>
 
           <motion.h1

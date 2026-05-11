@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 
 const FAQ = [
   {
-    q: "A pré-venda do álbum da Copa do Mundo FIFA 2026™ já começou?",
-    a: "Sim. A coleção FIFA World Cup 2026™ da Panini inclui produtos em pré-venda — álbum avulso, combos com envelopes, boxes especiais e a linha Adrenalyn XL™ — como na categoria oficial em panini.com.br.",
+    q: "O álbum oficial da Copa do Mundo FIFA 2026™ já está disponível?",
+    a: "Sim. A coleção FIFA World Cup 2026™ da Panini inclui álbum avulso, combos com envelopes, boxes especiais e a linha Adrenalyn XL™ — como na categoria oficial em panini.com.br.",
   },
   {
     q: "Quantas figurinhas tem o álbum oficial da Copa do Mundo FIFA 2026™?",
@@ -104,7 +104,7 @@ export function PaniniFaqAccordion({ className }: { className?: string }) {
   return (
     <section className={cn("", className)}>
       <h2 className="font-display text-2xl tracking-wide text-foreground md:text-3xl">
-        Perguntas frequentes (pré-venda)
+        Perguntas frequentes
       </h2>
       <p className="mt-3 max-w-2xl text-sm text-muted">
         Conteúdo alinhado às informações divulgadas pela Panini na categoria oficial FIFA World Cup 2026™.

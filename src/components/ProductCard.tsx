@@ -38,9 +38,7 @@ export function ProductCard({ produto }: { produto: Produto }) {
         </div>
 
         <span className="text-[11px] font-medium uppercase tracking-widest text-muted">
-          {produto.estoque === "em_estoque" && "Em estoque"}
-          {produto.estoque === "ultimas_unidades" && "Últimas unidades"}
-          {produto.estoque === "pre_venda" && "Pré-venda"}
+          {produto.estoque === "ultimas_unidades" ? "Últimas unidades" : "Disponível"}
         </span>
       </div>
     </Link>
