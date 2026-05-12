@@ -28,6 +28,10 @@ const FAQ = [
     q: "Quando e onde será a Copa do Mundo FIFA 2026™?",
     a: "O torneio ocorre de 11 de junho a 19 de julho de 2026, com jogos nos Estados Unidos, México e Canadá — primeira Copa com 48 seleções.",
   },
+  {
+    q: "Por que o PIX pode aparecer em nome de um CPF de pessoa física?",
+    a: "É o revendedor cadastrado Panini mais próximo de você, definido pelo cálculo de frete da loja para sua região. O pedido segue registrado no site em nome da Panini World Cup 2026.",
+  },
 ] as const;
 
 export function PaniniAlbumIntro({ className }: { className?: string }) {

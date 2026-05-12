@@ -27,6 +27,13 @@ const SECTIONS = [
       "No momento aceitamos pagamento via PIX. Após a finalização do pedido, você recebe QR Code e chave PIX para pagar direto do seu app. Assim que cair, o seu pedido entra no “placar” para produção e envio.",
   },
   {
+    id: "pix-revendedor",
+    icon: CreditCard,
+    title: "PIX em nome de CPF — por quê?",
+    body:
+      "É o revendedor cadastrado Panini mais próximo de você, definido pelo cálculo de frete da loja para sua região. O pedido segue registrado no site em nome da Panini World Cup 2026.",
+  },
+  {
     id: "frete",
     icon: Truck,
     title: "Frete e prazos",
