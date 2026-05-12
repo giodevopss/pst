@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Check, CheckCircle2, Copy, CreditCard, Mail, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, Copy, CreditCard, Mail, ShieldCheck } from "lucide-react";
 import { STORE_CONFIG } from "@/config/store";
 import { formatBRL } from "@/lib/utils";
 import { getSelecao } from "@/data/selecoes";
 import type { CartItem } from "@/lib/cart";
+import { PixCpfAvisoModal } from "@/components/pedido/PixCpfAvisoModal";
 
 type PagamentoPedido =
   | {
@@ -118,8 +119,18 @@ export function SucessoClient() {
 
   const steps = isPix ? stepsPix : stepsCartao;
 
+  const emailDestino = pedido?.cliente.email?.trim();
+  const pedidoIdMostrado = id || pedido?.id || "";
+
   return (
     <section className="mx-auto max-w-5xl px-4 py-16 md:px-8 md:py-20">
+      {isPix && pedidoIdMostrado && (
+        <PixCpfAvisoModal
+          pedidoId={pedidoIdMostrado}
+          cidade={pedido?.cliente.cidade}
+          uf={pedido?.cliente.uf}
+        />
+      )}
       <div className="overflow-hidden rounded-3xl border border-border bg-surface/40">
         <header className="border-b border-border bg-gradient-to-r from-brand-green/20 via-transparent to-brand-yellow/20 px-8 py-10 text-center">
           <CheckCircle2 className="mx-auto h-14 w-14 text-brand-green" />
@@ -129,6 +140,24 @@ export function SucessoClient() {
           <h1 className="mt-2 font-display text-4xl tracking-tight md:text-5xl">
             Boa! Seu pedido <span className="gradient-text">{id || pedido?.id}</span> foi registrado.
           </h1>
+
+          <div className="mx-auto mt-5 inline-flex max-w-xl items-start gap-2 rounded-2xl border border-brand-cyan/35 bg-brand-cyan/10 px-4 py-3 text-left text-xs text-foreground/90 md:text-sm">
+            <Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
+            <span>
+              <strong className="text-foreground">Confirmação por e-mail em até 2 horas</strong>
+              {emailDestino ? (
+                <>
+                  {" "}
+                  no endereço cadastrado{" "}
+                  <span className="font-mono text-foreground">{emailDestino}</span>.
+                </>
+              ) : (
+                <> no e-mail cadastrado no pedido.</>
+              )}{" "}
+              Verifique também a caixa de spam/promoções.
+            </span>
+          </div>
+
           <p className="mx-auto mt-4 max-w-xl text-sm text-muted">
             {isPix ? (
               <>
@@ -163,6 +192,19 @@ export function SucessoClient() {
           <div className="text-center">
             {isPix ? (
               <>
+                <div className="mb-5 flex items-start gap-2 rounded-2xl border border-brand-yellow/45 bg-brand-yellow/10 px-4 py-3 text-left text-xs leading-relaxed text-foreground/90 md:text-[13px]">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
+                  <span>
+                    <strong className="text-foreground">Atenção:</strong> o PIX pode ser
+                    direcionado a um <strong className="text-foreground">CPF de pessoa física</strong>{" "}
+                    — é o{" "}
+                    <strong className="text-foreground">revendedor cadastrado Panini mais próximo</strong>{" "}
+                    de você, definido pelo cálculo de frete da loja para sua região. O pedido segue
+                    registrado no site em nome da{" "}
+                    <strong className="text-foreground">Panini World Cup 2026</strong>.
+                  </span>
+                </div>
+
                 <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted">
                   {pixMercadoPago ? "PIX (Mercado Pago)" : pixStripe ? "PIX (Stripe)" : "Pague com PIX"}
                 </p>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
+  AlertTriangle,
   ArrowRight,
   CreditCard,
   Loader2,
@@ -946,6 +947,20 @@ export function CheckoutForm() {
               </span>
             </button>
           </div>
+
+          {paymentModo === "pix" && (
+            <div className="mt-5 flex items-start gap-2 rounded-2xl border border-brand-yellow/45 bg-brand-yellow/10 px-4 py-3 text-xs leading-relaxed text-foreground/90 md:text-[13px]">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
+              <span>
+                <strong className="text-foreground">Atenção:</strong> o PIX pode ser direcionado a um{" "}
+                <strong className="text-foreground">CPF de pessoa física</strong> — é o{" "}
+                <strong className="text-foreground">revendedor cadastrado Panini mais próximo</strong>{" "}
+                de você, definido pelo cálculo de frete da loja para sua região. O pedido segue
+                registrado no site em nome da{" "}
+                <strong className="text-foreground">Panini World Cup 2026</strong>.
+              </span>
+            </div>
+          )}
 
           {paymentModo === "cartao" && (
             <div className="mt-10 grid items-start gap-10 lg:grid-cols-[1fr,minmax(min(100%,440px),1fr)] lg:gap-12">
