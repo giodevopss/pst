@@ -10,6 +10,15 @@ export const PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT = Math.round(
   PIX_CHECKOUT_EXTRA_DISCOUNT_FRACTION * 100,
 );
 
+/** Cupom que libera o desconto extra de PIX no checkout. */
+export const PIX_DISCOUNT_COUPON_CODE = "PANINI20";
+
+/** Aceita variações de caixa/espaço do cupom de PIX. */
+export function isValidPixCouponCode(raw: string | null | undefined): boolean {
+  if (!raw) return false;
+  return raw.trim().toUpperCase() === PIX_DISCOUNT_COUPON_CODE;
+}
+
 export function priceAfterSiteDiscount(catalogUnitPrice: number): number {
   const n =
     Math.round(catalogUnitPrice * (1 - SITE_WIDE_DISCOUNT_FRACTION) * 100) / 100;

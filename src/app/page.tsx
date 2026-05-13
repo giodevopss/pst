@@ -14,6 +14,7 @@ import {
   sitePromoUnitSale,
 } from "@/lib/store-pricing";
 import { AddToCartButton } from "@/components/AddToCartButton";
+import { CouponBanner } from "@/components/CouponBanner";
 
 const FEATURES = [
   {
@@ -47,6 +48,8 @@ export default function Home() {
   return (
     <>
       <Hero />
+
+      <CouponBanner />
 
       <section className="border-y border-border bg-background-elev/40">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-6 md:grid-cols-3 md:px-8 md:py-8">

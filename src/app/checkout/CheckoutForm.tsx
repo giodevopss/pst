@@ -7,12 +7,17 @@ import { loadStripe } from "@stripe/stripe-js";
 import {
   AlertTriangle,
   ArrowRight,
+  BadgePercent,
+  Check,
   CreditCard,
   Loader2,
   LogIn,
   Mail,
   QrCode,
   ShoppingBag,
+  Sparkles,
+  Tag,
+  X,
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatBRL } from "@/lib/utils";
@@ -34,7 +39,9 @@ import type { UsuarioPublico } from "@/types/usuario";
 import type { PagamentoPersistidoSeguro } from "@/types/pedido-store";
 import {
   PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
+  PIX_DISCOUNT_COUPON_CODE,
   SITE_WIDE_DISCOUNT_PERCENT,
+  isValidPixCouponCode,
   totalAfterPixExtraDiscount,
 } from "@/lib/store-pricing";
 import {
@@ -94,6 +101,7 @@ const REQUIRED: (keyof FormData)[] = [
 ];
 
 const STORAGE_KEY = "copa2026:checkout:v1";
+const COUPON_STORAGE_KEY = "copa2026:checkout:coupon:v1";
 
 export function CheckoutForm() {
   const { items, totalPrice, clear } = useCart();
@@ -110,6 +118,23 @@ export function CheckoutForm() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
   const [paymentModo, setPaymentModo] = useState<PaymentModo>("pix");
+
+  const [couponInput, setCouponInput] = useState<string>("");
+  const [appliedCoupon, setAppliedCoupon] = useState<string>("");
+  const [couponError, setCouponError] = useState<string>("");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(COUPON_STORAGE_KEY);
+      if (raw && isValidPixCouponCode(raw)) {
+        setAppliedCoupon(raw.trim().toUpperCase());
+        setCouponInput(raw.trim().toUpperCase());
+      }
+    } catch {}
+  }, []);
+
+  const couponValid = isValidPixCouponCode(appliedCoupon);
 
   const [cardDigits, setCardDigits] = useState("");
   const [cardName, setCardName] = useState("");
@@ -214,13 +239,13 @@ export function CheckoutForm() {
 
   const checkoutTotals = useMemo(() => {
     const subtotalLoja = totalPrice;
-    if (paymentModo !== "pix") {
+    if (paymentModo !== "pix" || !couponValid) {
       return { subtotalLoja, descontoPixCheckout: 0, totalPagar: subtotalLoja };
     }
     const totalPagar = totalAfterPixExtraDiscount(subtotalLoja);
     const descontoPixCheckout = Math.round((subtotalLoja - totalPagar) * 100) / 100;
     return { subtotalLoja, descontoPixCheckout, totalPagar };
-  }, [paymentModo, totalPrice]);
+  }, [paymentModo, totalPrice, couponValid]);
 
   useCheckoutAbandonBeacon({
     items,
@@ -237,6 +262,32 @@ export function CheckoutForm() {
     totalComPagamentoEscolhido: checkoutTotals.totalPagar,
     checkoutBusy,
   });
+
+  function applyCoupon(raw: string) {
+    const value = raw.trim().toUpperCase();
+    if (!value) {
+      setCouponError("Informe um cupom.");
+      return;
+    }
+    if (!isValidPixCouponCode(value)) {
+      setCouponError("Cupom inválido.");
+      return;
+    }
+    setAppliedCoupon(value);
+    setCouponInput(value);
+    setCouponError("");
+    try {
+      window.localStorage.setItem(COUPON_STORAGE_KEY, value);
+    } catch {}
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon("");
+    setCouponError("");
+    try {
+      window.localStorage.removeItem(COUPON_STORAGE_KEY);
+    } catch {}
+  }
 
   const update = (key: keyof FormData, value: string) => {
     setData((prev) => {
@@ -449,7 +500,7 @@ export function CheckoutForm() {
       }
 
       const totalACobrar =
-        paymentModo === "pix"
+        paymentModo === "pix" && couponValid
           ? totalAfterPixExtraDiscount(totalPrice)
           : totalPrice;
 
@@ -896,6 +947,10 @@ export function CheckoutForm() {
                 ? "PIX via Stripe: após confirmar, você verá o QR Code nesta loja e na página de confirmação. Frete grátis em todo o Brasil."
                 : "Escolha PIX ou cartão. O frete é grátis; o total do pedido é o valor dos itens."}
           </p>
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand-green/35 bg-brand-green/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-brand-green">
+            <BadgePercent className="h-3.5 w-3.5" />
+            Cupom {PIX_DISCOUNT_COUPON_CODE} libera −{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX
+          </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <button
               type="button"
@@ -916,7 +971,7 @@ export function CheckoutForm() {
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="font-display text-lg tracking-wide">PIX</span>
                   <span className="rounded-full border border-brand-green/35 bg-brand-green/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-green">
-                    +{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% de desconto
+                    +{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% com {PIX_DISCOUNT_COUPON_CODE}
                   </span>
                 </span>
                 <span className="mt-0.5 block text-xs text-muted">
@@ -961,6 +1016,116 @@ export function CheckoutForm() {
               </span>
             </div>
           )}
+
+          <div className="mt-5 space-y-3">
+            {paymentModo === "pix" && !couponValid && (
+              <div className="flex flex-wrap items-start gap-3 rounded-2xl border-2 border-brand-green/55 bg-brand-green/12 px-4 py-3 shadow-glow-yellow/40">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-green/25 text-brand-green">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-display text-sm tracking-wide text-foreground md:text-base">
+                    Você tem um cupom disponível!
+                  </p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-muted">
+                    Aplique{" "}
+                    <span className="rounded-md bg-brand-green/25 px-1.5 py-0.5 font-mono font-bold text-brand-green">
+                      {PIX_DISCOUNT_COUPON_CODE}
+                    </span>{" "}
+                    para ganhar <strong className="text-foreground">−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}%</strong> extra no PIX.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => applyCoupon(PIX_DISCOUNT_COUPON_CODE)}
+                  className="rounded-full bg-brand-green px-4 py-2 font-display text-[11px] font-bold uppercase tracking-[0.16em] text-[#06080f] shadow-md transition hover:bg-brand-green/85"
+                >
+                  Aplicar cupom
+                </button>
+              </div>
+            )}
+
+            <div className="rounded-2xl border border-border bg-surface/40 p-4">
+              <label htmlFor="cupom" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                <Tag className="h-3.5 w-3.5 text-brand-yellow" />
+                Cupom de desconto
+              </label>
+              {couponValid ? (
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-green/45 bg-brand-green/12 px-3 py-2.5">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Check className="h-4 w-4 text-brand-green" />
+                    <span className="text-foreground">
+                      Cupom{" "}
+                      <span className="font-mono font-bold text-brand-green">
+                        {appliedCoupon}
+                      </span>{" "}
+                      aplicado
+                    </span>
+                    {paymentModo === "pix" ? (
+                      <span className="rounded-full border border-brand-green/45 bg-brand-green/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-green">
+                        −{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% ativo
+                      </span>
+                    ) : (
+                      <span className="rounded-full border border-border bg-surface/60 px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted">
+                        Vale só no PIX
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeCoupon}
+                    className="inline-flex items-center gap-1 text-xs text-muted transition hover:text-brand-red"
+                  >
+                    <X className="h-3.5 w-3.5" /> Remover
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                    <input
+                      id="cupom"
+                      type="text"
+                      inputMode="text"
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      value={couponInput}
+                      onChange={(e) => {
+                        setCouponInput(e.target.value.toUpperCase().slice(0, 24));
+                        if (couponError) setCouponError("");
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          applyCoupon(couponInput);
+                        }
+                      }}
+                      placeholder={`Ex.: ${PIX_DISCOUNT_COUPON_CODE}`}
+                      className="form-input flex-1 font-mono uppercase tracking-[0.18em]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => applyCoupon(couponInput)}
+                      className="rounded-2xl border border-brand-yellow/60 bg-brand-yellow px-5 py-2.5 font-display text-xs font-bold uppercase tracking-[0.18em] text-[#06080f] transition hover:bg-brand-yellow/90"
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                  {couponError && (
+                    <p className="mt-2 text-xs text-brand-red">{couponError}</p>
+                  )}
+                  {!couponError && (
+                    <p className="mt-2 text-[11px] leading-relaxed text-muted">
+                      O desconto extra de PIX (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}%) é liberado apenas com o cupom{" "}
+                      <span className="font-mono font-semibold text-foreground">
+                        {PIX_DISCOUNT_COUPON_CODE}
+                      </span>
+                      .
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
 
           {paymentModo === "cartao" && (
             <div className="mt-10 grid items-start gap-10 lg:grid-cols-[1fr,minmax(min(100%,440px),1fr)] lg:gap-12">
@@ -1122,15 +1287,27 @@ export function CheckoutForm() {
               </span>
               <span className="font-medium tabular-nums">{formatBRL(checkoutTotals.subtotalLoja)}</span>
             </div>
-            {checkoutTotals.descontoPixCheckout > 0 && (
+            {checkoutTotals.descontoPixCheckout > 0 ? (
               <div className="mt-2 flex items-baseline justify-between text-brand-green">
                 <span className="text-sm">
-                  Desconto PIX (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}%)
+                  Cupom {appliedCoupon} (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% PIX)
                 </span>
                 <span className="font-medium tabular-nums">
                   − {formatBRL(checkoutTotals.descontoPixCheckout)}
                 </span>
               </div>
+            ) : (
+              submitPix && (
+                <div className="mt-2 flex items-baseline justify-between text-brand-yellow">
+                  <span className="text-[11px] leading-snug">
+                    Use o cupom{" "}
+                    <span className="font-mono font-semibold">
+                      {PIX_DISCOUNT_COUPON_CODE}
+                    </span>{" "}
+                    e ganhe −{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX
+                  </span>
+                </div>
+              )
             )}
             <div className="mt-1 flex items-baseline justify-between">
               <span className="text-sm text-muted">Frete</span>
