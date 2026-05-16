@@ -2,6 +2,7 @@ import { Store } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { produtosLojistasCaixas } from "@/data/produtos";
 import { LojistaCaixaCard } from "@/components/LojistaCaixaCard";
+import { LojistaPedidoPersonalizadoForm } from "@/components/LojistaPedidoPersonalizadoForm";
 
 const IMG_1000_A = "/images/lojistas/caixa-1000-envelopes-1.png";
 const IMG_1000_B = "/images/lojistas/caixa-1000-envelopes-2.png";
@@ -41,6 +42,8 @@ export function PacotesLojistasSection() {
           />
           <LojistaCaixaCard produto={caixa100} imageSrc={IMG_100} />
         </div>
+
+        <LojistaPedidoPersonalizadoForm />
       </div>
     </section>
   );

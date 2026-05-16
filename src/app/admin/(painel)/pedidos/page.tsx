@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LogOut, Package, UserCheck } from "lucide-react";
+import { AdminPainelNav } from "@/components/AdminPainelNav";
 import { listPedidosRecent } from "@/lib/pedidos-store";
 import { listUsuarios } from "@/lib/usuarios-store";
 import { formatBRL } from "@/lib/utils";
@@ -112,6 +113,9 @@ export default async function AdminPedidosPage() {
             primeiro
             {!dbError ? ` (${pedidos.length} carregados).` : "."}
           </p>
+          <div className="mt-4">
+            <AdminPainelNav />
+          </div>
         </div>
         <form action="/api/admin/logout" method="post">
           <button
