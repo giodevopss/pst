@@ -6,8 +6,11 @@ import { ProductCard } from "@/components/ProductCard";
 import {
   produtosPacotesFigurinhas,
   produtosPacotesAdrenalyn,
+  produtosPacotesHeroDestaque,
 } from "@/data/produtos";
 import { PacotesOfertasSlider } from "@/components/PacotesOfertasSlider";
+import { PacotesDestaquesStrip } from "@/components/PacotesDestaquesStrip";
+import { PacotesLojistasSection } from "@/components/PacotesLojistasSection";
 
 function pickRandom<T>(items: T[], count: number) {
   return [...items]
@@ -27,9 +30,12 @@ export default function PacotesPage() {
   const figurinhasRandom = pickRandom(figurinhas, 10);
   const figurinhasShuffled = pickRandom(figurinhas, figurinhas.length);
   const adrenalyn = produtosPacotesAdrenalyn();
+  const destaquesTopo = produtosPacotesHeroDestaque();
 
   return (
     <>
+      <PacotesDestaquesStrip items={destaquesTopo} />
+
       <section className="relative overflow-hidden border-b border-border">
         <div className="pointer-events-none absolute -left-32 top-0 h-72 w-72 rounded-full bg-brand-yellow/35 blur-[100px]" />
         <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-brand-green/30 blur-[120px]" />
@@ -67,7 +73,7 @@ export default function PacotesPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-20 md:px-8 md:py-24">
+      <section id="pacotes-figurinhas" className="mx-auto max-w-7xl px-4 py-20 md:px-8 md:py-24">
         <SectionHeading
           eyebrow="Figurinhas Copa 2026™"
           title="Camisa + álbum + 12, 24 ou 50 pacotes de figurinha"
@@ -80,7 +86,7 @@ export default function PacotesPage() {
         </div>
       </section>
 
-      <section className="border-y border-border bg-surface/20">
+      <section id="pacotes-adrenalyn" className="border-y border-border bg-surface/20">
         <div className="mx-auto max-w-7xl px-4 py-20 md:px-8 md:py-24">
           <SectionHeading
             eyebrow="Adrenalyn XL™"
@@ -115,6 +121,8 @@ export default function PacotesPage() {
           </div>
         </div>
       </section>
+
+      <PacotesLojistasSection />
     </>
   );
 }

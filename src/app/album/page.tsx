@@ -27,7 +27,9 @@ export default function AlbumPage() {
   const albumSale = sitePromoUnitSale(albumDuro);
   const albumStrike = catalogStrikePrice(albumDuro);
   const produtosAlbum = produtosPorCategoria("album");
-  const figurinhas = produtosAlbum.filter((p) => !p.id.startsWith("adrenalyn-xl-"));
+  const figurinhas = produtosAlbum.filter(
+    (p) => !p.id.startsWith("adrenalyn-xl-") && !p.id.startsWith("lojista-caixa-"),
+  );
   const adrenalynLinha = produtosAlbum.filter((p) => p.id.startsWith("adrenalyn-xl-"));
 
   return (

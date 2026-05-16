@@ -1,4 +1,5 @@
 import { getSelecao } from "./selecoes";
+import { PACOTES_PAGINA_DESTAQUE_IDS } from "@/lib/store-pricing";
 
 export type Tamanho = "P" | "M" | "G" | "GG" | "XGG";
 export type ProdutoCategoria = "album" | "camiseta" | "pacote";
@@ -212,6 +213,43 @@ export const PRODUTOS: Produto[] = [
     destaques: ["Lata para display", "Ótimo presente colecionador", "SKU anunciado pela Panini"],
     estoque: "ultimas_unidades",
     badge: "Classic tin",
+  },
+  {
+    id: "lojista-caixa-1000-envelopes",
+    slug: "caixa-fechada-1000-envelopes-figurinhas-fifa-world-cup-2026",
+    nome: "Caixa fechada — 1000 envelopes figurinhas FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/lojistas/caixa-1000-envelopes-1.png",
+    galeria: ["/images/lojistas/caixa-1000-envelopes-2.png"],
+    preco: 3500,
+    descricao:
+      "Caixa master Panini para lojistas: 1000 envelopes oficiais da coleção de figurinhas da Copa do Mundo FIFA 2026™ (7 cromos por envelope). Embalagem fechada para revenda.",
+    destaques: [
+      "1000 envelopes oficiais",
+      "7 figurinhas por envelope",
+      "Linha FIFA World Cup 2026™",
+      "Condições comerciais para lojistas",
+    ],
+    estoque: "em_estoque",
+    badge: "Lojista · 1000",
+  },
+  {
+    id: "lojista-caixa-100-envelopes",
+    slug: "caixa-fechada-100-envelopes-figurinhas-fifa-world-cup-2026",
+    nome: "Caixa fechada — 100 envelopes figurinhas FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/lojistas/caixa-100-envelopes.png",
+    preco: 500,
+    descricao:
+      "Caixa Panini com 100 envelopes oficiais de figurinhas da Copa do Mundo FIFA 2026™ (7 cromos por envelope). Ideal para lojas de bairro e pontos de revenda.",
+    destaques: [
+      "100 envelopes oficiais",
+      "7 figurinhas por envelope",
+      "Panini · Copa 2026™",
+      "Pedido mínimo e envio sob consulta",
+    ],
+    estoque: "em_estoque",
+    badge: "Lojista · 100",
   },
   // Pacotes Brasil: camisa + álbum Panini + N pacotes envelopes figurinhas (ref. préço público figurinhas)
   {
@@ -860,6 +898,20 @@ export function produtosPacotesFigurinhas() {
 /** Pacotes que somam envelopes Adrenalyn XL™ além do álbum figurinhas e da camisa. */
 export function produtosPacotesAdrenalyn() {
   return produtosPacotes().filter((p) => p.slug.includes("-adrenalyn-"));
+}
+
+/** Barra “Destaques” em `/pacotes`: combos álbum + envelopes (sem camisa), ordem em `PACOTES_PAGINA_DESTAQUE_IDS`. */
+export function produtosPacotesHeroDestaque(): Produto[] {
+  return PACOTES_PAGINA_DESTAQUE_IDS.map((id) => PRODUTOS.find((p) => p.id === id)).filter(
+    Boolean,
+  ) as Produto[];
+}
+
+/** Caixas atacado (seção Lojistas em `/pacotes`). */
+export function produtosLojistasCaixas(): Produto[] {
+  const a = PRODUTOS.find((p) => p.id === "lojista-caixa-1000-envelopes");
+  const b = PRODUTOS.find((p) => p.id === "lojista-caixa-100-envelopes");
+  return [a, b].filter(Boolean) as Produto[];
 }
 
 export function produtosDestaque(): Produto[] {

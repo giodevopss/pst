@@ -19,6 +19,7 @@ export function isAdrenalynAlbumLine(id: string): boolean {
 /** Mostrar upsell “+ envelopes” só para foto‑álbum sem pacote de envelopes no SKU. */
 export function shouldOfferFigurinhaEnvelopeUpsell(produto: Produto): boolean {
   if (produto.categoria !== "album") return false;
+  if (produto.id.startsWith("lojista-caixa-")) return false;
   if (produto.id === FIGURINHA_KIT_12_ID) return false;
   if (isAdrenalynAlbumLine(produto.id)) return false;
   if (ALBUM_FIGURINHA_ALREADY_BUNDLES.has(produto.id)) return false;

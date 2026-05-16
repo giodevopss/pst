@@ -10,7 +10,7 @@ const lojaFundo =
 const pixFundo =
   "border border-brand-cyan/55 bg-[#050c14]/95 shadow-md backdrop-blur-sm ring-1 ring-brand-cyan/25";
 
-/** Chip verde: desconto promocional na loja (vitrine / cartões de preço). */
+/** Chip verde: desconto promocional na vitrine (cartões de preço). */
 export function LojaDiscountBadge({
   className,
   size = "default",
@@ -30,7 +30,7 @@ export function LojaDiscountBadge({
         className,
       )}
     >
-      −{SITE_WIDE_DISCOUNT_PERCENT}% na loja
+      −{SITE_WIDE_DISCOUNT_PERCENT}%
     </span>
   );
 }

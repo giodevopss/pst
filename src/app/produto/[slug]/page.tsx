@@ -8,7 +8,7 @@ import { ProductAlbumAddZone } from "@/components/ProductAlbumAddZone";
 import { SectionHeading } from "@/components/SectionHeading";
 import { getProduto, PRODUTOS } from "@/data/produtos";
 import { PacoteDetalheClient } from "@/components/PacoteDetalheClient";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, formatBRLExact } from "@/lib/utils";
 import { PromoBadgesPair } from "@/components/PromoPriceBadges";
 import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
 
@@ -32,11 +32,20 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
   const produto = getProduto(slug);
   if (!produto || produto.categoria === "camiseta") notFound();
 
+  const isLojistaCaixa = produto.id.startsWith("lojista-caixa-");
+
   const relacionados = PRODUTOS.filter(
-    (p) => p.categoria === produto.categoria && p.id !== produto.id,
+    (p) =>
+      p.categoria === produto.categoria &&
+      p.id !== produto.id &&
+      !(isLojistaCaixa && p.id.startsWith("lojista-caixa-")),
   ).slice(0, 4);
 
-  const voltarHref = produto.categoria === "pacote" ? "/pacotes" : "/album";
+  const voltarHref = isLojistaCaixa
+    ? "/pacotes#lojistas"
+    : produto.categoria === "pacote"
+      ? "/pacotes"
+      : "/album";
   const salePrice = sitePromoUnitSale(produto);
   const strikePrice = catalogStrikePrice(produto);
 
@@ -65,19 +74,24 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
-            {produto.categoria === "album" && "Álbum oficial"}
-            {produto.categoria === "pacote" && "Pacote promocional Brasil"}
+            {isLojistaCaixa && "Lojistas · atacado"}
+            {!isLojistaCaixa && produto.categoria === "album" && "Álbum oficial"}
+            {!isLojistaCaixa && produto.categoria === "pacote" && "Pacote promocional Brasil"}
           </p>
           <h1 className="mt-3 font-display text-4xl leading-tight tracking-tight md:text-6xl">
             {produto.nome}
           </h1>
 
           <div className="mt-5 flex flex-wrap items-baseline gap-3">
-            <span className="font-display text-4xl gradient-text">{formatBRL(salePrice)}</span>
+            <span className="font-display text-4xl gradient-text">
+              {isLojistaCaixa ? formatBRLExact(salePrice) : formatBRL(salePrice)}
+            </span>
             {strikePrice > salePrice + 1e-9 && (
-              <span className="text-base text-muted line-through">{formatBRL(strikePrice)}</span>
+              <span className="text-base text-muted line-through">
+                {isLojistaCaixa ? formatBRLExact(strikePrice) : formatBRL(strikePrice)}
+              </span>
             )}
-            <PromoBadgesPair badgeClassName="px-3 py-1 text-xs" />
+            {!isLojistaCaixa && <PromoBadgesPair badgeClassName="px-3 py-1 text-xs" />}
           </div>
 
           <p className="mt-5 text-base leading-relaxed text-muted">{produto.descricao}</p>
@@ -104,7 +118,11 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
 
           <div className="mt-6 flex items-start gap-3 rounded-2xl border border-border bg-surface/40 p-4 text-sm text-muted">
             <Truck className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />
-            <p>Enviamos para todo o Brasil com frete grátis nesta loja.</p>
+            <p>
+              {isLojistaCaixa
+                ? "Volumes atacado: frete e condições comerciais combinados no pedido."
+                : "Enviamos para todo o Brasil com frete grátis nesta loja."}
+            </p>
           </div>
         </div>
       </section>
@@ -115,8 +133,18 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
             eyebrow="Combina com você"
             title={produto.categoria === "pacote" ? "Outros pacotes Brasil" : "Produtos relacionados"}
             cta={{
-              href: produto.categoria === "pacote" ? "/pacotes" : "/album",
-              label: produto.categoria === "pacote" ? "Ver todos os pacotes" : "Ver tudo do álbum",
+              href:
+                produto.categoria === "pacote"
+                  ? "/pacotes"
+                  : isLojistaCaixa
+                    ? "/pacotes#lojistas"
+                    : "/album",
+              label:
+                produto.categoria === "pacote"
+                  ? "Ver todos os pacotes"
+                  : isLojistaCaixa
+                    ? "Ver ofertas lojistas"
+                    : "Ver tudo do álbum",
             }}
           />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
