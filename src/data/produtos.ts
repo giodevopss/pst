@@ -803,8 +803,7 @@ export const PRODUTOS: Produto[] = [
     categoria: "camiseta",
     imagemSrc: "/images/camiseta-brasil.jpg",
     galeria: GALERIA_ANUNCIO_CAMISETA_BRASIL_I,
-    preco: 299.9,
-    precoOriginal: 399.9,
+    preco: 228.56,
     selecaoSlug: brasil.slug,
     descricao:
       "Camiseta oficial da seleção brasileira para viver o Mundial das Américas. Tecido tecnológico e escudo em alta definição.",
@@ -825,8 +824,7 @@ export const PRODUTOS: Produto[] = [
     categoria: "camiseta",
     imagemSrc: "/images/camiseta-brasil-ii.png",
     galeria: GALERIA_ANUNCIO_CAMISETA_BRASIL_II,
-    preco: 299.9,
-    precoOriginal: 399.9,
+    preco: 228.56,
     selecaoSlug: brasil.slug,
     descricao:
       "Segunda versão da camisa oficial do Brasil para a Copa 2026. Visual alternativo com acabamento premium para completar seu kit de torcedor.",

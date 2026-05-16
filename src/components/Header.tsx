@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ShoppingBag, Menu, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 import { useCart } from "@/lib/cart";
 
 const NAV_ITEMS = [
@@ -69,6 +70,7 @@ export function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <ThemeToggle />
           <Link
             href="/conta"
             aria-label="Minha conta"

@@ -4,7 +4,7 @@ import { PANINI_FIFA_2026_URL } from "@/config/panini";
 
 export function PartnershipRibbon() {
   return (
-    <div className="relative z-40 border-b border-white/10 bg-surface text-center">
+    <div className="relative z-40 border-b border-border bg-surface text-center">
       <p className="mx-auto max-w-4xl px-4 py-2 text-[11px] leading-snug text-muted md:text-xs">
         <span className="font-semibold text-foreground">
           Coleção oficial Panini — FIFA World Cup 2026™

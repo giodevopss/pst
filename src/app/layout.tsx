@@ -9,6 +9,10 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { TickerBar } from "@/components/TickerBar";
 import { PartnershipRibbon } from "@/components/PartnershipRibbon";
 import { PromoModal } from "@/components/PromoModal";
+import { MetaPixelRoot } from "@/components/MetaPixelRoot";
+import { AttributionCaptureRoot } from "@/components/AttributionCaptureRoot";
+import { ThemeInitScript } from "@/components/ThemeInitScript";
+import { ThemeColorMeta } from "@/components/ThemeColorMeta";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -66,9 +70,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${bebas.variable}`}>
+    <html lang="pt-BR" suppressHydrationWarning className={`${inter.variable} ${bebas.variable}`}>
       <body className="min-h-screen flex flex-col">
+        <ThemeInitScript />
+        <ThemeColorMeta />
         <CartProvider>
+          <AttributionCaptureRoot />
+          <MetaPixelRoot />
           <PartnershipRibbon />
           <TickerBar />
           <Header />

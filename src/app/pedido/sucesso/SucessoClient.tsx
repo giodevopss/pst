@@ -10,6 +10,8 @@ import { formatBRL } from "@/lib/utils";
 import { getSelecao } from "@/data/selecoes";
 import type { CartItem } from "@/lib/cart";
 import { PixCpfAvisoModal } from "@/components/pedido/PixCpfAvisoModal";
+import { readCookie } from "@/lib/attribution";
+import { trackMetaPurchase } from "@/lib/meta-pixel-client";
 
 type PagamentoPedido =
   | {
@@ -46,6 +48,54 @@ export function SucessoClient() {
       if (raw) setPedido(JSON.parse(raw));
     } catch {}
   }, []);
+
+  useEffect(() => {
+    if (!pedido?.id || !Array.isArray(pedido.items) || pedido.items.length === 0) return;
+    const eventId = `purchase_${pedido.id}`;
+    const sentKey = `copa2026:metaPurchase:${pedido.id}`;
+    try {
+      if (window.sessionStorage.getItem(sentKey)) return;
+    } catch {
+      return;
+    }
+
+    const contents = pedido.items.map((i) => ({
+      id: i.produtoId,
+      quantity: i.quantidade,
+    }));
+    const content_ids = pedido.items.map((i) => i.produtoId);
+
+    trackMetaPurchase(
+      {
+        value: pedido.totalPrice,
+        currency: "BRL",
+        contents,
+        content_ids,
+      },
+      { eventID: eventId },
+    );
+
+    const email = pedido.cliente?.email?.trim();
+    void fetch("/api/meta/purchase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_id: eventId,
+        value: pedido.totalPrice,
+        currency: "BRL",
+        contents,
+        content_ids,
+        event_source_url: window.location.href,
+        email: email && email.includes("@") ? email : undefined,
+        fbp: readCookie("_fbp"),
+        fbc: readCookie("_fbc"),
+      }),
+    }).catch(() => {});
+
+    try {
+      window.sessionStorage.setItem(sentKey, "1");
+    } catch {}
+  }, [pedido]);
 
   const pixStripe =
     pedido?.pagamento?.modo === "pix" &&

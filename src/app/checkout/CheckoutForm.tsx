@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   AlertTriangle,
@@ -48,6 +48,7 @@ import {
   REMARKETING_CHECKOUT_CONVERTIDO_KEY,
   useCheckoutAbandonBeacon,
 } from "@/hooks/use-checkout-abandon-beacon";
+import { trackMetaInitiateCheckout } from "@/lib/meta-pixel-client";
 
 type FormData = {
   nome: string;
@@ -300,6 +301,23 @@ export function CheckoutForm() {
   };
 
   const isEmpty = items.length === 0;
+
+  const metaInitiateSent = useRef(false);
+  useEffect(() => {
+    if (isEmpty || metaInitiateSent.current) return;
+    metaInitiateSent.current = true;
+    const numItems = items.reduce((acc, i) => acc + i.quantidade, 0);
+    const contents = items.map((i) => ({
+      id: i.produtoId,
+      quantity: i.quantidade,
+    }));
+    trackMetaInitiateCheckout({
+      value: totalPrice,
+      currency: "BRL",
+      num_items: numItems,
+      contents,
+    });
+  }, [isEmpty, items, totalPrice]);
 
   const orderId = useMemo(() => {
     if (typeof window === "undefined") return "";

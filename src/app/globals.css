@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
   --background: #06080f;
   --background-elev: #0d1220;
   --surface: #131a2e;
@@ -23,6 +24,17 @@
   --radius: 14px;
   --radius-lg: 22px;
   --radius-xl: 32px;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --background: #eef1f8;
+  --background-elev: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #e4e9f4;
+  --border: #c5cee0;
+  --foreground: #0a1020;
+  --muted: #5a6478;
 }
 
 @theme inline {
@@ -70,6 +82,14 @@ body {
   min-height: 100vh;
 }
 
+[data-theme="light"] body {
+  background:
+    radial-gradient(1100px 560px at 12% -8%, rgba(0, 177, 79, 0.09), transparent 58%),
+    radial-gradient(980px 640px at 108% 8%, rgba(255, 214, 10, 0.14), transparent 52%),
+    radial-gradient(880px 480px at 50% 108%, rgba(0, 80, 168, 0.08), transparent 58%),
+    var(--background);
+}
+
 ::selection {
   background: var(--brand-yellow);
   color: #06080f;
@@ -90,6 +110,12 @@ body {
     linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 48px 48px;
+}
+
+[data-theme="light"] .bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(10, 16, 32, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 16, 32, 0.06) 1px, transparent 1px);
 }
 
 .bg-noise {
@@ -171,11 +197,26 @@ body {
   border-color: var(--brand-yellow);
 }
 
+[data-theme="light"] .btn-secondary {
+  background: rgba(10, 16, 32, 0.04);
+  border-color: var(--border);
+}
+
+[data-theme="light"] .btn-secondary:hover {
+  background: rgba(10, 16, 32, 0.07);
+  border-color: var(--brand-yellow);
+}
+
 .card-surface {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(12px);
+}
+
+[data-theme="light"] .card-surface {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(244, 247, 252, 0.92));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
 }
 
 @keyframes spin-slow {
@@ -234,4 +275,16 @@ body {
   outline: none;
   border-color: var(--brand-yellow);
   box-shadow: 0 0 0 4px rgba(255, 214, 10, 0.12);
+}
+
+[data-theme="light"] .form-input {
+  background: rgba(10, 16, 32, 0.03);
+}
+
+[data-theme="light"] .form-input::placeholder {
+  color: rgba(90, 100, 120, 0.55);
+}
+
+[data-theme="light"] .form-input:focus {
+  box-shadow: 0 0 0 4px rgba(255, 214, 10, 0.22);
 }
