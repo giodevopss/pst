@@ -37,7 +37,7 @@ export function PacoteDetalheClient({ produto }: { produto: Produto }) {
 
       <div className="flex flex-wrap items-center gap-4">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted">
-          Quantidade de pacotes
+          Quantidade
         </p>
         <div className="inline-flex items-center rounded-full border border-border bg-surface/60">
           <button
@@ -66,7 +66,7 @@ export function PacoteDetalheClient({ produto }: { produto: Produto }) {
         quantidade={qty}
         requiresSize
         fullWidth
-        label="Adicionar pacote ao carrinho"
+        label="Adicionar ao carrinho"
       />
     </div>
   );

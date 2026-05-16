@@ -97,7 +97,7 @@ export default function Home() {
         <div className="relative mx-auto max-w-7xl px-4 pb-24 md:px-8">
           <SectionHeading
             title="Combos"
-            description="Seleção de pacotes com camisa do Brasil + álbum + figurinhas/Adrenalyn para comprar tudo de uma vez."
+            description="Seleção de promoções com camisa do Brasil + álbum + figurinhas/Adrenalyn para comprar tudo de uma vez."
             cta={{ href: "/pacotes", label: "Ver todos os combos" }}
           />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

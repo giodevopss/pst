@@ -31,14 +31,14 @@ export function PacotesDestaquesStrip({ items, className }: Props) {
               Kits oficiais Panini com álbum e envelopes — <span className="font-medium text-foreground">sem camisa</span>.
               Nos três primeiros itens:{" "}
               <span className="font-medium text-brand-green">mais −{PACOTES_DESTAQUE_EXTRA_DISCOUNT_PERCENT}%</span> sobre o
-              preço já promocional da loja. Abaixo, os pacotes com camisa Brasil.
+              preço já promocional da loja. Abaixo, as promoções com camisa Brasil.
             </p>
           </div>
           <Link
             href="#pacotes-figurinhas"
             className="shrink-0 text-sm font-medium text-brand-cyan underline decoration-brand-cyan/35 underline-offset-4 transition hover:text-brand-yellow hover:decoration-brand-yellow/50"
           >
-            Ver todos os pacotes ↓
+            Ver todas as promoções ↓
           </Link>
         </div>
 

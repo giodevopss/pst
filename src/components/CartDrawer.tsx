@@ -69,12 +69,12 @@ export function CartDrawer() {
                   <div>
                     <p className="font-display text-2xl">Carrinho vazio</p>
                     <p className="mt-1 text-sm text-muted">
-                      Que tal começar pelo álbum oficial ou por um pacote Brasil + figurinhas?
+                      Que tal começar pelo álbum oficial ou por uma promoção Brasil + figurinhas?
                     </p>
                   </div>
                   <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
                     <Link href="/pacotes" onClick={close} className="btn-secondary">
-                      Ver pacotes
+                      Ver promoções
                     </Link>
                     <Link href="/album" onClick={close} className="btn-primary">
                       Ver o álbum

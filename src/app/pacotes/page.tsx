@@ -20,7 +20,7 @@ function pickRandom<T>(items: T[], count: number) {
 
 export const metadata: Metadata = {
   title:
-    "Pacotes Brasil — camisa + álbum Panini | figurinhas e Adrenalyn XL™ Copa 2026",
+    "Promoções Brasil — camisa + álbum Panini | figurinhas e Adrenalyn XL™ Copa 2026",
   description:
     "Monte o kit: camisa oficial Brasil com álbum ouro, prata, capa dura ou capa cartão; escolha 12, 24 ou 50 pacotes de figurinhas, ou combinações com 12, 24 ou 30 envelopes Adrenalyn XL™.",
 };
@@ -108,7 +108,7 @@ export default function PacotesPage() {
               Precisa só do álbum ou das camisas?
             </h2>
             <p className="mt-2 max-w-xl text-muted">
-              Os pacotes exigem tamanho da camisa no carrinho. Figurinhas e Adrenalyn avulsos seguem na página do álbum.
+              As promoções exigem tamanho da camisa no carrinho. Figurinhas e Adrenalyn avulsos seguem na página do álbum.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">

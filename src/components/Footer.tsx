@@ -64,7 +64,7 @@ export function Footer() {
               </Link>
             </li>
             <li><Link href="/camisetas" className="hover:text-brand-yellow">Camisetas</Link></li>
-            <li><Link href="/pacotes" className="hover:text-brand-yellow">Pacotes</Link></li>
+            <li><Link href="/pacotes" className="hover:text-brand-yellow">Promoções</Link></li>
             <li><Link href="/checkout" className="hover:text-brand-yellow">Carrinho</Link></li>
           </ul>
         </div>

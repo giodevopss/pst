@@ -11,7 +11,7 @@ import { useCart } from "@/lib/cart";
 const NAV_ITEMS = [
   { href: "/album", label: "Álbum" },
   { href: "/camisetas", label: "Camisetas" },
-  { href: "/pacotes", label: "Pacotes" },
+  { href: "/pacotes", label: "Promoções" },
   { href: "/sobre", label: "Sobre" },
 ];
 

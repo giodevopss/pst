@@ -115,7 +115,7 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
           </div>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">{produto.descricao}</p>
           <Link href={`/produto/${produto.slug}`} className="btn-primary mt-6 inline-flex">
-            Ver pacote e escolher tamanho
+            Ver promoção e escolher tamanho
           </Link>
         </motion.div>
 

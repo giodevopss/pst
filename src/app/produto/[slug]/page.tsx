@@ -76,7 +76,7 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
             {isLojistaCaixa && "Lojistas · atacado"}
             {!isLojistaCaixa && produto.categoria === "album" && "Álbum oficial"}
-            {!isLojistaCaixa && produto.categoria === "pacote" && "Pacote promocional Brasil"}
+            {!isLojistaCaixa && produto.categoria === "pacote" && "Promoção Brasil"}
           </p>
           <h1 className="mt-3 font-display text-4xl leading-tight tracking-tight md:text-6xl">
             {produto.nome}
@@ -131,7 +131,7 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
         <section className="mx-auto max-w-7xl px-4 py-20 md:px-8">
           <SectionHeading
             eyebrow="Combina com você"
-            title={produto.categoria === "pacote" ? "Outros pacotes Brasil" : "Produtos relacionados"}
+            title={produto.categoria === "pacote" ? "Outras promoções Brasil" : "Produtos relacionados"}
             cta={{
               href:
                 produto.categoria === "pacote"
@@ -141,7 +141,7 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
                     : "/album",
               label:
                 produto.categoria === "pacote"
-                  ? "Ver todos os pacotes"
+                  ? "Ver todas as promoções"
                   : isLojistaCaixa
                     ? "Ver ofertas lojistas"
                     : "Ver tudo do álbum",
