@@ -106,8 +106,10 @@ export default function SobrePage() {
           <aside className="rounded-[2rem] border border-border bg-surface/35 p-6 md:p-8">
             <h3 className="font-display text-3xl tracking-tight">Placar final</h3>
             <p className="mt-3 text-muted">
-              Frete grátis para compras nesta loja. Para dúvidas sobre pedido, prazo ou produto,
-              prefira o e-mail — respondemos o quanto antes.
+              Frete grátis para compras nesta loja. Suporte oficial:{" "}
+              <a href={`mailto:${STORE_CONFIG.email}`} className="text-brand-yellow hover:underline">
+                {STORE_CONFIG.email}
+              </a>
             </p>
             <div className="mt-6 space-y-3">
               <Link href={`mailto:${STORE_CONFIG.email}`} className="btn-primary w-full justify-center">

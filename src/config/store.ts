@@ -19,7 +19,8 @@ export const STORE_CONFIG = {
     tiktok: "https://tiktok.com/@copa2026.store",
   },
 
-  email: "contato@copa2026.store",
+  /** Contato oficial de suporte Panini */
+  email: "suporte@panini.com.br",
 
   worldCup: {
     startDate: "2026-06-11T00:00:00-03:00",

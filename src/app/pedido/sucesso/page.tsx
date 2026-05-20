@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { PedidoAcompanhamentoClient } from "@/components/pedido/PedidoAcompanhamentoClient";
 
 export const metadata: Metadata = {
-  title: "Pedido recebido",
+  title: "Pedido recebido — acompanhe seu pedido",
+  description:
+    "Seu pedido foi registrado. Acompanhe as etapas: pedido feito, pagamento, separação, envio e entrega.",
 };
 
-export default async function SucessoPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ id?: string }>;
-}) {
-  const { id } = await searchParams;
-  if (id) {
-    redirect(`/pedido/acompanhar?id=${encodeURIComponent(id)}`);
-  }
-  redirect("/pedido/acompanhar");
+export const dynamic = "force-dynamic";
+
+export default function SucessoPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-3xl px-4 py-24 text-center text-muted">
+          Carregando seu pedido...
+        </div>
+      }
+    >
+      <PedidoAcompanhamentoClient />
+    </Suspense>
+  );
 }

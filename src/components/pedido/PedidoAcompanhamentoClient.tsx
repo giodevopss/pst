@@ -42,7 +42,15 @@ type PedidoView = {
   pagamento?: PagamentoPersistidoSeguro;
 };
 
-export function AcompanharPedidoClient() {
+function normalizePedidoView(p: PedidoView): PedidoView {
+  return {
+    ...p,
+    statusPagamento: p.statusPagamento ?? "pendente",
+    etapa: p.etapa ?? "pedido_feito",
+  };
+}
+
+export function PedidoAcompanhamentoClient() {
   const searchParams = useSearchParams();
   const idParam = searchParams.get("id") ?? "";
   const [pedido, setPedido] = useState<PedidoView | null>(null);
@@ -52,17 +60,19 @@ export function AcompanharPedidoClient() {
   const mergeFromStorage = useCallback((base: PedidoView | null): PedidoView | null => {
     try {
       const raw = window.localStorage.getItem("copa2026:ultimoPedido");
-      if (!raw) return base;
-      const stored = JSON.parse(raw) as PedidoView;
+      if (!raw) return base ? normalizePedidoView(base) : null;
+      const stored = normalizePedidoView(JSON.parse(raw) as PedidoView);
       if (!base) return stored;
-      if (base.id !== stored.id) return base;
-      return {
+      if (base.id !== stored.id) return normalizePedidoView(base);
+      return normalizePedidoView({
         ...base,
         pagamento: base.pagamento ?? stored.pagamento,
         items: base.items?.length ? base.items : stored.items,
-      };
+        statusPagamento: base.statusPagamento ?? stored.statusPagamento,
+        etapa: base.etapa ?? stored.etapa,
+      });
     } catch {
-      return base;
+      return base ? normalizePedidoView(base) : null;
     }
   }, []);
 
@@ -79,7 +89,7 @@ export function AcompanharPedidoClient() {
       if (res.ok) {
         const data = (await res.json()) as { pedido?: PedidoView };
         if (data.pedido) {
-          setPedido(mergeFromStorage(data.pedido));
+          setPedido(mergeFromStorage(normalizePedidoView(data.pedido)));
           setLoading(false);
           return;
         }
@@ -90,7 +100,7 @@ export function AcompanharPedidoClient() {
     try {
       const raw = window.localStorage.getItem("copa2026:ultimoPedido");
       if (raw) {
-        const stored = JSON.parse(raw) as PedidoView;
+        const stored = normalizePedidoView(JSON.parse(raw) as PedidoView);
         if (stored.id === id) setPedido(stored);
       }
     } catch {}
@@ -155,8 +165,7 @@ export function AcompanharPedidoClient() {
   const pag = pedido?.pagamento;
   const isPix = !pag || pag.modo === "pix";
   const statusPag = normalizeStatusPagamento(pedido?.statusPagamento);
-  const showPixPay =
-    isPix && statusPag === "pendente" && pag?.modo === "pix";
+  const showPixPay = isPix && statusPag === "pendente" && pag?.modo === "pix";
 
   const pixStripe =
     pag?.modo === "pix" && !!(pag.stripePixQrUrl || pag.stripePixCopiaECola);
@@ -207,43 +216,49 @@ export function AcompanharPedidoClient() {
         <PixCpfAvisoModal pedidoId={pedidoId} cidade={pedido.cliente.cidade} uf={pedido.cliente.uf} />
       )}
 
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
-            Pedido {pedidoId}
-          </p>
-          <h1 className="mt-2 font-display text-4xl tracking-tight md:text-5xl">
-            Acompanhe seu pedido
-          </h1>
-        </div>
+      <header className="mb-8 text-center">
+        <CheckCircle2 className="mx-auto h-14 w-14 text-brand-green" />
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
+          Pedido recebido
+        </p>
+        <h1 className="mt-2 font-display text-4xl leading-tight tracking-tight md:text-5xl">
+          Boa! Seu pedido{" "}
+          <span className="gradient-text">{pedidoId}</span> foi registrado.
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-sm text-muted">
+          Acompanhe abaixo cada etapa — começando por{" "}
+          <strong className="text-foreground">Pedido feito</strong>.
+        </p>
+      </header>
+
+      <div className="mb-6 flex justify-center">
         <button
           type="button"
           onClick={() => void fetchPedido()}
           className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted transition hover:border-brand-yellow hover:text-brand-yellow"
         >
           <RefreshCw className="h-3.5 w-3.5" />
-          Atualizar
+          Atualizar status
         </button>
       </div>
 
       <PedidoTimeline
         pedido={{
-          etapa: pedido.etapa,
-          statusPagamento: pedido.statusPagamento,
+          etapa: pedido.etapa ?? "pedido_feito",
+          statusPagamento: pedido.statusPagamento ?? "pendente",
         }}
         className="mb-8"
       />
 
       <div className="overflow-hidden rounded-3xl border border-border bg-surface/40">
-        <header className="border-b border-border bg-gradient-to-r from-brand-green/20 via-transparent to-brand-yellow/20 px-6 py-8 text-center md:px-10">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-brand-green" />
-          <p className="mt-4 text-sm text-muted">
+        <div className="border-b border-border bg-gradient-to-r from-brand-green/15 via-transparent to-brand-yellow/15 px-6 py-6 text-center md:px-10">
+          <p className="text-sm text-muted">
             {statusPag === "aprovado"
               ? "Pagamento confirmado. Em breve seu pedido avança para separação e envio."
               : statusPag === "rejeitado"
                 ? "Não foi possível confirmar o pagamento. Fale com a loja se acredita que houve um engano."
                 : isPix
-                  ? "Pague com PIX abaixo (se ainda não pagou). Após a confirmação, atualizamos as etapas aqui."
+                  ? "Pague com PIX abaixo (se ainda não pagou). Após a confirmação, atualizamos as etapas acima."
                   : "Aguardando confirmação do pagamento no cartão."}
           </p>
           {emailDestino && (
@@ -252,7 +267,7 @@ export function AcompanharPedidoClient() {
               <span className="font-mono text-foreground">{emailDestino}</span>
             </p>
           )}
-        </header>
+        </div>
 
         {showPixPay && (
           <div className="grid gap-8 border-b border-border p-6 md:grid-cols-2 md:p-10">
@@ -325,7 +340,10 @@ export function AcompanharPedidoClient() {
               </button>
             </div>
             <div className="flex flex-col justify-center text-sm text-muted">
-              <p>Guarde o comprovante após pagar. A etapa &quot;Pagamento concluído&quot; será marcada quando a loja confirmar.</p>
+              <p>
+                Guarde o comprovante após pagar. A etapa &quot;Pagamento concluído&quot; será
+                marcada quando a loja confirmar.
+              </p>
               <Link href={`mailto:${STORE_CONFIG.email}`} className="btn-secondary mt-6 inline-flex w-fit">
                 <Mail className="h-4 w-4" />
                 Falar com a loja
@@ -396,3 +414,6 @@ export function AcompanharPedidoClient() {
     </section>
   );
 }
+
+/** @deprecated Use PedidoAcompanhamentoClient */
+export const AcompanharPedidoClient = PedidoAcompanhamentoClient;

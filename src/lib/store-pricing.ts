@@ -69,7 +69,7 @@ export type CheckoutCouponConfig = {
   pixOnly: boolean;
 };
 
-const CHECKOUT_COUPON_REGISTRY: CheckoutCouponConfig[] = [
+export const CHECKOUT_COUPON_REGISTRY: CheckoutCouponConfig[] = [
   {
     code: PIX_DISCOUNT_COUPON_CODE,
     fraction: PIX_CHECKOUT_EXTRA_DISCOUNT_FRACTION,
@@ -113,17 +113,63 @@ export function isValidPixCouponCode(raw: string | null | undefined): boolean {
   return resolveCheckoutCoupon(raw)?.code === PIX_DISCOUNT_COUPON_CODE;
 }
 
-/** Total após cupom de checkout (se válido para o meio de pagamento). */
+export type CheckoutCouponLine = {
+  code: string;
+  percent: number;
+  discountAmount: number;
+  active: boolean;
+  pixOnly: boolean;
+};
+
+/** Aplica vários cupons em sequência (gerais primeiro, PIX por último). */
+export function computeCheckoutWithCoupons(
+  subtotal: number,
+  rawCodes: string[],
+  paymentModo: "pix" | "cartao",
+): { totalPagar: number; descontoTotal: number; lines: CheckoutCouponLine[] } {
+  const unique = [
+    ...new Set(
+      rawCodes.map((c) => normalizeCheckoutCouponCode(c)).filter((c) => c.length > 0),
+    ),
+  ];
+  const coupons = unique
+    .map((code) => resolveCheckoutCoupon(code))
+    .filter((c): c is CheckoutCouponConfig => c != null)
+    .sort((a, b) => Number(a.pixOnly) - Number(b.pixOnly));
+
+  let running = subtotal;
+  const lines: CheckoutCouponLine[] = [];
+
+  for (const coupon of coupons) {
+    const active = checkoutCouponApplies(coupon, paymentModo);
+    const before = running;
+    if (active) {
+      running = precoCharmDezena99(running * (1 - coupon.fraction));
+    }
+    lines.push({
+      code: coupon.code,
+      percent: coupon.percent,
+      discountAmount: active ? Math.round((before - running) * 100) / 100 : 0,
+      active,
+      pixOnly: coupon.pixOnly,
+    });
+  }
+
+  return {
+    totalPagar: running,
+    descontoTotal: Math.round((subtotal - running) * 100) / 100,
+    lines,
+  };
+}
+
+/** Total após um único cupom (legado). */
 export function totalAfterCheckoutCoupon(
   subtotal: number,
   rawCoupon: string | null | undefined,
   paymentModo: "pix" | "cartao",
 ): number {
-  const coupon = resolveCheckoutCoupon(rawCoupon);
-  if (!coupon || !checkoutCouponApplies(coupon, paymentModo)) {
-    return subtotal;
-  }
-  return precoCharmDezena99(subtotal * (1 - coupon.fraction));
+  const code = rawCoupon ? normalizeCheckoutCouponCode(rawCoupon) : "";
+  return computeCheckoutWithCoupons(subtotal, code ? [code] : [], paymentModo).totalPagar;
 }
 
 export function priceAfterSiteDiscount(catalogUnitPrice: number): number {

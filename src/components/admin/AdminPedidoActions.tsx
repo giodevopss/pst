@@ -100,7 +100,7 @@ export function AdminPedidoActions({ pedidoId, statusPagamento, etapa }: Props) 
           </button>
         )}
         <a
-          href={`/pedido/acompanhar?id=${encodeURIComponent(pedidoId)}`}
+          href={`/pedido/sucesso?id=${encodeURIComponent(pedidoId)}`}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted transition hover:border-brand-yellow hover:text-brand-yellow"

@@ -43,11 +43,10 @@ import {
   PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
   PIX_DISCOUNT_COUPON_CODE,
   SITE_WIDE_DISCOUNT_PERCENT,
-  checkoutCouponApplies,
+  CHECKOUT_COUPON_REGISTRY,
+  computeCheckoutWithCoupons,
   isValidCheckoutCouponCode,
   normalizeCheckoutCouponCode,
-  resolveCheckoutCoupon,
-  totalAfterCheckoutCoupon,
 } from "@/lib/store-pricing";
 import {
   REMARKETING_CHECKOUT_CONVERTIDO_KEY,
@@ -107,7 +106,40 @@ const REQUIRED: (keyof FormData)[] = [
 ];
 
 const STORAGE_KEY = "copa2026:checkout:v1";
-const COUPON_STORAGE_KEY = "copa2026:checkout:coupon:v1";
+const COUPON_STORAGE_KEY = "copa2026:checkout:coupons:v2";
+const COUPON_STORAGE_KEY_LEGACY = "copa2026:checkout:coupon:v1";
+
+function loadCouponsFromStorage(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const rawV2 = window.localStorage.getItem(COUPON_STORAGE_KEY);
+    if (rawV2) {
+      const parsed = JSON.parse(rawV2) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed
+          .filter((c): c is string => typeof c === "string")
+          .map((c) => normalizeCheckoutCouponCode(c))
+          .filter((c) => isValidCheckoutCouponCode(c));
+      }
+    }
+    const rawV1 = window.localStorage.getItem(COUPON_STORAGE_KEY_LEGACY);
+    if (rawV1 && isValidCheckoutCouponCode(rawV1)) {
+      return [normalizeCheckoutCouponCode(rawV1)];
+    }
+  } catch {}
+  return [];
+}
+
+function saveCouponsToStorage(codes: string[]) {
+  try {
+    if (codes.length === 0) {
+      window.localStorage.removeItem(COUPON_STORAGE_KEY);
+      window.localStorage.removeItem(COUPON_STORAGE_KEY_LEGACY);
+    } else {
+      window.localStorage.setItem(COUPON_STORAGE_KEY, JSON.stringify(codes));
+    }
+  } catch {}
+}
 
 export function CheckoutForm() {
   const { items, totalPrice, clear } = useCart();
@@ -126,29 +158,12 @@ export function CheckoutForm() {
   const [paymentModo, setPaymentModo] = useState<PaymentModo>("pix");
 
   const [couponInput, setCouponInput] = useState<string>("");
-  const [appliedCoupon, setAppliedCoupon] = useState<string>("");
+  const [appliedCoupons, setAppliedCoupons] = useState<string[]>([]);
   const [couponError, setCouponError] = useState<string>("");
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = window.localStorage.getItem(COUPON_STORAGE_KEY);
-      if (raw && isValidCheckoutCouponCode(raw)) {
-        const code = raw.trim().toUpperCase().replace(/\s+/g, "");
-        setAppliedCoupon(code);
-        setCouponInput(code);
-      }
-    } catch {}
+    setAppliedCoupons(loadCouponsFromStorage());
   }, []);
-
-  const appliedCouponDef = useMemo(
-    () => resolveCheckoutCoupon(appliedCoupon),
-    [appliedCoupon],
-  );
-  const couponDiscountActive = useMemo(() => {
-    if (!appliedCouponDef) return false;
-    return checkoutCouponApplies(appliedCouponDef, paymentModo);
-  }, [appliedCouponDef, paymentModo]);
 
   const [cardDigits, setCardDigits] = useState("");
   const [cardName, setCardName] = useState("");
@@ -253,10 +268,13 @@ export function CheckoutForm() {
 
   const checkoutTotals = useMemo(() => {
     const subtotalLoja = totalPrice;
-    const totalPagar = totalAfterCheckoutCoupon(subtotalLoja, appliedCoupon, paymentModo);
-    const descontoCupom = Math.round((subtotalLoja - totalPagar) * 100) / 100;
-    return { subtotalLoja, descontoCupom, totalPagar };
-  }, [paymentModo, totalPrice, appliedCoupon]);
+    const { totalPagar, descontoTotal, lines } = computeCheckoutWithCoupons(
+      subtotalLoja,
+      appliedCoupons,
+      paymentModo,
+    );
+    return { subtotalLoja, descontoCupom: descontoTotal, totalPagar, couponLines: lines };
+  }, [paymentModo, totalPrice, appliedCoupons]);
 
   useCheckoutAbandonBeacon({
     items,
@@ -284,20 +302,32 @@ export function CheckoutForm() {
       setCouponError("Cupom inválido.");
       return;
     }
-    setAppliedCoupon(value);
-    setCouponInput(value);
+    if (appliedCoupons.includes(value)) {
+      setCouponError("Este cupom já foi adicionado.");
+      return;
+    }
+    const next = [...appliedCoupons, value];
+    setAppliedCoupons(next);
+    setCouponInput("");
     setCouponError("");
-    try {
-      window.localStorage.setItem(COUPON_STORAGE_KEY, value);
-    } catch {}
+    saveCouponsToStorage(next);
   }
 
-  function removeCoupon() {
-    setAppliedCoupon("");
+  function removeCoupon(code: string) {
+    const next = appliedCoupons.filter((c) => c !== code);
+    setAppliedCoupons(next);
     setCouponError("");
-    try {
-      window.localStorage.removeItem(COUPON_STORAGE_KEY);
-    } catch {}
+    saveCouponsToStorage(next);
+  }
+
+  function applySuggestedCoupons() {
+    const toAdd = CHECKOUT_COUPON_REGISTRY.map((c) => c.code).filter(
+      (code) => !appliedCoupons.includes(code),
+    );
+    if (toAdd.length === 0) return;
+    const next = [...appliedCoupons, ...toAdd];
+    setAppliedCoupons(next);
+    saveCouponsToStorage(next);
   }
 
   const update = (key: keyof FormData, value: string) => {
@@ -448,7 +478,7 @@ export function CheckoutForm() {
 
     setTimeout(() => {
       clear();
-      router.push(`/pedido/acompanhar?id=${encodeURIComponent(orderId)}`);
+      router.push(`/pedido/sucesso?id=${encodeURIComponent(orderId)}`);
     }, 400);
   }
 
@@ -529,7 +559,11 @@ export function CheckoutForm() {
         }
       }
 
-      const totalACobrar = totalAfterCheckoutCoupon(totalPrice, appliedCoupon, paymentModo);
+      const totalACobrar = computeCheckoutWithCoupons(
+        totalPrice,
+        appliedCoupons,
+        paymentModo,
+      ).totalPagar;
 
       if (paymentModo === "pix" && useMercadoPagoPix) {
         const mpRes = await fetch("/api/mercadopago/pix-payment", {
@@ -976,8 +1010,8 @@ export function CheckoutForm() {
           </p>
           <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand-green/35 bg-brand-green/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-brand-green">
             <BadgePercent className="h-3.5 w-3.5" />
-            Cupons: {PIX_DISCOUNT_COUPON_CODE} (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX) ·{" "}
-            {CHECKOUT_COUPON_NEYMAR_CODE} (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}% no pedido)
+            Você pode combinar cupons: {PIX_DISCOUNT_COUPON_CODE} (PIX) e {CHECKOUT_COUPON_NEYMAR_CODE}{" "}
+            (qualquer pagamento).
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <button
@@ -1046,29 +1080,28 @@ export function CheckoutForm() {
           )}
 
           <div className="mt-5 space-y-3">
-            {paymentModo === "pix" && !couponDiscountActive && (
+            {appliedCoupons.length < CHECKOUT_COUPON_REGISTRY.length && (
               <div className="flex flex-wrap items-start gap-3 rounded-2xl border-2 border-brand-green/55 bg-brand-green/12 px-4 py-3 shadow-glow-yellow/40">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-green/25 text-brand-green">
                   <Sparkles className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-sm tracking-wide text-foreground md:text-base">
-                    Você tem um cupom disponível!
+                    Combine os cupons disponíveis
                   </p>
                   <p className="mt-0.5 text-xs leading-relaxed text-muted">
-                    Aplique{" "}
-                    <span className="rounded-md bg-brand-green/25 px-1.5 py-0.5 font-mono font-bold text-brand-green">
-                      {PIX_DISCOUNT_COUPON_CODE}
-                    </span>{" "}
-                    para ganhar <strong className="text-foreground">−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}%</strong> extra no PIX.
+                    Adicione{" "}
+                    <span className="font-mono font-bold text-brand-green">{PIX_DISCOUNT_COUPON_CODE}</span> e{" "}
+                    <span className="font-mono font-bold text-brand-green">{CHECKOUT_COUPON_NEYMAR_CODE}</span> no
+                    mesmo pedido.
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => applyCoupon(PIX_DISCOUNT_COUPON_CODE)}
+                  onClick={applySuggestedCoupons}
                   className="rounded-full bg-brand-green px-4 py-2 font-display text-[11px] font-bold uppercase tracking-[0.16em] text-[#06080f] shadow-md transition hover:bg-brand-green/85"
                 >
-                  Aplicar cupom
+                  Adicionar todos
                 </button>
               </div>
             )}
@@ -1076,84 +1109,75 @@ export function CheckoutForm() {
             <div className="rounded-2xl border border-border bg-surface/40 p-4">
               <label htmlFor="cupom" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                 <Tag className="h-3.5 w-3.5 text-brand-yellow" />
-                Cupom de desconto
+                Cupons de desconto
               </label>
-              {appliedCouponDef ? (
-                <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-green/45 bg-brand-green/12 px-3 py-2.5">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-brand-green" />
-                    <span className="text-foreground">
-                      Cupom{" "}
-                      <span className="font-mono font-bold text-brand-green">
-                        {appliedCoupon}
-                      </span>{" "}
-                      aplicado
-                    </span>
-                    {couponDiscountActive ? (
-                      <span className="rounded-full border border-brand-green/45 bg-brand-green/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-green">
-                        −{appliedCouponDef.percent}% ativo
-                      </span>
-                    ) : (
-                      <span className="rounded-full border border-border bg-surface/60 px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted">
-                        Vale só no PIX
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={removeCoupon}
-                    className="inline-flex items-center gap-1 text-xs text-muted transition hover:text-brand-red"
-                  >
-                    <X className="h-3.5 w-3.5" /> Remover
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                    <input
-                      id="cupom"
-                      type="text"
-                      inputMode="text"
-                      autoCapitalize="characters"
-                      autoComplete="off"
-                      value={couponInput}
-                      onChange={(e) => {
-                        setCouponInput(e.target.value.toUpperCase().slice(0, 24));
-                        if (couponError) setCouponError("");
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          applyCoupon(couponInput);
-                        }
-                      }}
-                      placeholder={`Ex.: ${CHECKOUT_COUPON_NEYMAR_CODE}`}
-                      className="form-input flex-1 font-mono uppercase tracking-[0.18em]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => applyCoupon(couponInput)}
-                      className="rounded-2xl border border-brand-yellow/60 bg-brand-yellow px-5 py-2.5 font-display text-xs font-bold uppercase tracking-[0.18em] text-[#06080f] transition hover:bg-brand-yellow/90"
+
+              {appliedCoupons.length > 0 && (
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {checkoutTotals.couponLines.map((line) => (
+                    <li
+                      key={line.code}
+                      className="inline-flex items-center gap-2 rounded-full border border-brand-green/45 bg-brand-green/12 py-1 pl-3 pr-1 text-sm"
                     >
-                      Aplicar
-                    </button>
-                  </div>
-                  {couponError && (
-                    <p className="mt-2 text-xs text-brand-red">{couponError}</p>
-                  )}
-                  {!couponError && (
-                    <p className="mt-2 text-[11px] leading-relaxed text-muted">
-                      <span className="font-mono font-semibold text-foreground">
-                        {PIX_DISCOUNT_COUPON_CODE}
-                      </span>{" "}
-                      (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX) ·{" "}
-                      <span className="font-mono font-semibold text-foreground">
-                        {CHECKOUT_COUPON_NEYMAR_CODE}
-                      </span>{" "}
-                      (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}% em qualquer pagamento).
-                    </p>
-                  )}
-                </>
+                      <Check className="h-3.5 w-3.5 text-brand-green" />
+                      <span className="font-mono font-bold text-brand-green">{line.code}</span>
+                      {line.active ? (
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand-green">
+                          −{line.percent}%
+                        </span>
+                      ) : (
+                        <span className="text-[10px] uppercase tracking-wider text-muted">só PIX</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeCoupon(line.code)}
+                        className="rounded-full p-1 text-muted transition hover:bg-brand-red/15 hover:text-brand-red"
+                        aria-label={`Remover cupom ${line.code}`}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <input
+                  id="cupom"
+                  type="text"
+                  inputMode="text"
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  value={couponInput}
+                  onChange={(e) => {
+                    setCouponInput(e.target.value.toUpperCase().slice(0, 24));
+                    if (couponError) setCouponError("");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      applyCoupon(couponInput);
+                    }
+                  }}
+                  placeholder="Adicionar outro cupom"
+                  className="form-input flex-1 font-mono uppercase tracking-[0.18em]"
+                />
+                <button
+                  type="button"
+                  onClick={() => applyCoupon(couponInput)}
+                  className="rounded-2xl border border-brand-yellow/60 bg-brand-yellow px-5 py-2.5 font-display text-xs font-bold uppercase tracking-[0.18em] text-[#06080f] transition hover:bg-brand-yellow/90"
+                >
+                  Adicionar
+                </button>
+              </div>
+              {couponError && <p className="mt-2 text-xs text-brand-red">{couponError}</p>}
+              {!couponError && (
+                <p className="mt-2 text-[11px] leading-relaxed text-muted">
+                  <span className="font-mono font-semibold text-foreground">{PIX_DISCOUNT_COUPON_CODE}</span>{" "}
+                  (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX) ·{" "}
+                  <span className="font-mono font-semibold text-foreground">{CHECKOUT_COUPON_NEYMAR_CODE}</span>{" "}
+                  (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}% em qualquer pagamento). Descontos acumulam no total.
+                </p>
               )}
             </div>
           </div>
@@ -1318,27 +1342,31 @@ export function CheckoutForm() {
               </span>
               <span className="font-medium tabular-nums">{formatBRL(checkoutTotals.subtotalLoja)}</span>
             </div>
-            {checkoutTotals.descontoCupom > 0 && appliedCouponDef ? (
-              <div className="mt-2 flex items-baseline justify-between text-brand-green">
-                <span className="text-sm">
-                  Cupom {appliedCoupon} (−{appliedCouponDef.percent}%)
-                </span>
-                <span className="font-medium tabular-nums">
+            {checkoutTotals.couponLines
+              .filter((line) => line.active && line.discountAmount > 0)
+              .map((line) => (
+                <div
+                  key={line.code}
+                  className="mt-2 flex items-baseline justify-between text-brand-green"
+                >
+                  <span className="text-sm">
+                    Cupom {line.code} (−{line.percent}%)
+                  </span>
+                  <span className="font-medium tabular-nums">− {formatBRL(line.discountAmount)}</span>
+                </div>
+              ))}
+            {checkoutTotals.descontoCupom > 0 && (
+              <div className="mt-1 flex items-baseline justify-between text-brand-green/90">
+                <span className="text-xs font-semibold uppercase tracking-wider">Total cupons</span>
+                <span className="text-sm font-medium tabular-nums">
                   − {formatBRL(checkoutTotals.descontoCupom)}
                 </span>
               </div>
-            ) : (
-              submitPix &&
-              !appliedCouponDef && (
-                <div className="mt-2 flex items-baseline justify-between text-brand-yellow">
-                  <span className="text-[11px] leading-snug">
-                    Use{" "}
-                    <span className="font-mono font-semibold">{PIX_DISCOUNT_COUPON_CODE}</span> ou{" "}
-                    <span className="font-mono font-semibold">{CHECKOUT_COUPON_NEYMAR_CODE}</span> no
-                    campo acima
-                  </span>
-                </div>
-              )
+            )}
+            {appliedCoupons.length === 0 && (
+              <p className="mt-2 text-[11px] leading-snug text-brand-yellow">
+                Adicione um ou mais cupons no campo acima para reduzir o total.
+              </p>
             )}
             <div className="mt-1 flex items-baseline justify-between">
               <span className="text-sm text-muted">Frete</span>

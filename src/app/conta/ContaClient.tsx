@@ -285,7 +285,7 @@ export function ContaClient({
                     </p>
                   )}
                   <Link
-                    href={`/pedido/acompanhar?id=${encodeURIComponent(p.id)}`}
+                    href={`/pedido/sucesso?id=${encodeURIComponent(p.id)}`}
                     className="mt-4 inline-flex text-sm font-medium text-brand-yellow hover:underline"
                   >
                     Acompanhar pedido →

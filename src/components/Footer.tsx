@@ -75,7 +75,7 @@ export function Footer() {
             <li><Link href="/sobre" className="hover:text-brand-yellow">Sobre a loja</Link></li>
             <li>
               <Link href={`mailto:${STORE_CONFIG.email}`} className="hover:text-brand-yellow">
-                Contato por e-mail
+                Suporte oficial
               </Link>
             </li>
             <li><Link href="/sobre#frete" className="hover:text-brand-yellow">Frete e prazos</Link></li>
