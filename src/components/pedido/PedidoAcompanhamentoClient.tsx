@@ -208,7 +208,10 @@ export function PedidoAcompanhamentoClient() {
     );
   }
 
-  const emailDestino = pedido.cliente.email?.trim();
+  const timelinePedido = {
+    etapa: pedido.etapa ?? "pedido_feito",
+    statusPagamento: pedido.statusPagamento ?? "pendente",
+  };
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-16 md:px-8 md:py-20">
@@ -216,67 +219,69 @@ export function PedidoAcompanhamentoClient() {
         <PixCpfAvisoModal pedidoId={pedidoId} cidade={pedido.cliente.cidade} uf={pedido.cliente.uf} />
       )}
 
-      <header className="mb-8 text-center">
-        <CheckCircle2 className="mx-auto h-14 w-14 text-brand-green" />
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
-          Pedido recebido
-        </p>
-        <h1 className="mt-2 font-display text-4xl leading-tight tracking-tight md:text-5xl">
-          Boa! Seu pedido{" "}
-          <span className="gradient-text">{pedidoId}</span> foi registrado.
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-sm text-muted">
-          Acompanhe abaixo cada etapa — começando por{" "}
-          <strong className="text-foreground">Pedido feito</strong>.
-        </p>
-      </header>
-
-      <div className="mb-6 flex justify-center">
-        <button
-          type="button"
-          onClick={() => void fetchPedido()}
-          className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted transition hover:border-brand-yellow hover:text-brand-yellow"
-        >
-          <RefreshCw className="h-3.5 w-3.5" />
-          Atualizar status
-        </button>
-      </div>
-
-      <PedidoTimeline
-        pedido={{
-          etapa: pedido.etapa ?? "pedido_feito",
-          statusPagamento: pedido.statusPagamento ?? "pendente",
-        }}
-        className="mb-8"
-      />
-
-      <div className="overflow-hidden rounded-3xl border border-border bg-surface/40">
-        <div className="border-b border-border bg-gradient-to-r from-brand-green/15 via-transparent to-brand-yellow/15 px-6 py-6 text-center md:px-10">
-          <p className="text-sm text-muted">
-            {statusPag === "aprovado"
-              ? "Pagamento confirmado. Em breve seu pedido avança para separação e envio."
-              : statusPag === "rejeitado"
-                ? "Não foi possível confirmar o pagamento. Fale com a loja se acredita que houve um engano."
-                : isPix
-                  ? "Pague com PIX abaixo (se ainda não pagou). Após a confirmação, atualizamos as etapas acima."
-                  : "Aguardando confirmação do pagamento no cartão."}
+      <div className="overflow-hidden rounded-3xl border border-border bg-surface/40 shadow-lg">
+        <header className="border-b border-border bg-gradient-to-r from-brand-green/20 via-transparent to-brand-yellow/20 px-6 py-8 text-center md:px-10 md:py-10">
+          <CheckCircle2 className="mx-auto h-14 w-14 text-brand-green" />
+          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
+            Pedido recebido
           </p>
-          {emailDestino && (
-            <p className="mx-auto mt-3 max-w-md text-xs text-muted">
-              Confirmação por e-mail em até 2h em{" "}
-              <span className="font-mono text-foreground">{emailDestino}</span>
-            </p>
-          )}
-        </div>
+          <h1 className="mt-2 font-display text-4xl leading-tight tracking-tight md:text-5xl">
+            Boa! Seu pedido <span className="gradient-text">{pedidoId}</span> foi registrado.
+          </h1>
+
+          <div className="mx-auto mt-6 max-w-2xl text-left">
+            <PedidoTimeline
+              pedido={timelinePedido}
+              className="border-brand-yellow/35 bg-background-elev/50 shadow-inner"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => void fetchPedido()}
+            className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted transition hover:border-brand-yellow hover:text-brand-yellow"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Atualizar status
+          </button>
+
+          <p className="mx-auto mt-5 max-w-xl text-sm text-muted">
+            {isPix ? (
+              pixMercadoPago ? (
+                <>
+                  Pagamento via <span className="font-medium text-foreground">Mercado Pago</span>. Use o
+                  QR ou o código abaixo. Frete grátis; guarde o comprovante do PIX.
+                </>
+              ) : pixStripe ? (
+                <>
+                  Pagamento via <span className="font-medium text-foreground">Stripe</span>. Use o QR ou
+                  o código abaixo. Frete grátis; guarde o comprovante do PIX.
+                </>
+              ) : (
+                <>
+                  Frete grátis em todo o Brasil. Pague com PIX usando o QR ou a chave abaixo e guarde o
+                  comprovante.
+                </>
+              )
+            ) : (
+              <>
+                Pagamento com <span className="font-medium text-foreground">cartão</span> registrado.
+                Aguardamos confirmação da loja — acompanhe as etapas acima.
+              </>
+            )}
+          </p>
+        </header>
 
         {showPixPay && (
           <div className="grid gap-8 border-b border-border p-6 md:grid-cols-2 md:p-10">
             <div className="text-center">
-              <div className="mb-4 flex items-start gap-2 rounded-2xl border border-brand-yellow/45 bg-brand-yellow/10 px-4 py-3 text-left text-xs leading-relaxed text-foreground/90">
+              <div className="mb-5 flex items-start gap-2 rounded-2xl border border-brand-yellow/45 bg-brand-yellow/10 px-4 py-3 text-left text-xs leading-relaxed text-foreground/90 md:text-[13px]">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
                 <span>
-                  O PIX pode ser direcionado a um CPF de revendedor Panini mais próximo da sua
-                  região. O pedido segue em nome da Panini World Cup 2026.
+                  <strong className="text-foreground">Atenção:</strong> o PIX pode ser direcionado a um{" "}
+                  <strong className="text-foreground">CPF de pessoa física</strong> — revendedor Panini
+                  mais próximo da sua região. Pedido em nome da{" "}
+                  <strong className="text-foreground">Panini World Cup 2026</strong>.
                 </span>
               </div>
               <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted">
@@ -341,12 +346,12 @@ export function PedidoAcompanhamentoClient() {
             </div>
             <div className="flex flex-col justify-center text-sm text-muted">
               <p>
-                Guarde o comprovante após pagar. A etapa &quot;Pagamento concluído&quot; será
-                marcada quando a loja confirmar.
+                Após pagar, a etapa <strong className="text-foreground">Pagamento concluído</strong>{" "}
+                será atualizada nesta página quando a loja confirmar.
               </p>
               <Link href={`mailto:${STORE_CONFIG.email}`} className="btn-secondary mt-6 inline-flex w-fit">
                 <Mail className="h-4 w-4" />
-                Falar com a loja
+                Falar com suporte
               </Link>
             </div>
           </div>
@@ -397,7 +402,7 @@ export function PedidoAcompanhamentoClient() {
           <div className="flex items-start gap-3 text-xs text-muted">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
             <p>
-              Dados usados apenas para envio. Dúvidas:{" "}
+              Dúvidas?{" "}
               <a href={`mailto:${STORE_CONFIG.email}`} className="text-foreground hover:text-brand-yellow">
                 {STORE_CONFIG.email}
               </a>
@@ -415,5 +420,5 @@ export function PedidoAcompanhamentoClient() {
   );
 }
 
-/** @deprecated Use PedidoAcompanhamentoClient */
+/** Alias usado em rotas legadas. */
 export const AcompanharPedidoClient = PedidoAcompanhamentoClient;

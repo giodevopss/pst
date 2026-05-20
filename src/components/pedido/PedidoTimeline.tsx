@@ -88,7 +88,7 @@ export function PedidoTimeline({ pedido, className }: Props) {
                 </p>
                 {step.id === "pagamento_concluido" && status === "pendente" && current && (
                   <p className="mt-1 text-sm text-muted">
-                    Estamos confirmando seu pagamento. Você receberá atualização por e-mail.
+                    Estamos confirmando seu pagamento. Atualize esta página para ver o progresso.
                   </p>
                 )}
                 {pagamentoRejeitado && (
