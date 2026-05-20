@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   AlertTriangle,
@@ -19,7 +19,7 @@ import { formatBRL } from "@/lib/utils";
 import { getSelecao } from "@/data/selecoes";
 import type { CartItem } from "@/lib/cart";
 import type { EtapaPedido, PagamentoPersistidoSeguro, StatusPagamentoPedido } from "@/types/pedido-store";
-import { PedidoTimeline } from "@/components/pedido/PedidoTimeline";
+import type { PublicPedido } from "@/lib/pedido-public";
 import { PixCpfAvisoModal } from "@/components/pedido/PixCpfAvisoModal";
 import { readCookie } from "@/lib/attribution";
 import { trackMetaPurchase } from "@/lib/meta-pixel-client";
@@ -50,12 +50,25 @@ function normalizePedidoView(p: PedidoView): PedidoView {
   };
 }
 
-export function PedidoAcompanhamentoClient() {
+type Props = {
+  orderId?: string;
+  initialPedido?: PublicPedido | null;
+  timelineSlot?: ReactNode;
+};
+
+export function PedidoAcompanhamentoClient({
+  orderId: orderIdProp = "",
+  initialPedido = null,
+  timelineSlot,
+}: Props) {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const idParam = searchParams.get("id") ?? "";
-  const [pedido, setPedido] = useState<PedidoView | null>(null);
+  const idParam = (orderIdProp || searchParams.get("id") || "").trim();
+  const [pedido, setPedido] = useState<PedidoView | null>(() =>
+    initialPedido ? normalizePedidoView(initialPedido as PedidoView) : null,
+  );
   const [copied, setCopied] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !initialPedido && !!idParam);
 
   const mergeFromStorage = useCallback((base: PedidoView | null): PedidoView | null => {
     try {
@@ -91,6 +104,7 @@ export function PedidoAcompanhamentoClient() {
         if (data.pedido) {
           setPedido(mergeFromStorage(normalizePedidoView(data.pedido)));
           setLoading(false);
+          router.refresh();
           return;
         }
       }
@@ -105,7 +119,7 @@ export function PedidoAcompanhamentoClient() {
       }
     } catch {}
     setLoading(false);
-  }, [idParam, mergeFromStorage]);
+  }, [idParam, mergeFromStorage, router]);
 
   useEffect(() => {
     void fetchPedido();
@@ -208,11 +222,6 @@ export function PedidoAcompanhamentoClient() {
     );
   }
 
-  const timelinePedido = {
-    etapa: pedido.etapa ?? "pedido_feito",
-    statusPagamento: pedido.statusPagamento ?? "pendente",
-  };
-
   return (
     <section className="mx-auto max-w-5xl px-4 py-16 md:px-8 md:py-20">
       {isPix && pedidoId && (
@@ -229,11 +238,12 @@ export function PedidoAcompanhamentoClient() {
             Boa! Seu pedido <span className="gradient-text">{pedidoId}</span> foi registrado.
           </h1>
 
-          <div className="mx-auto mt-6 max-w-2xl text-left">
-            <PedidoTimeline
-              pedido={timelinePedido}
-              className="border-brand-yellow/35 bg-background-elev/50 shadow-inner"
-            />
+          <div className="mx-auto mt-6 max-w-3xl text-left">
+            {timelineSlot ?? (
+              <p className="rounded-2xl border border-border bg-surface/40 p-6 text-sm text-muted">
+                Carregando acompanhamento do pedido…
+              </p>
+            )}
           </div>
 
           <button
