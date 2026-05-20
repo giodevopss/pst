@@ -137,8 +137,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Payload inválido" }, { status: 400 });
   }
 
+  const registro: PedidoRegistro = {
+    ...body,
+    statusPagamento: "pendente",
+    etapa: "pedido_feito",
+    atualizadoEm: body.criadoEm,
+  };
+
   try {
-    await appendPedido(body);
+    await appendPedido(registro);
   } catch {
     return NextResponse.json({ error: "Falha ao gravar pedido" }, { status: 503 });
   }

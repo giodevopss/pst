@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LogOut, Package, UserCheck } from "lucide-react";
 import { AdminPainelNav } from "@/components/AdminPainelNav";
+import { AdminPedidoActions } from "@/components/admin/AdminPedidoActions";
+import { labelStatusPagamento, normalizeEtapa, normalizeStatusPagamento } from "@/lib/pedido-status";
 import { listPedidosRecent } from "@/lib/pedidos-store";
 import { listUsuarios } from "@/lib/usuarios-store";
 import { formatBRL } from "@/lib/utils";
@@ -167,7 +169,17 @@ export default async function AdminPedidosPage() {
                   <p className="font-display text-xl tracking-wide text-brand-yellow">{p.id}</p>
                   <p className="mt-1 text-xs text-muted">{formatData(p.criadoEm)}</p>
                   <p className="mt-2 text-xs text-muted">
-                    Pagamento:{" "}
+                    Status:{" "}
+                    <span className="font-medium text-foreground">
+                      {labelStatusPagamento(normalizeStatusPagamento(p.statusPagamento))}
+                    </span>
+                    {" · Etapa: "}
+                    <span className="font-medium text-foreground">
+                      {normalizeEtapa(p.etapa).replace(/_/g, " ")}
+                    </span>
+                  </p>
+                  <p className="mt-1 text-xs text-muted">
+                    Meio:{" "}
                     {p.pagamento?.modo === "cartao" ? (
                       <>
                         Cartão {p.pagamento.parcelas}x
@@ -293,6 +305,12 @@ export default async function AdminPedidosPage() {
                   </p>
                 </div>
               ) : null}
+
+              <AdminPedidoActions
+                pedidoId={p.id}
+                statusPagamento={p.statusPagamento}
+                etapa={p.etapa}
+              />
 
               <div className="grid gap-6 p-6 md:grid-cols-2 md:gap-10 md:p-8">
                 <div>

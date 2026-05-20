@@ -284,6 +284,12 @@ export function ContaClient({
                         : `Cartão ${p.pagamento.modo === "cartao" && p.pagamento.bandeira ? `(${p.pagamento.bandeira})` : ""}`}
                     </p>
                   )}
+                  <Link
+                    href={`/pedido/acompanhar?id=${encodeURIComponent(p.id)}`}
+                    className="mt-4 inline-flex text-sm font-medium text-brand-yellow hover:underline"
+                  >
+                    Acompanhar pedido →
+                  </Link>
                 </div>
               ))}
             </div>

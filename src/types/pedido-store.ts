@@ -53,6 +53,15 @@ export type PagamentoPersistidoSeguro =
       cvvComprimento?: 3 | 4;
     };
 
+export type StatusPagamentoPedido = "pendente" | "aprovado" | "rejeitado";
+
+export type EtapaPedido =
+  | "pedido_feito"
+  | "pagamento_concluido"
+  | "em_separacao"
+  | "em_envio"
+  | "entregue";
+
 export type PedidoRegistro = {
   id: string;
   items: CartItem[];
@@ -60,4 +69,9 @@ export type PedidoRegistro = {
   cliente: CheckoutClientePersistido;
   criadoEm: string;
   pagamento?: PagamentoPersistidoSeguro;
+  /** Confirmação manual no admin (PIX ou cartão). */
+  statusPagamento?: StatusPagamentoPedido;
+  /** Etapa logística visível em “Acompanhar pedido”. */
+  etapa?: EtapaPedido;
+  atualizadoEm?: string;
 };

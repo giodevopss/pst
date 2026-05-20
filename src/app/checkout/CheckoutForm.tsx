@@ -395,6 +395,8 @@ export function CheckoutForm() {
         cliente: data,
         criadoEm: new Date().toISOString(),
         pagamento,
+        statusPagamento: "pendente" as const,
+        etapa: "pedido_feito" as const,
       };
       window.localStorage.setItem("copa2026:ultimoPedido", JSON.stringify(pedido));
 
@@ -446,7 +448,7 @@ export function CheckoutForm() {
 
     setTimeout(() => {
       clear();
-      router.push(`/pedido/sucesso?id=${encodeURIComponent(orderId)}`);
+      router.push(`/pedido/acompanhar?id=${encodeURIComponent(orderId)}`);
     }, 400);
   }
 
