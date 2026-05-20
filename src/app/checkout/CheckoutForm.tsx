@@ -38,11 +38,16 @@ import {
 import type { UsuarioPublico } from "@/types/usuario";
 import type { PagamentoPersistidoSeguro } from "@/types/pedido-store";
 import {
+  CHECKOUT_COUPON_NEYMAR_CODE,
+  CHECKOUT_NEYMAR_DISCOUNT_PERCENT,
   PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
   PIX_DISCOUNT_COUPON_CODE,
   SITE_WIDE_DISCOUNT_PERCENT,
-  isValidPixCouponCode,
-  totalAfterPixExtraDiscount,
+  checkoutCouponApplies,
+  isValidCheckoutCouponCode,
+  normalizeCheckoutCouponCode,
+  resolveCheckoutCoupon,
+  totalAfterCheckoutCoupon,
 } from "@/lib/store-pricing";
 import {
   REMARKETING_CHECKOUT_CONVERTIDO_KEY,
@@ -128,14 +133,22 @@ export function CheckoutForm() {
     if (typeof window === "undefined") return;
     try {
       const raw = window.localStorage.getItem(COUPON_STORAGE_KEY);
-      if (raw && isValidPixCouponCode(raw)) {
-        setAppliedCoupon(raw.trim().toUpperCase());
-        setCouponInput(raw.trim().toUpperCase());
+      if (raw && isValidCheckoutCouponCode(raw)) {
+        const code = raw.trim().toUpperCase().replace(/\s+/g, "");
+        setAppliedCoupon(code);
+        setCouponInput(code);
       }
     } catch {}
   }, []);
 
-  const couponValid = isValidPixCouponCode(appliedCoupon);
+  const appliedCouponDef = useMemo(
+    () => resolveCheckoutCoupon(appliedCoupon),
+    [appliedCoupon],
+  );
+  const couponDiscountActive = useMemo(() => {
+    if (!appliedCouponDef) return false;
+    return checkoutCouponApplies(appliedCouponDef, paymentModo);
+  }, [appliedCouponDef, paymentModo]);
 
   const [cardDigits, setCardDigits] = useState("");
   const [cardName, setCardName] = useState("");
@@ -240,13 +253,10 @@ export function CheckoutForm() {
 
   const checkoutTotals = useMemo(() => {
     const subtotalLoja = totalPrice;
-    if (paymentModo !== "pix" || !couponValid) {
-      return { subtotalLoja, descontoPixCheckout: 0, totalPagar: subtotalLoja };
-    }
-    const totalPagar = totalAfterPixExtraDiscount(subtotalLoja);
-    const descontoPixCheckout = Math.round((subtotalLoja - totalPagar) * 100) / 100;
-    return { subtotalLoja, descontoPixCheckout, totalPagar };
-  }, [paymentModo, totalPrice, couponValid]);
+    const totalPagar = totalAfterCheckoutCoupon(subtotalLoja, appliedCoupon, paymentModo);
+    const descontoCupom = Math.round((subtotalLoja - totalPagar) * 100) / 100;
+    return { subtotalLoja, descontoCupom, totalPagar };
+  }, [paymentModo, totalPrice, appliedCoupon]);
 
   useCheckoutAbandonBeacon({
     items,
@@ -265,12 +275,12 @@ export function CheckoutForm() {
   });
 
   function applyCoupon(raw: string) {
-    const value = raw.trim().toUpperCase();
+    const value = normalizeCheckoutCouponCode(raw);
     if (!value) {
       setCouponError("Informe um cupom.");
       return;
     }
-    if (!isValidPixCouponCode(value)) {
+    if (!isValidCheckoutCouponCode(value)) {
       setCouponError("Cupom inválido.");
       return;
     }
@@ -517,10 +527,7 @@ export function CheckoutForm() {
         }
       }
 
-      const totalACobrar =
-        paymentModo === "pix" && couponValid
-          ? totalAfterPixExtraDiscount(totalPrice)
-          : totalPrice;
+      const totalACobrar = totalAfterCheckoutCoupon(totalPrice, appliedCoupon, paymentModo);
 
       if (paymentModo === "pix" && useMercadoPagoPix) {
         const mpRes = await fetch("/api/mercadopago/pix-payment", {
@@ -967,7 +974,8 @@ export function CheckoutForm() {
           </p>
           <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand-green/35 bg-brand-green/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-brand-green">
             <BadgePercent className="h-3.5 w-3.5" />
-            Cupom {PIX_DISCOUNT_COUPON_CODE} libera −{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX
+            Cupons: {PIX_DISCOUNT_COUPON_CODE} (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX) ·{" "}
+            {CHECKOUT_COUPON_NEYMAR_CODE} (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}% no pedido)
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <button
@@ -1036,7 +1044,7 @@ export function CheckoutForm() {
           )}
 
           <div className="mt-5 space-y-3">
-            {paymentModo === "pix" && !couponValid && (
+            {paymentModo === "pix" && !couponDiscountActive && (
               <div className="flex flex-wrap items-start gap-3 rounded-2xl border-2 border-brand-green/55 bg-brand-green/12 px-4 py-3 shadow-glow-yellow/40">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-green/25 text-brand-green">
                   <Sparkles className="h-4 w-4" />
@@ -1068,7 +1076,7 @@ export function CheckoutForm() {
                 <Tag className="h-3.5 w-3.5 text-brand-yellow" />
                 Cupom de desconto
               </label>
-              {couponValid ? (
+              {appliedCouponDef ? (
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-green/45 bg-brand-green/12 px-3 py-2.5">
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-brand-green" />
@@ -1079,9 +1087,9 @@ export function CheckoutForm() {
                       </span>{" "}
                       aplicado
                     </span>
-                    {paymentModo === "pix" ? (
+                    {couponDiscountActive ? (
                       <span className="rounded-full border border-brand-green/45 bg-brand-green/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-green">
-                        −{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% ativo
+                        −{appliedCouponDef.percent}% ativo
                       </span>
                     ) : (
                       <span className="rounded-full border border-border bg-surface/60 px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted">
@@ -1117,7 +1125,7 @@ export function CheckoutForm() {
                           applyCoupon(couponInput);
                         }
                       }}
-                      placeholder={`Ex.: ${PIX_DISCOUNT_COUPON_CODE}`}
+                      placeholder={`Ex.: ${CHECKOUT_COUPON_NEYMAR_CODE}`}
                       className="form-input flex-1 font-mono uppercase tracking-[0.18em]"
                     />
                     <button
@@ -1133,11 +1141,14 @@ export function CheckoutForm() {
                   )}
                   {!couponError && (
                     <p className="mt-2 text-[11px] leading-relaxed text-muted">
-                      O desconto extra de PIX (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}%) é liberado apenas com o cupom{" "}
                       <span className="font-mono font-semibold text-foreground">
                         {PIX_DISCOUNT_COUPON_CODE}
-                      </span>
-                      .
+                      </span>{" "}
+                      (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX) ·{" "}
+                      <span className="font-mono font-semibold text-foreground">
+                        {CHECKOUT_COUPON_NEYMAR_CODE}
+                      </span>{" "}
+                      (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}% em qualquer pagamento).
                     </p>
                   )}
                 </>
@@ -1305,24 +1316,24 @@ export function CheckoutForm() {
               </span>
               <span className="font-medium tabular-nums">{formatBRL(checkoutTotals.subtotalLoja)}</span>
             </div>
-            {checkoutTotals.descontoPixCheckout > 0 ? (
+            {checkoutTotals.descontoCupom > 0 && appliedCouponDef ? (
               <div className="mt-2 flex items-baseline justify-between text-brand-green">
                 <span className="text-sm">
-                  Cupom {appliedCoupon} (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% PIX)
+                  Cupom {appliedCoupon} (−{appliedCouponDef.percent}%)
                 </span>
                 <span className="font-medium tabular-nums">
-                  − {formatBRL(checkoutTotals.descontoPixCheckout)}
+                  − {formatBRL(checkoutTotals.descontoCupom)}
                 </span>
               </div>
             ) : (
-              submitPix && (
+              submitPix &&
+              !appliedCouponDef && (
                 <div className="mt-2 flex items-baseline justify-between text-brand-yellow">
                   <span className="text-[11px] leading-snug">
-                    Use o cupom{" "}
-                    <span className="font-mono font-semibold">
-                      {PIX_DISCOUNT_COUPON_CODE}
-                    </span>{" "}
-                    e ganhe −{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX
+                    Use{" "}
+                    <span className="font-mono font-semibold">{PIX_DISCOUNT_COUPON_CODE}</span> ou{" "}
+                    <span className="font-mono font-semibold">{CHECKOUT_COUPON_NEYMAR_CODE}</span> no
+                    campo acima
                   </span>
                 </div>
               )

@@ -52,10 +52,78 @@ export const PACOTES_DESTAQUE_EXTRA_DISCOUNT_PERCENT = Math.round(
 /** Cupom que libera o desconto extra de PIX no checkout. */
 export const PIX_DISCOUNT_COUPON_CODE = "PANINI20";
 
+/** Cupom +10% no checkout (PIX ou cartão). */
+export const CHECKOUT_COUPON_NEYMAR_CODE = "NEYMARNACOPA10";
+
+export const CHECKOUT_NEYMAR_DISCOUNT_FRACTION = 0.1;
+
+export const CHECKOUT_NEYMAR_DISCOUNT_PERCENT = Math.round(
+  CHECKOUT_NEYMAR_DISCOUNT_FRACTION * 100,
+);
+
+export type CheckoutCouponConfig = {
+  code: string;
+  fraction: number;
+  percent: number;
+  /** Desconto só quando o pagamento é PIX. */
+  pixOnly: boolean;
+};
+
+const CHECKOUT_COUPON_REGISTRY: CheckoutCouponConfig[] = [
+  {
+    code: PIX_DISCOUNT_COUPON_CODE,
+    fraction: PIX_CHECKOUT_EXTRA_DISCOUNT_FRACTION,
+    percent: PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
+    pixOnly: true,
+  },
+  {
+    code: CHECKOUT_COUPON_NEYMAR_CODE,
+    fraction: CHECKOUT_NEYMAR_DISCOUNT_FRACTION,
+    percent: CHECKOUT_NEYMAR_DISCOUNT_PERCENT,
+    pixOnly: false,
+  },
+];
+
+export function normalizeCheckoutCouponCode(raw: string | null | undefined): string {
+  return (raw ?? "").trim().toUpperCase().replace(/\s+/g, "");
+}
+
+export function resolveCheckoutCoupon(
+  raw: string | null | undefined,
+): CheckoutCouponConfig | null {
+  const code = normalizeCheckoutCouponCode(raw);
+  if (!code) return null;
+  return CHECKOUT_COUPON_REGISTRY.find((c) => c.code === code) ?? null;
+}
+
+export function isValidCheckoutCouponCode(raw: string | null | undefined): boolean {
+  return resolveCheckoutCoupon(raw) != null;
+}
+
+export function checkoutCouponApplies(
+  coupon: CheckoutCouponConfig,
+  paymentModo: "pix" | "cartao",
+): boolean {
+  if (!coupon.pixOnly) return true;
+  return paymentModo === "pix";
+}
+
 /** Aceita variações de caixa/espaço do cupom de PIX. */
 export function isValidPixCouponCode(raw: string | null | undefined): boolean {
-  if (!raw) return false;
-  return raw.trim().toUpperCase() === PIX_DISCOUNT_COUPON_CODE;
+  return resolveCheckoutCoupon(raw)?.code === PIX_DISCOUNT_COUPON_CODE;
+}
+
+/** Total após cupom de checkout (se válido para o meio de pagamento). */
+export function totalAfterCheckoutCoupon(
+  subtotal: number,
+  rawCoupon: string | null | undefined,
+  paymentModo: "pix" | "cartao",
+): number {
+  const coupon = resolveCheckoutCoupon(rawCoupon);
+  if (!coupon || !checkoutCouponApplies(coupon, paymentModo)) {
+    return subtotal;
+  }
+  return precoCharmDezena99(subtotal * (1 - coupon.fraction));
 }
 
 export function priceAfterSiteDiscount(catalogUnitPrice: number): number {
@@ -63,7 +131,7 @@ export function priceAfterSiteDiscount(catalogUnitPrice: number): number {
 }
 
 export function totalAfterPixExtraDiscount(sitePromoCartTotal: number): number {
-  return precoCharmDezena99(sitePromoCartTotal * (1 - PIX_CHECKOUT_EXTRA_DISCOUNT_FRACTION));
+  return totalAfterCheckoutCoupon(sitePromoCartTotal, PIX_DISCOUNT_COUPON_CODE, "pix");
 }
 
 /** Valor de lista para tachado: MSRP Panini quando maior que o catálogo, senão o preço SKU. */

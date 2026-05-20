@@ -9,6 +9,8 @@ import { useEffect } from "react";
 import { CartLineThumb } from "@/components/CartLineThumb";
 import {
   PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
+  CHECKOUT_COUPON_NEYMAR_CODE,
+  CHECKOUT_NEYMAR_DISCOUNT_PERCENT,
   PIX_DISCOUNT_COUPON_CODE,
   SITE_WIDE_DISCOUNT_PERCENT,
 } from "@/lib/store-pricing";
@@ -163,12 +165,15 @@ export function CartDrawer() {
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-muted">
-                  Preços com −{SITE_WIDE_DISCOUNT_PERCENT}% na loja. No PIX, mais −
-                  {PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% com o cupom{" "}
+                  Preços com −{SITE_WIDE_DISCOUNT_PERCENT}% na loja. Cupons no checkout:{" "}
+                  <span className="font-mono font-semibold text-brand-green">
+                    {CHECKOUT_COUPON_NEYMAR_CODE}
+                  </span>{" "}
+                  (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}%) ·{" "}
                   <span className="font-mono font-semibold text-brand-green">
                     {PIX_DISCOUNT_COUPON_CODE}
-                  </span>
-                  . Frete grátis.
+                  </span>{" "}
+                  (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX). Frete grátis.
                 </p>
                 <Link
                   href="/checkout"
