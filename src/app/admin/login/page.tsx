@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Logo } from "@/components/Logo";
 import { AdminLoginForm } from "./AdminLoginForm";
 
 export const metadata: Metadata = {
@@ -11,6 +12,7 @@ export default function AdminLoginPage() {
   return (
     <section className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16">
       <div className="overflow-hidden rounded-3xl border border-border bg-surface/40 p-8">
+        <Logo className="mb-6 justify-center [&_img]:mx-auto [&_img]:object-center" />
         <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
           Copa 2026 Store
         </p>

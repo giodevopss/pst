@@ -14,6 +14,7 @@ import { getMetaPixelId } from "@/lib/meta-pixel";
 import { AttributionCaptureRoot } from "@/components/AttributionCaptureRoot";
 import { ThemeInitScript } from "@/components/ThemeInitScript";
 import { ThemeColorMeta } from "@/components/ThemeColorMeta";
+import { SITE_LOGO } from "@/config/brand";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -56,6 +57,10 @@ export const metadata: Metadata = {
     title: "Copa 2026 Store",
     description:
       "Parceria Panini FIFA World Cup 2026™: álbum oficial, coleção Adrenalyn XL™ e Brasil na Copa.",
+  },
+  icons: {
+    icon: [{ url: SITE_LOGO.src, type: "image/png" }],
+    apple: [{ url: SITE_LOGO.src, type: "image/png" }],
   },
 };
 

@@ -14,7 +14,7 @@ export function Footer() {
 
       <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 md:grid-cols-4 md:px-8">
         <div className="md:col-span-2">
-          <Logo />
+          <Logo variant="footer" />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted">
             {STORE_CONFIG.tagline}. Produtos da categoria oficial Panini (álbum, envelopes, boxes e
             Adrenalyn XL™) mais camisas da Copa.

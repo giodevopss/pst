@@ -1,10 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
+import { SITE_LOGO } from "@/config/brand";
 import { cn } from "@/lib/utils";
 
-const LOGO_SRC = "/images/logo-copa-panini.png";
+type LogoProps = {
+  className?: string;
+  /** Navbar (padrão) ou rodapé (um pouco maior). */
+  variant?: "header" | "footer";
+};
 
-export function Logo({ className }: { className?: string }) {
+export function Logo({ className, variant = "header" }: LogoProps) {
+  const isFooter = variant === "footer";
+
   return (
     <Link
       href="/"
@@ -14,12 +21,21 @@ export function Logo({ className }: { className?: string }) {
       )}
     >
       <Image
-        src={LOGO_SRC}
-        alt="FIFA World Cup, Panini Brasil e Brasil"
-        width={489}
-        height={190}
-        className="h-8 w-auto max-w-full object-contain object-left sm:h-10 md:h-12 md:max-w-[min(100%,320px)]"
-        sizes="(max-width: 640px) 160px, (max-width: 768px) 220px, 320px"
+        src={SITE_LOGO.src}
+        alt={SITE_LOGO.alt}
+        width={SITE_LOGO.width}
+        height={SITE_LOGO.height}
+        className={cn(
+          "w-auto max-w-full object-contain object-left",
+          isFooter
+            ? "h-10 sm:h-12 md:h-14 md:max-w-[min(100%,400px)]"
+            : "h-9 sm:h-10 md:h-12 lg:h-[3.25rem] md:max-w-[min(100%,min(92vw,420px))]",
+        )}
+        sizes={
+          isFooter
+            ? "(max-width: 640px) 200px, (max-width: 768px) 280px, 400px"
+            : "(max-width: 640px) 180px, (max-width: 1024px) 320px, 420px"
+        }
         priority
       />
     </Link>
