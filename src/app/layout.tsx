@@ -10,6 +10,7 @@ import { TickerBar } from "@/components/TickerBar";
 import { PartnershipRibbon } from "@/components/PartnershipRibbon";
 import { PromoModal } from "@/components/PromoModal";
 import { MetaPixelRoot } from "@/components/MetaPixelRoot";
+import { getMetaPixelId } from "@/lib/meta-pixel";
 import { AttributionCaptureRoot } from "@/components/AttributionCaptureRoot";
 import { ThemeInitScript } from "@/components/ThemeInitScript";
 import { ThemeColorMeta } from "@/components/ThemeColorMeta";
@@ -69,6 +70,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const metaPixelId = getMetaPixelId();
+
   return (
     <html lang="pt-BR" suppressHydrationWarning className={`${inter.variable} ${bebas.variable}`}>
       <body className="min-h-screen flex flex-col">
@@ -76,7 +79,7 @@ export default function RootLayout({
         <ThemeColorMeta />
         <CartProvider>
           <AttributionCaptureRoot />
-          <MetaPixelRoot />
+          {metaPixelId ? <MetaPixelRoot pixelId={metaPixelId} /> : null}
           <PartnershipRibbon />
           <TickerBar />
           <Header />

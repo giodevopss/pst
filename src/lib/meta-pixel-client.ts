@@ -9,9 +9,10 @@ declare global {
   }
 }
 
+import { getMetaPixelId } from "@/lib/meta-pixel";
+
 function pixelId(): string | undefined {
-  const id = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
-  return id && id.length > 0 ? id : undefined;
+  return getMetaPixelId();
 }
 
 export function metaPixelReady(): boolean {

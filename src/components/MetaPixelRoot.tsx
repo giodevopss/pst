@@ -5,39 +5,32 @@ import { Suspense, useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { trackMetaPageView } from "@/lib/meta-pixel-client";
 
-/** Só dígitos — evita injeção no snippet inline. */
-function pixelIdFromEnv(): string | undefined {
-  const raw = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim() ?? "";
-  if (!/^\d{8,20}$/.test(raw)) return undefined;
-  return raw;
-}
-
-const PIXEL_ID = pixelIdFromEnv();
-
-function MetaPageViewOnRoute() {
+function MetaPageViewOnRoute({ enabled }: { enabled: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const skipFirst = useRef(true);
 
   useEffect(() => {
-    if (!PIXEL_ID) return;
+    if (!enabled) return;
     if (skipFirst.current) {
       skipFirst.current = false;
       return;
     }
     trackMetaPageView();
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, enabled]);
 
   return null;
 }
+
+type Props = {
+  pixelId: string;
+};
 
 /**
  * Snippet oficial Meta Pixel (bootstrap + init + PageView).
  * @see https://developers.facebook.com/docs/meta-pixel/get-started
  */
-export function MetaPixelRoot() {
-  if (!PIXEL_ID) return null;
-
+export function MetaPixelRoot({ pixelId }: Props) {
   return (
     <>
       <Script
@@ -52,12 +45,12 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '${PIXEL_ID}');
+fbq('init', '${pixelId}');
 fbq('track', 'PageView');`,
         }}
       />
       <Suspense fallback={null}>
-        <MetaPageViewOnRoute />
+        <MetaPageViewOnRoute enabled />
       </Suspense>
       <noscript>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -65,7 +58,7 @@ fbq('track', 'PageView');`,
           height={1}
           width={1}
           style={{ display: "none" }}
-          src={`https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1`}
+          src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
           alt=""
         />
       </noscript>

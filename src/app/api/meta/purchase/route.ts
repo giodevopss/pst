@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendMetaCapiPurchase, sha256HexLower } from "@/lib/meta-capi";
+import { getMetaPixelId } from "@/lib/meta-pixel";
 
 type Body = {
   event_id?: unknown;
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
   }
 
   const accessToken = process.env.META_ACCESS_TOKEN?.trim();
-  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
+  const pixelId = getMetaPixelId();
   if (!accessToken || !pixelId) {
     return NextResponse.json({ ok: true, skipped: true, reason: "not_configured" });
   }
