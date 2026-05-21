@@ -61,6 +61,11 @@ export const CHECKOUT_NEYMAR_DISCOUNT_PERCENT = Math.round(
   CHECKOUT_NEYMAR_DISCOUNT_FRACTION * 100,
 );
 
+/** Textos da faixa rolante (ticker). Cupons são aplicados no checkout. */
+export const TICKER_CUPOM_NEYMAR = `CUPOM ${CHECKOUT_COUPON_NEYMAR_CODE} −${CHECKOUT_NEYMAR_DISCOUNT_PERCENT}% NO CHECKOUT`;
+
+export const TICKER_CUPOM_PIX = `CUPOM ${PIX_DISCOUNT_COUPON_CODE} −${PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% NO PIX`;
+
 export type CheckoutCouponConfig = {
   code: string;
   fraction: number;

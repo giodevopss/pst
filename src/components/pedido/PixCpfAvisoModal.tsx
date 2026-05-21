@@ -100,12 +100,8 @@ export function PixCpfAvisoModal({ pedidoId, cidade, uf }: Props) {
 
         <div className="space-y-4 px-6 py-5 text-sm leading-relaxed text-muted">
           <p>
-            <strong className="text-foreground">Atenção:</strong> o PIX pode ser direcionado a um{" "}
-            <strong className="text-foreground">CPF de pessoa física</strong> — é o{" "}
-            <strong className="text-foreground">revendedor cadastrado Panini mais próximo</strong>{" "}
-            de você, definido pelo cálculo de frete da loja para sua região. O pedido segue
-            registrado no site em nome da{" "}
-            <strong className="text-foreground">Panini World Cup 2026</strong>.
+            <strong className="text-foreground">Atenção:</strong> o PIX pode ser direcionado a um CPF de
+            pessoa física — revendedor Panini mais próximo da sua região.
           </p>
           <div className="flex items-start gap-2 rounded-2xl border border-border bg-surface/50 px-4 py-3 text-xs">
             <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-cyan" />

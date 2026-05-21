@@ -169,7 +169,7 @@ export function CartDrawer() {
                   <span className="font-mono font-semibold text-brand-green">
                     {CHECKOUT_COUPON_NEYMAR_CODE}
                   </span>{" "}
-                  (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}%) ·{" "}
+                  (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}%){" "}
                   <span className="font-mono font-semibold text-brand-green">
                     {PIX_DISCOUNT_COUPON_CODE}
                   </span>{" "}

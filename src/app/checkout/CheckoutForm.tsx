@@ -1034,7 +1034,7 @@ export function CheckoutForm() {
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="font-display text-lg tracking-wide">PIX</span>
                   <span className="rounded-full border border-brand-green/35 bg-brand-green/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-green">
-                    +{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% com {PIX_DISCOUNT_COUPON_CODE}
+                    −{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% com {PIX_DISCOUNT_COUPON_CODE}
                   </span>
                 </span>
                 <span className="mt-0.5 block text-xs text-muted">
@@ -1175,7 +1175,7 @@ export function CheckoutForm() {
               {!couponError && (
                 <p className="mt-2 text-[11px] leading-relaxed text-muted">
                   <span className="font-mono font-semibold text-foreground">{PIX_DISCOUNT_COUPON_CODE}</span>{" "}
-                  (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX) ·{" "}
+                  (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX){" "}
                   <span className="font-mono font-semibold text-foreground">{CHECKOUT_COUPON_NEYMAR_CODE}</span>{" "}
                   (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}% em qualquer pagamento). Descontos acumulam no total.
                 </p>

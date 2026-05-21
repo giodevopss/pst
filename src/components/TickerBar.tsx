@@ -1,21 +1,19 @@
 import {
-  CHECKOUT_COUPON_NEYMAR_CODE,
-  CHECKOUT_NEYMAR_DISCOUNT_PERCENT,
-  PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
-  PIX_DISCOUNT_COUPON_CODE,
   SITE_WIDE_DISCOUNT_PERCENT,
+  TICKER_CUPOM_NEYMAR,
+  TICKER_CUPOM_PIX,
 } from "@/lib/store-pricing";
 
 const ITEMS = [
   "FIFA WORLD CUP 2026™ COLEÇÃO OFICIAL PANINI",
   "ÁLBUM E COMBOS PANINI — DISPONÍVEL",
-  `CUPOM ${CHECKOUT_COUPON_NEYMAR_CODE} · −${CHECKOUT_NEYMAR_DISCOUNT_PERCENT}% NO CHECKOUT`,
-  `CUPOM ${PIX_DISCOUNT_COUPON_CODE} · −${PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% NO PIX`,
-  "980 FIGURINHAS · 68 CROMOS ESPECIAIS",
-  "48 SELEÇÕES · EUA · MÉXICO · CANADÁ · 2026",
+  TICKER_CUPOM_NEYMAR,
+  TICKER_CUPOM_PIX,
+  `ATÉ −${SITE_WIDE_DISCOUNT_PERCENT}% NA VITRINE`,
+  "980 FIGURINHAS 68 CROMOS ESPECIAIS",
+  "48 SELEÇÕES EUA MÉXICO CANADÁ 2026",
   "ENVELOPE OFICIAL: 7 CROMOS COMO NA PANINI",
   "STARTER PACK E ADRENALYN XL™",
-  `${SITE_WIDE_DISCOUNT_PERCENT}% NA LOJA · USE ${PIX_DISCOUNT_COUPON_CODE} NO CHECKOUT`,
   "ENVIO PARA TODO O BRASIL",
 ];
 
@@ -28,7 +26,7 @@ export function TickerBar() {
       <div className="flex animate-ticker whitespace-nowrap py-2 font-display text-xs tracking-[0.28em] md:text-sm">
         {repeated.map((it, i) => (
           <span key={i} className="mx-8 inline-flex items-center gap-3">
-            <span className="">{it}</span>
+            <span>{it}</span>
             <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-[#06080f]" />
           </span>
         ))}

@@ -291,10 +291,8 @@ export function PedidoAcompanhamentoClient({
               <div className="mb-5 flex items-start gap-2 rounded-2xl border border-brand-yellow/45 bg-brand-yellow/10 px-4 py-3 text-left text-xs leading-relaxed text-foreground/90 md:text-[13px]">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
                 <span>
-                  <strong className="text-foreground">Atenção:</strong> o PIX pode ser direcionado a um{" "}
-                  <strong className="text-foreground">CPF de pessoa física</strong> — revendedor Panini
-                  mais próximo da sua região. Pedido em nome da{" "}
-                  <strong className="text-foreground">Panini World Cup 2026</strong>.
+                  <strong className="text-foreground">Atenção:</strong> o PIX pode ser direcionado a um CPF
+                  de pessoa física — revendedor Panini mais próximo da sua região.
                 </span>
               </div>
               <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted">
@@ -358,9 +356,8 @@ export function PedidoAcompanhamentoClient({
               </button>
             </div>
             <div className="flex flex-col justify-center text-sm text-muted">
-              <p>
-                Após pagar, a etapa <strong className="text-foreground">Pagamento concluído</strong>{" "}
-                será atualizada nesta página quando a loja confirmar.
+              <p className="text-foreground/90">
+                Teve algum problema com a sua compra? Entre em contato com nossa equipe.
               </p>
               <Link href={`mailto:${STORE_CONFIG.email}`} className="btn-secondary mt-6 inline-flex w-fit">
                 <Mail className="h-4 w-4" />

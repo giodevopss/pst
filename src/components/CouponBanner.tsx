@@ -48,7 +48,7 @@ export function CouponBanner({ className, href = "/checkout" }: CouponBannerProp
           </span>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-brand-green md:text-[11px]">
-              Cupom exclusivo · pagamento PIX
+              Cupom exclusivo pagamento PIX
             </p>
             <p className="mt-1 font-display text-lg leading-tight text-foreground md:text-2xl">
               Use{" "}
