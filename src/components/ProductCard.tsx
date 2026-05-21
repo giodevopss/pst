@@ -18,7 +18,7 @@ export function ProductCard({ produto }: { produto: Produto }) {
       href={href}
       className="group block overflow-hidden rounded-2xl border border-border bg-surface/40 transition-all duration-300 hover:-translate-y-1 hover:border-brand-yellow/60 hover:shadow-glow-yellow"
     >
-      <ProductImage produto={produto} className="rounded-b-none" />
+      <ProductImage produto={produto} className="rounded-b-none" showBadges={false} showPromoBadges={false} />
 
       <div className="flex flex-col gap-2 p-5">
         <div className="flex items-start justify-between gap-2">

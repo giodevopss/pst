@@ -33,11 +33,6 @@ export function LojistaCaixaCard({ produto, imageSrc, caption }: Props) {
           className="object-contain p-4 transition duration-300 group-hover:scale-[1.02]"
           sizes="(max-width: 1024px) 100vw, 33vw"
         />
-        {produto.badge && (
-          <span className="absolute left-3 top-3 rounded-full border border-brand-yellow/45 bg-background/90 px-2.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-wider text-brand-yellow backdrop-blur-sm">
-            {produto.badge}
-          </span>
-        )}
       </Link>
       <div className="flex flex-1 flex-col gap-3 p-5">
         {caption && <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{caption}</p>}

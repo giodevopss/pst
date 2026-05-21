@@ -17,8 +17,8 @@ type Props = {
 export function CamisetaGaleria({
   produto,
   className,
-  showBadges = true,
-  showPromoBadges = true,
+  showBadges = false,
+  showPromoBadges = false,
 }: Props) {
   const selecao = produto.selecaoSlug ? getSelecao(produto.selecaoSlug) : undefined;
   const imgs = produto.galeria?.length ? produto.galeria : [];

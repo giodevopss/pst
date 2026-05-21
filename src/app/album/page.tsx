@@ -86,11 +86,6 @@ export default function AlbumPage() {
           <div className="relative mx-auto w-full max-w-lg lg:max-w-2xl xl:max-w-[44rem]">
             <div className="pointer-events-none absolute -inset-12 rounded-full bg-gradient-to-r from-brand-yellow/30 via-brand-green/25 to-brand-blue/30 opacity-60 blur-3xl" />
             <div className="relative isolate z-[1] overflow-hidden">
-              {albumDuro.badge && (
-                <span className="absolute left-4 top-4 z-[2] rounded-full bg-foreground px-3 py-1.5 font-display text-[10px] tracking-[0.25em] text-background">
-                  {albumDuro.badge}
-                </span>
-              )}
               <div className="h-[min(88vw,420px)] w-full md:h-[500px] lg:h-[560px]">
                 <HeroAlbum3D className="rounded-none" />
               </div>

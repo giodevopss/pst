@@ -8,7 +8,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Produto } from "@/data/produtos";
 import { visualSlidePacote } from "@/lib/pacote-slide-visual";
 import { cn, formatBRL } from "@/lib/utils";
-import { PromoBadgesPair } from "@/components/PromoPriceBadges";
 import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
 
 type Props = {
@@ -111,7 +110,6 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
             {catalogStrikePrice(produto) > sitePromoUnitSale(produto) + 1e-9 && (
               <span className="text-base text-muted line-through">{formatBRL(catalogStrikePrice(produto))}</span>
             )}
-            <PromoBadgesPair />
           </div>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">{produto.descricao}</p>
           <Link href={`/produto/${produto.slug}`} className="btn-primary mt-6 inline-flex">

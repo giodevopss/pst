@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { Produto } from "@/data/produtos";
-import { catalogStrikePrice, sitePromoUnitSale, hasPacotesDestaqueExtraKitPromo, PACOTES_DESTAQUE_EXTRA_DISCOUNT_PERCENT } from "@/lib/store-pricing";
+import { catalogStrikePrice, sitePromoUnitSale, PACOTES_DESTAQUE_EXTRA_DISCOUNT_PERCENT } from "@/lib/store-pricing";
 import { formatBRL, cn } from "@/lib/utils";
 
 type Props = {
@@ -63,16 +63,6 @@ export function PacotesDestaquesStrip({ items, className }: Props) {
                     className="object-cover transition duration-300 group-hover:scale-[1.03]"
                     sizes="(max-width: 768px) 260px, (max-width: 1024px) 50vw, 25vw"
                   />
-                  {produto.badge && (
-                    <span className="absolute left-3 top-3 rounded-full border border-brand-yellow/40 bg-background/80 px-2.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-wider text-brand-yellow backdrop-blur-sm">
-                      {produto.badge}
-                    </span>
-                  )}
-                  {hasPacotesDestaqueExtraKitPromo(produto.id) && (
-                    <span className="absolute right-3 top-3 rounded-full border border-brand-green/50 bg-[#041208]/90 px-2.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-wide text-brand-green shadow-sm backdrop-blur-sm">
-                      −{PACOTES_DESTAQUE_EXTRA_DISCOUNT_PERCENT}% extra
-                    </span>
-                  )}
                 </div>
                 <div className="flex flex-1 flex-col gap-2 p-4">
                   <div className="flex items-start justify-between gap-2">

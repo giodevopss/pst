@@ -21,8 +21,8 @@ const DEFAULT_IMG_QUALITY = 92;
 export function ProductImage({
   produto,
   className,
-  showBadges = true,
-  showPromoBadges = true,
+  showBadges = false,
+  showPromoBadges = false,
   sizes = DEFAULT_IMG_SIZES,
   quality = DEFAULT_IMG_QUALITY,
 }: Props) {
