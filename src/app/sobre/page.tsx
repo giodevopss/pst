@@ -186,6 +186,21 @@ export default function SobrePage() {
                 </p>
               </div>
 
+              <div className="rounded-2xl border-2 border-brand-yellow/45 bg-brand-yellow/10 p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-yellow">
+                  Importante — número do pedido
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-foreground/95">
+                  Ao finalizar a compra, você recebe um código de pedido (ex.:{" "}
+                  <strong className="font-mono text-brand-yellow">C26-XXXXXXXX</strong>).{" "}
+                  <strong className="text-foreground">
+                    Esse número é o que será usado no sorteio
+                  </strong>{" "}
+                  — guarde-o ou tire um print da tela de confirmação. Não é necessário cadastro
+                  extra além do pedido elegível.
+                </p>
+              </div>
+
               <div className="pt-2">
                 <Link href="/" className="btn-primary inline-flex items-center justify-center">
                   Comprar e concorrer

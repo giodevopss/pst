@@ -21,6 +21,7 @@ import type { CartItem } from "@/lib/cart";
 import type { EtapaPedido, PagamentoPersistidoSeguro, StatusPagamentoPedido } from "@/types/pedido-store";
 import type { PublicPedido } from "@/lib/pedido-public";
 import { PixCpfAvisoModal } from "@/components/pedido/PixCpfAvisoModal";
+import { PromoViagemInformativo } from "@/components/PromoViagemInformativo";
 import { readCookie } from "@/lib/attribution";
 import { trackMetaPurchase } from "@/lib/meta-pixel-client";
 import { normalizeStatusPagamento } from "@/lib/pedido-status";
@@ -254,6 +255,12 @@ export function PedidoAcompanhamentoClient({
             <RefreshCw className="h-3.5 w-3.5" />
             Atualizar status
           </button>
+
+          <PromoViagemInformativo
+            className="mx-auto mt-6 max-w-3xl text-left"
+            orderId={pedidoId}
+            valorTotal={pedido.totalPrice}
+          />
 
           <p className="mx-auto mt-5 max-w-xl text-sm text-muted">
             {isPix ? (
