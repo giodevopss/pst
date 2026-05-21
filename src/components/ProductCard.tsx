@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Produto } from "@/data/produtos";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, formatBRLExact } from "@/lib/utils";
 import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
 import { ProductImage } from "./ProductImage";
 import { ArrowUpRight } from "lucide-react";
@@ -8,6 +8,7 @@ import { ArrowUpRight } from "lucide-react";
 export function ProductCard({ produto }: { produto: Produto }) {
   const salePrice = sitePromoUnitSale(produto);
   const strikePrice = catalogStrikePrice(produto);
+  const formatPrice = produto.categoria === "camiseta" ? formatBRLExact : formatBRL;
   const href =
     produto.categoria === "camiseta"
       ? `/camisetas/${produto.slug}`
@@ -30,10 +31,10 @@ export function ProductCard({ produto }: { produto: Produto }) {
 
         <div className="mt-1 flex flex-wrap items-baseline gap-2">
           <span className="font-display text-2xl tracking-wide tabular-nums gradient-text">
-            {formatBRL(salePrice)}
+            {formatPrice(salePrice)}
           </span>
           {strikePrice > salePrice + 1e-9 && (
-            <span className="text-sm text-muted line-through">{formatBRL(strikePrice)}</span>
+            <span className="text-sm text-muted line-through">{formatPrice(strikePrice)}</span>
           )}
         </div>
 

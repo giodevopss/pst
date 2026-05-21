@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { SectionHeading } from "@/components/SectionHeading";
 import { produtosDestaque, produtosPacotes, getProduto } from "@/data/produtos";
 import { ProductImage } from "@/components/ProductImage";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, formatBRLExact } from "@/lib/utils";
 import {
   PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
   SITE_WIDE_DISCOUNT_PERCENT,
@@ -190,7 +190,7 @@ export default function Home() {
               ))}
             </ul>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <span className="font-display text-4xl gradient-text">{formatBRL(camisaIISale)}</span>
+              <span className="font-display text-4xl gradient-text">{formatBRLExact(camisaIISale)}</span>
               <AddToCartButton produto={camisaBrasilII} label="Comprar Camiseta II" />
             </div>
           </div>

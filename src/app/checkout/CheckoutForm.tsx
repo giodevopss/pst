@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useCart } from "@/lib/cart";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, formatBRLExact } from "@/lib/utils";
 import { STORE_CONFIG } from "@/config/store";
 import { PromoViagemInformativo } from "@/components/PromoViagemInformativo";
 import { CheckoutCreditCard3D } from "@/components/checkout/CheckoutCreditCard3D";
@@ -1254,7 +1254,7 @@ export function CheckoutForm() {
                   </p>
                 </div>
                 <span className="shrink-0 font-display text-base font-medium tabular-nums gradient-text">
-                  {formatBRL(i.preco * i.quantidade)}
+                  {(i.categoria === "camiseta" ? formatBRLExact : formatBRL)(i.preco * i.quantidade)}
                 </span>
               </li>
             ))}

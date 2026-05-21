@@ -8,7 +8,7 @@ import { CamisetaGaleria } from "@/components/CamisetaGaleria";
 import { ProductImage } from "@/components/ProductImage";
 import { ProductCard } from "@/components/ProductCard";
 import { CamisetaDetalheClient } from "./CamisetaDetalheClient";
-import { formatBRL } from "@/lib/utils";
+import { formatBRLExact } from "@/lib/utils";
 import { PromoBadgesPair } from "@/components/PromoPriceBadges";
 import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -105,9 +105,9 @@ export default async function CamisetaDetalhe({ params }: { params: Promise<Para
           </h1>
 
           <div className="mt-5 flex flex-wrap items-baseline gap-3">
-            <span className="font-display text-4xl gradient-text">{formatBRL(salePrice)}</span>
+            <span className="font-display text-4xl gradient-text">{formatBRLExact(salePrice)}</span>
             {strikePrice > salePrice + 1e-9 && (
-              <span className="text-base text-muted line-through">{formatBRL(strikePrice)}</span>
+              <span className="text-base text-muted line-through">{formatBRLExact(strikePrice)}</span>
             )}
             <PromoBadgesPair badgeClassName="px-3 py-1 text-xs" />
           </div>

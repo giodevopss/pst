@@ -7,6 +7,11 @@ function isLojistaCaixaProdutoId(id: string | undefined): boolean {
   return id != null && LOJISTA_CAIXA_IDS.has(id);
 }
 
+/** Camisetas avulsas: preço fixo de vitrine, sem −30% da loja. */
+function isCamisetaProdutoId(id: string | undefined): boolean {
+  return id != null && id.startsWith("camiseta-");
+}
+
 /** Desconto fixo de vitrine/carrinho sobre o valor de lista (strike Panini/catálogo). */
 export const SITE_WIDE_DISCOUNT_FRACTION = 0.3;
 
@@ -198,7 +203,7 @@ export function sitePromoUnitSaleStoreOnly(produto: {
   preco: number;
   precoOriginal?: number;
 }): number {
-  if (isLojistaCaixaProdutoId(produto.id)) {
+  if (isLojistaCaixaProdutoId(produto.id) || isCamisetaProdutoId(produto.id)) {
     return Math.round(produto.preco * 100) / 100;
   }
   return priceAfterSiteDiscount(catalogStrikePrice(produto));

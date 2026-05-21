@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
-import { formatBRL } from "@/lib/utils";
+import { formatBRL, formatBRLExact } from "@/lib/utils";
 import { useEffect } from "react";
 import { CartLineThumb } from "@/components/CartLineThumb";
 import {
@@ -140,11 +140,15 @@ export function CartDrawer() {
                               {item.precoCatalogoLoja != null &&
                                 item.precoCatalogoLoja > item.preco + 1e-9 && (
                                   <span className="mr-2 text-xs text-muted line-through">
-                                    {formatBRL(item.precoCatalogoLoja * item.quantidade)}
+                                    {(item.categoria === "camiseta" ? formatBRLExact : formatBRL)(
+                                      item.precoCatalogoLoja * item.quantidade,
+                                    )}
                                   </span>
                                 )}
                               <span className="font-display text-base tracking-wide tabular-nums gradient-text">
-                                {formatBRL(item.preco * item.quantidade)}
+                                {(item.categoria === "camiseta" ? formatBRLExact : formatBRL)(
+                                  item.preco * item.quantidade,
+                                )}
                               </span>
                             </div>
                           </div>
