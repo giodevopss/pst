@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   Copy,
   CreditCard,
-  Mail,
+  MessageCircle,
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
@@ -25,6 +25,7 @@ import { PromoViagemInformativo } from "@/components/PromoViagemInformativo";
 import { readCookie } from "@/lib/attribution";
 import { trackMetaPurchase } from "@/lib/meta-pixel-client";
 import { normalizeStatusPagamento } from "@/lib/pedido-status";
+import { whatsappSupportHref, whatsappSupportMessagePedido } from "@/lib/whatsapp-support";
 
 type PedidoView = {
   id: string;
@@ -256,7 +257,11 @@ export function PedidoAcompanhamentoClient({
             Atualizar status
           </button>
 
-          <PromoViagemInformativo className="mx-auto mt-6 max-w-3xl text-left" orderId={pedidoId} />
+          <PromoViagemInformativo
+            className="mx-auto mt-6 max-w-3xl text-left"
+            orderId={pedidoId}
+            statusPagamento={pedido.statusPagamento}
+          />
 
           <p className="mx-auto mt-5 max-w-xl text-sm text-muted">
             {isPix ? (
@@ -359,10 +364,15 @@ export function PedidoAcompanhamentoClient({
               <p className="text-foreground/90">
                 Teve algum problema com a sua compra? Entre em contato com nossa equipe.
               </p>
-              <Link href={`mailto:${STORE_CONFIG.email}`} className="btn-secondary mt-6 inline-flex w-fit">
-                <Mail className="h-4 w-4" />
+              <a
+                href={whatsappSupportHref(whatsappSupportMessagePedido(pedidoId))}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary mt-6 inline-flex w-fit"
+              >
+                <MessageCircle className="h-4 w-4" />
                 Falar com suporte
-              </Link>
+              </a>
             </div>
           </div>
         )}

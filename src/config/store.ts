@@ -22,6 +22,12 @@ export const STORE_CONFIG = {
   /** Contato oficial de suporte Panini */
   email: "suporte@panini.com.br",
 
+  /** WhatsApp da equipe (+11 942578705) */
+  whatsapp: {
+    display: "+11 942578705",
+    e164: "5511942578705",
+  },
+
   worldCup: {
     startDate: "2026-06-11T00:00:00-03:00",
     name: "Copa do Mundo FIFA 2026",

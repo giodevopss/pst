@@ -1,21 +1,42 @@
 import Link from "next/link";
 import { Gift, Ticket } from "lucide-react";
 import { PROMO_VIAGEM_COPA } from "@/config/promocao-viagem";
+import { normalizeStatusPagamento } from "@/lib/pedido-status";
+import type { StatusPagamentoPedido } from "@/types/pedido-store";
 import { cn } from "@/lib/utils";
 
 type Props = {
   /** Número do pedido (ex.: C26-…) — usado como cupom no sorteio. */
   orderId?: string;
+  /** Quando informado com `orderId`, define a mensagem de participação no sorteio. */
+  statusPagamento?: StatusPagamentoPedido;
   className?: string;
   variant?: "default" | "compact";
 };
 
+function mensagemParticipacaoSorteio(
+  orderId: string | undefined,
+  statusPagamento: StatusPagamentoPedido | undefined,
+): string {
+  if (!orderId) {
+    return "Após finalizar, anote o número na confirmação — sem cadastro extra.";
+  }
+  if (normalizeStatusPagamento(statusPagamento) === "aprovado") {
+    return "Você está concorrendo à viagem para a final da Copa 2026™.";
+  }
+  return "Conclua o seu pagamento para participar!";
+}
+
 export function PromoViagemInformativo({
   orderId,
+  statusPagamento,
   className,
   variant = "default",
 }: Props) {
   const compact = variant === "compact";
+  const pagamentoAprovado =
+    !!orderId && normalizeStatusPagamento(statusPagamento) === "aprovado";
+  const msgParticipacao = mensagemParticipacaoSorteio(orderId, statusPagamento);
 
   return (
     <div
@@ -65,10 +86,13 @@ export function PromoViagemInformativo({
             </p>
           )}
 
-          <p className="text-sm font-medium text-brand-green">
-            {orderId
-              ? "Você está concorrendo à viagem para a final da Copa 2026™."
-              : "Após finalizar, anote o número na confirmação — sem cadastro extra."}
+          <p
+            className={cn(
+              "text-sm font-medium",
+              pagamentoAprovado ? "text-brand-green" : orderId ? "text-brand-yellow" : "text-muted",
+            )}
+          >
+            {msgParticipacao}
           </p>
 
           <Link
