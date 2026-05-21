@@ -23,7 +23,6 @@ import { useCart } from "@/lib/cart";
 import { formatBRL } from "@/lib/utils";
 import { STORE_CONFIG } from "@/config/store";
 import { PromoViagemInformativo } from "@/components/PromoViagemInformativo";
-import { elegivelPromoViagem } from "@/config/promocao-viagem";
 import { CheckoutCreditCard3D } from "@/components/checkout/CheckoutCreditCard3D";
 import { CheckoutEnvelopeUpsell } from "@/components/checkout/CheckoutEnvelopeUpsell";
 import { CartLineThumb } from "@/components/CartLineThumb";
@@ -1381,13 +1380,7 @@ export function CheckoutForm() {
               </span>
             </div>
 
-            {elegivelPromoViagem(checkoutTotals.totalPagar) && (
-              <PromoViagemInformativo
-                className="mt-5"
-                valorTotal={checkoutTotals.totalPagar}
-                variant="compact"
-              />
-            )}
+            <PromoViagemInformativo className="mt-5" variant="compact" />
 
             <button type="submit" disabled={checkoutBusy} className="btn-primary mt-6 w-full">
               {checkoutBusy ? (

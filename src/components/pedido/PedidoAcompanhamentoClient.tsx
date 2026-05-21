@@ -256,11 +256,7 @@ export function PedidoAcompanhamentoClient({
             Atualizar status
           </button>
 
-          <PromoViagemInformativo
-            className="mx-auto mt-6 max-w-3xl text-left"
-            orderId={pedidoId}
-            valorTotal={pedido.totalPrice}
-          />
+          <PromoViagemInformativo className="mx-auto mt-6 max-w-3xl text-left" orderId={pedidoId} />
 
           <p className="mx-auto mt-5 max-w-xl text-sm text-muted">
             {isPix ? (

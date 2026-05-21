@@ -150,9 +150,9 @@ export default function SobrePage() {
                 Concorra a uma viagem para a <span className="gradient-text">Final da Copa 2026</span>
               </h2>
               <p className="text-base leading-relaxed text-muted">
-                Em compras acima de <strong className="text-foreground">R$&nbsp;500</strong> você
-                está automaticamente concorrendo ao sorteio de um pacote completo para assistir à
-                grande final do FIFA World Cup 2026™. Sem cadastro extra — basta finalizar o pedido.
+                <strong className="text-foreground">Todo pedido finalizado</strong> na loja entra
+                automaticamente no sorteio de um pacote completo para assistir à grande final do FIFA
+                World Cup 2026™ — sem valor mínimo e sem cadastro extra.
               </p>
 
               <div className="rounded-2xl border border-brand-green/25 bg-brand-green/5 p-5">
@@ -180,9 +180,8 @@ export default function SobrePage() {
                   Como participar
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-muted">
-                  Faça uma compra de R$&nbsp;500 ou mais na nossa loja e pronto — você já está
-                  concorrendo. Cada pedido acima desse valor gera uma participação. Quanto mais
-                  pedidos, mais chances.
+                  Finalize qualquer compra na nossa loja e pronto — você já está concorrendo. Cada
+                  pedido gera uma participação no sorteio. Quanto mais pedidos, mais chances.
                 </p>
               </div>
 
@@ -197,7 +196,7 @@ export default function SobrePage() {
                     Esse número é o que será usado no sorteio
                   </strong>{" "}
                   — guarde-o ou tire um print da tela de confirmação. Não é necessário cadastro
-                  extra além do pedido elegível.
+                  extra além do pedido.
                 </p>
               </div>
 

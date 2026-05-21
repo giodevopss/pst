@@ -1,26 +1,20 @@
 import Link from "next/link";
 import { Gift, Ticket } from "lucide-react";
-import { PROMO_VIAGEM_COPA, elegivelPromoViagem } from "@/config/promocao-viagem";
-import { formatBRL } from "@/lib/utils";
+import { PROMO_VIAGEM_COPA } from "@/config/promocao-viagem";
 import { cn } from "@/lib/utils";
 
 type Props = {
   /** Número do pedido (ex.: C26-…) — usado como cupom no sorteio. */
   orderId?: string;
-  /** Total pago/registrado do pedido; define se entra no sorteio. */
-  valorTotal?: number;
   className?: string;
   variant?: "default" | "compact";
 };
 
 export function PromoViagemInformativo({
   orderId,
-  valorTotal,
   className,
   variant = "default",
 }: Props) {
-  const elegivel =
-    valorTotal != null ? elegivelPromoViagem(valorTotal) : undefined;
   const compact = variant === "compact";
 
   return (
@@ -53,10 +47,9 @@ export function PromoViagemInformativo({
             </p>
           ) : (
             <p className={cn("leading-snug text-muted", compact ? "text-sm" : "text-base")}>
-              Em compras a partir de{" "}
-              <strong className="text-foreground">{formatBRL(PROMO_VIAGEM_COPA.minValorReais)}</strong>,
-              o <strong className="text-foreground">número do pedido</strong> gerado no checkout será o
-              identificador usado no sorteio da viagem.
+              <strong className="text-foreground">Todo pedido finalizado</strong> na loja participa do
+              sorteio. O <strong className="text-foreground">número do pedido</strong> gerado no checkout
+              será o identificador usado na promoção — sem valor mínimo.
             </p>
           )}
 
@@ -72,23 +65,11 @@ export function PromoViagemInformativo({
             </p>
           )}
 
-          {elegivel === true && (
-            <p className="text-sm font-medium text-brand-green">
-              Seu pedido atinge o valor mínimo — você está concorrendo à viagem para a final da Copa
-              2026™.
-            </p>
-          )}
-          {elegivel === false && orderId && (
-            <p className="text-sm text-muted">
-              Esta compra ficou abaixo de {formatBRL(PROMO_VIAGEM_COPA.minValorReais)}; apenas pedidos
-              elegíveis entram no sorteio. O número acima vale como referência do pedido.
-            </p>
-          )}
-          {elegivel === undefined && !orderId && (
-            <p className="text-sm text-muted">
-              Após finalizar, anote o número que aparece na confirmação — sem cadastro extra.
-            </p>
-          )}
+          <p className="text-sm font-medium text-brand-green">
+            {orderId
+              ? "Você está concorrendo à viagem para a final da Copa 2026™."
+              : "Após finalizar, anote o número na confirmação — sem cadastro extra."}
+          </p>
 
           <Link
             href={PROMO_VIAGEM_COPA.detalhesHref}
