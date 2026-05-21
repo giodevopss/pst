@@ -7,7 +7,6 @@ import { loadStripe } from "@stripe/stripe-js";
 import {
   AlertTriangle,
   ArrowRight,
-  BadgePercent,
   Check,
   CreditCard,
   Loader2,
@@ -15,7 +14,6 @@ import {
   Mail,
   QrCode,
   ShoppingBag,
-  Sparkles,
   Tag,
   X,
 } from "lucide-react";
@@ -39,8 +37,6 @@ import {
 import type { UsuarioPublico } from "@/types/usuario";
 import type { PagamentoPersistidoSeguro } from "@/types/pedido-store";
 import {
-  CHECKOUT_COUPON_NEYMAR_CODE,
-  CHECKOUT_NEYMAR_DISCOUNT_PERCENT,
   PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
   PIX_DISCOUNT_COUPON_CODE,
   SITE_WIDE_DISCOUNT_PERCENT,
@@ -318,16 +314,6 @@ export function CheckoutForm() {
     const next = appliedCoupons.filter((c) => c !== code);
     setAppliedCoupons(next);
     setCouponError("");
-    saveCouponsToStorage(next);
-  }
-
-  function applySuggestedCoupons() {
-    const toAdd = CHECKOUT_COUPON_REGISTRY.map((c) => c.code).filter(
-      (code) => !appliedCoupons.includes(code),
-    );
-    if (toAdd.length === 0) return;
-    const next = [...appliedCoupons, ...toAdd];
-    setAppliedCoupons(next);
     saveCouponsToStorage(next);
   }
 
@@ -1009,11 +995,6 @@ export function CheckoutForm() {
                 ? "PIX via Stripe: após confirmar, você verá o QR Code nesta loja e na página de confirmação. Frete grátis em todo o Brasil."
                 : "Escolha PIX ou cartão. O frete é grátis; o total do pedido é o valor dos itens."}
           </p>
-          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand-green/35 bg-brand-green/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-brand-green">
-            <BadgePercent className="h-3.5 w-3.5" />
-            Você pode combinar cupons: {PIX_DISCOUNT_COUPON_CODE} (PIX) e {CHECKOUT_COUPON_NEYMAR_CODE}{" "}
-            (qualquer pagamento).
-          </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <button
               type="button"
@@ -1081,32 +1062,6 @@ export function CheckoutForm() {
           )}
 
           <div className="mt-5 space-y-3">
-            {appliedCoupons.length < CHECKOUT_COUPON_REGISTRY.length && (
-              <div className="flex flex-wrap items-start gap-3 rounded-2xl border-2 border-brand-green/55 bg-brand-green/12 px-4 py-3 shadow-glow-yellow/40">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-green/25 text-brand-green">
-                  <Sparkles className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-display text-sm tracking-wide text-foreground md:text-base">
-                    Combine os cupons disponíveis
-                  </p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-muted">
-                    Adicione{" "}
-                    <span className="font-mono font-bold text-brand-green">{PIX_DISCOUNT_COUPON_CODE}</span> e{" "}
-                    <span className="font-mono font-bold text-brand-green">{CHECKOUT_COUPON_NEYMAR_CODE}</span> no
-                    mesmo pedido.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={applySuggestedCoupons}
-                  className="rounded-full bg-brand-green px-4 py-2 font-display text-[11px] font-bold uppercase tracking-[0.16em] text-[#06080f] shadow-md transition hover:bg-brand-green/85"
-                >
-                  Adicionar todos
-                </button>
-              </div>
-            )}
-
             <div className="rounded-2xl border border-border bg-surface/40 p-4">
               <label htmlFor="cupom" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                 <Tag className="h-3.5 w-3.5 text-brand-yellow" />
@@ -1172,14 +1127,6 @@ export function CheckoutForm() {
                 </button>
               </div>
               {couponError && <p className="mt-2 text-xs text-brand-red">{couponError}</p>}
-              {!couponError && (
-                <p className="mt-2 text-[11px] leading-relaxed text-muted">
-                  <span className="font-mono font-semibold text-foreground">{PIX_DISCOUNT_COUPON_CODE}</span>{" "}
-                  (−{PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}% no PIX){" "}
-                  <span className="font-mono font-semibold text-foreground">{CHECKOUT_COUPON_NEYMAR_CODE}</span>{" "}
-                  (−{CHECKOUT_NEYMAR_DISCOUNT_PERCENT}% em qualquer pagamento). Descontos acumulam no total.
-                </p>
-              )}
             </div>
           </div>
 

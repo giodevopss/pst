@@ -200,7 +200,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden">
+      <section className="home-cta-stadium relative overflow-hidden">
         <div className="absolute inset-0">
           <Image
             src="/images/crowd-copa2026.png"
@@ -211,17 +211,17 @@ export default function Home() {
             priority={false}
           />
         </div>
-        <div className="absolute inset-0 bg-[#050a14]/72" />
-        <div className="absolute inset-0 gradient-conic opacity-15 blur-3xl" />
+        <div className="absolute inset-0 bg-[#050a14]/72 [data-theme=light]:bg-[#050a14]/68" />
+        <div className="absolute inset-0 gradient-conic opacity-15 blur-3xl [data-theme=light]:opacity-10" />
         <div className="relative mx-auto max-w-5xl px-4 py-24 text-center md:px-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
+          <p className="cta-eyebrow text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
             #Copa2026
           </p>
-          <h2 className="mt-3 font-display text-4xl leading-[0.95] tracking-tight md:text-7xl">
+          <h2 className="cta-title mt-3 font-display text-4xl leading-[0.95] tracking-tight text-foreground md:text-7xl">
             DA COLEÇÃO PRO ESTÁDIO.<br />
-            <span className="gradient-text">VOCÊ NA TORCIDA.</span>
+            <span className="cta-gradient gradient-text">VOCÊ NA TORCIDA.</span>
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-base text-muted md:text-lg">
+          <p className="cta-desc mx-auto mt-6 max-w-2xl text-base text-muted md:text-lg">
             Garanta o álbum e os packs anunciados pela Panini e vista o Brasil — tudo alinhado ao hub oficial
             FIFA World Cup 2026™ em colecionáveis.
           </p>
@@ -230,7 +230,7 @@ export default function Home() {
               Começar pelo álbum
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/camisetas" className="btn-secondary">
+            <Link href="/camisetas" className="btn-secondary cta-btn-secondary">
               Comprar camiseta
             </Link>
           </div>

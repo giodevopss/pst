@@ -53,7 +53,7 @@ export const PACOTES_DESTAQUE_EXTRA_DISCOUNT_PERCENT = Math.round(
 export const PIX_DISCOUNT_COUPON_CODE = "PANINI20";
 
 /** Cupom +10% no checkout (PIX ou cartão). */
-export const CHECKOUT_COUPON_NEYMAR_CODE = "NEYMARNACOPA10";
+export const CHECKOUT_COUPON_NEYMAR_CODE = "NEY10";
 
 export const CHECKOUT_NEYMAR_DISCOUNT_FRACTION = 0.1;
 

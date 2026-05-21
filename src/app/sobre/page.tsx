@@ -11,13 +11,23 @@ export const metadata: Metadata = {
     "Tudo o que você precisa saber sobre a Copa 2026 Store: como compramos, prazos de entrega, formas de pagamento e política de trocas.",
 };
 
-const SECTIONS = [
+type SobreSection = {
+  id: string;
+  icon: typeof ShieldCheck;
+  title: string;
+  body?: string;
+  paragraphs?: string[];
+};
+
+const SECTIONS: SobreSection[] = [
   {
     id: "loja",
     icon: ShieldCheck,
     title: "Quem somos",
-    body:
-      "Somos uma loja brasileira de colecionáveis com energia de estádio. Trabalhamos em parceria com a Panini Brasil para trazer a linha oficial FIFA World Cup 2026™ (álbum, envelopes, combos, boxes e Adrenalyn XL™) e também camisas premium inspiradas na Copa (ex.: Brasil). Para checar titularidade e catálogo completo, consulte também o site oficial da marca.",
+    paragraphs: [
+      "Somos a Panini Brasil em parceria com a FIFA World Cup 2026™. Trazemos a linha oficial da Copa com álbuns, envelopes, combos, boxes e cartas Adrenalyn XL™, além de camisetas premium inspiradas nas maiores seleções do mundo. ⚽🏆",
+      "Nossa missão é levar a emoção da Copa para colecionadores e fãs que vivem o futebol dentro e fora dos estádios.",
+    ],
   },
   {
     id: "pagamentos",
@@ -95,8 +105,16 @@ export default function SobrePage() {
                       </span>
                     </div>
                   </summary>
-                  <div className="px-6 pb-6 pt-1">
-                    <p className="text-base leading-relaxed text-muted">{s.body}</p>
+                  <div className="space-y-3 px-6 pb-6 pt-1">
+                    {s.paragraphs ? (
+                      s.paragraphs.map((paragraph) => (
+                        <p key={paragraph.slice(0, 24)} className="text-base leading-relaxed text-muted">
+                          {paragraph}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="text-base leading-relaxed text-muted">{s.body}</p>
+                    )}
                   </div>
                 </details>
               );

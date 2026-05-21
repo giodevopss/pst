@@ -60,7 +60,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#06080f",
+  themeColor: "#eef1f8",
   width: "device-width",
   initialScale: 1,
 };
@@ -73,7 +73,12 @@ export default function RootLayout({
   const metaPixelId = getMetaPixelId();
 
   return (
-    <html lang="pt-BR" suppressHydrationWarning className={`${inter.variable} ${bebas.variable}`}>
+    <html
+      lang="pt-BR"
+      data-theme="light"
+      suppressHydrationWarning
+      className={`${inter.variable} ${bebas.variable}`}
+    >
       <body className="min-h-screen flex flex-col">
         <ThemeInitScript />
         <ThemeColorMeta />

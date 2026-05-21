@@ -12,6 +12,9 @@ export function getStoredTheme(): SiteTheme | null {
   }
 }
 
+/** Padrão do site: modo claro. Modo escuro remove `data-theme="light"` do `<html>`. */
+export const DEFAULT_THEME: SiteTheme = "light";
+
 export function applyTheme(theme: SiteTheme) {
   const root = document.documentElement;
   if (theme === "light") root.setAttribute("data-theme", "light");

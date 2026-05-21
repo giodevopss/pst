@@ -11,7 +11,7 @@ function readDomTheme(): SiteTheme {
 
 export function ThemeToggle({ className }: { className?: string }) {
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<SiteTheme>("dark");
+  const [theme, setTheme] = useState<SiteTheme>("light");
 
   useEffect(() => {
     setTheme(readDomTheme());
@@ -25,8 +25,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     setTheme((prev) => {
       const next: SiteTheme = prev === "light" ? "dark" : "light";
       try {
-        if (next === "dark") localStorage.removeItem(THEME_STORAGE_KEY);
-        else localStorage.setItem(THEME_STORAGE_KEY, next);
+        localStorage.setItem(THEME_STORAGE_KEY, next);
       } catch {
         /* ignore */
       }

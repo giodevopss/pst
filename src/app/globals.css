@@ -129,6 +129,38 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+/* Banner torcida (home) — contraste no modo claro sobre foto escurecida */
+[data-theme="light"] .home-cta-stadium .cta-eyebrow {
+  color: #fde68a;
+}
+
+[data-theme="light"] .home-cta-stadium .cta-title {
+  color: #ffffff;
+}
+
+[data-theme="light"] .home-cta-stadium .cta-gradient {
+  background: linear-gradient(120deg, #fde047 0%, #4ade80 48%, #7dd3fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .home-cta-stadium .cta-desc {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="light"] .home-cta-stadium .cta-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.55);
+  color: #ffffff;
+}
+
+[data-theme="light"] .home-cta-stadium .cta-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: #fde047;
+  color: #ffffff;
+}
+
 .gradient-conic {
   background: conic-gradient(
     from 0deg,
