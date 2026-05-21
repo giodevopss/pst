@@ -47,8 +47,8 @@ export default function PacotesPage() {
             </span>
           </div>
 
-          <div className="mt-8 grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
-            <div>
+          <div className="mt-8 grid min-w-0 items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
+            <div className="min-w-0">
               <h1 className="max-w-xl font-display text-5xl leading-[0.95] tracking-tight md:text-6xl lg:text-7xl">
                 COMBOS ESPECIAIS
               </h1>
@@ -68,7 +68,9 @@ export default function PacotesPage() {
               </Link>
             </div>
 
-            <PacotesOfertasSlider pacotes={figurinhasRandom} />
+            <div className="min-w-0">
+              <PacotesOfertasSlider pacotes={figurinhasRandom} />
+            </div>
           </div>
         </div>
       </section>

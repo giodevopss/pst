@@ -755,7 +755,7 @@ export function CheckoutForm() {
   const submitPix = paymentModo === "pix";
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+    <form onSubmit={handleSubmit} className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
       <div className="space-y-6">
         {!loggedUser && (
           <div className="rounded-3xl border border-brand-cyan/30 bg-brand-cyan/5 p-5">

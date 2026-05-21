@@ -56,8 +56,8 @@ export default async function CamisetaDetalhe({ params }: { params: Promise<Para
         </Link>
       </div>
 
-      <section className="mx-auto grid max-w-7xl items-start gap-12 px-4 py-10 md:px-8 md:py-16 lg:grid-cols-2">
-        <div className="relative">
+      <section className="mx-auto grid min-w-0 max-w-7xl items-start gap-12 px-4 py-10 md:px-8 md:py-16 lg:grid-cols-2">
+        <div className="relative min-w-0">
           <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-brand-yellow/20 via-brand-green/15 to-brand-blue/20 blur-2xl" />
           <div className="relative">
             {produto.galeria && produto.galeria.length > 0 ? (
@@ -94,13 +94,13 @@ export default async function CamisetaDetalhe({ params }: { params: Promise<Para
           )}
         </div>
 
-        <div>
+        <div className="min-w-0">
           {selecao && (
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
               Seleção {selecao.nome}
             </p>
           )}
-          <h1 className="mt-3 font-display text-4xl leading-tight tracking-tight md:text-6xl">
+          <h1 className="mt-3 font-display text-[1.75rem] leading-tight tracking-tight text-balance sm:text-4xl md:text-6xl">
             {produto.nome}
           </h1>
 

@@ -29,7 +29,7 @@ export function Logo({ className, variant = "header" }: LogoProps) {
           "w-auto max-w-full object-contain object-left",
           isFooter
             ? "h-10 sm:h-12 md:h-14 md:max-w-[min(100%,400px)]"
-            : "h-9 sm:h-10 md:h-12 lg:h-[3.25rem] md:max-w-[min(100%,min(92vw,420px))]",
+            : "h-8 max-w-[min(100%,calc(100vw-10.5rem))] sm:h-10 sm:max-w-[min(100%,calc(100vw-12rem))] md:h-12 md:max-w-[min(100%,min(92vw,420px))] lg:h-[3.25rem]",
         )}
         sizes={
           isFooter

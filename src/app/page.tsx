@@ -189,9 +189,14 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="font-display text-4xl gradient-text">{formatBRLExact(camisaIISale)}</span>
-              <AddToCartButton produto={camisaBrasilII} label="Comprar Camiseta II" />
+              <AddToCartButton
+                produto={camisaBrasilII}
+                label="Comprar Camiseta II"
+                fullWidth
+                className="sm:w-auto"
+              />
             </div>
           </div>
           <div className="rounded-3xl border border-border bg-surface/50 p-6">
@@ -217,7 +222,7 @@ export default function Home() {
           <p className="cta-eyebrow text-xs font-semibold uppercase tracking-[0.4em] text-brand-yellow">
             #Copa2026
           </p>
-          <h2 className="cta-title mt-3 font-display text-4xl leading-[0.95] tracking-tight text-foreground md:text-7xl">
+          <h2 className="cta-title mt-3 font-display text-[1.75rem] leading-[0.95] tracking-tight text-balance text-foreground sm:text-4xl md:text-7xl">
             DA COLEÇÃO PRO ESTÁDIO.<br />
             <span className="cta-gradient gradient-text">VOCÊ NA TORCIDA.</span>
           </h2>

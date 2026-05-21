@@ -87,7 +87,7 @@ export function Footer() {
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-6 text-xs text-muted md:flex-row md:px-8">
           <span>© Panini World Cup 2026 Store. Todos os direitos reservados.</span>
-          <span>
+          <span className="max-w-full text-center leading-relaxed break-words md:text-left">
             Parceria comercial com a coleção oficial Panini — FIFA World Cup 2026™, Adrenalyn XL™,
             Copa do Mundo™ e símbolos FIFA são marcas dos respectivos titulares.
           </span>

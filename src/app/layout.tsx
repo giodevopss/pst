@@ -79,7 +79,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${bebas.variable}`}
     >
-      <body className="min-h-screen flex flex-col">
+      <body className="flex min-h-screen min-w-0 flex-col overflow-x-hidden">
         <ThemeInitScript />
         <ThemeColorMeta />
         <CartProvider>
@@ -88,7 +88,7 @@ export default function RootLayout({
           <PartnershipRibbon />
           <TickerBar />
           <Header />
-          <main className="flex-1">{children}</main>
+          <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
           <Footer />
           <CartDrawer />
           <PromoModal />
