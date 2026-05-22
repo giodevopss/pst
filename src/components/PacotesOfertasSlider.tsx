@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Produto } from "@/data/produtos";
+import { hrefProduto } from "@/data/produtos";
 import { visualSlidePacote } from "@/lib/pacote-slide-visual";
 import { cn, formatBRL } from "@/lib/utils";
 import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
@@ -15,12 +16,21 @@ type Props = {
   className?: string;
 };
 
+function isInteractiveTarget(target: EventTarget | null) {
+  return Boolean((target as HTMLElement | null)?.closest("a,button"));
+}
+
 export function PacotesOfertasSlider({ pacotes, className }: Props) {
+  const pacotesExibiveis = useMemo(
+    () => pacotes.filter((p) => visualSlidePacote(p) != null),
+    [pacotes],
+  );
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
-  const total = pacotes.length;
-  const produto = pacotes[index];
+  const total = pacotesExibiveis.length;
+  const produto = pacotesExibiveis[index];
   const visual = produto ? visualSlidePacote(produto) : null;
+  const produtoHref = produto ? hrefProduto(produto) : "#";
 
   const go = useCallback(
     (dir: -1 | 1) => {
@@ -29,6 +39,10 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
     },
     [total],
   );
+
+  useEffect(() => {
+    if (index >= total && total > 0) setIndex(0);
+  }, [index, total]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -40,10 +54,12 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
   }, [go]);
 
   const onTouchStart = (e: React.TouchEvent) => {
+    if (isInteractiveTarget(e.target)) return;
     touchStartX.current = e.touches[0]?.clientX ?? null;
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
+    if (isInteractiveTarget(e.target)) return;
     const start = touchStartX.current;
     touchStartX.current = null;
     if (start == null) return;
@@ -54,11 +70,14 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
     go(delta < 0 ? 1 : -1);
   };
 
-  if (total === 0 || !produto) return null;
-  if (!visual) return null;
+  if (total === 0 || !produto || !visual) return null;
 
   const salePrice = sitePromoUnitSale(produto);
   const strikePrice = catalogStrikePrice(produto);
+  const ctaLabel =
+    produto.categoria === "pacote"
+      ? "Ver promoção e escolher tamanho"
+      : "Ver oferta";
 
   return (
     <div
@@ -94,12 +113,12 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
               transition={{ duration: 0.22 }}
               className="min-w-0"
             >
-              {/* Mobile: carrossel horizontal das 3 peças do combo */}
               <div className="-mx-1 flex gap-3 overflow-x-auto overscroll-x-contain px-1 pb-2 scrollbar-none snap-x snap-mandatory md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0 md:snap-none">
                 {visual.itens.map((item) => (
-                  <figure
+                  <Link
                     key={`${produto.id}-${item.src}`}
-                    className="group relative aspect-[3/4] w-[min(72vw,16.5rem)] shrink-0 snap-center overflow-hidden rounded-2xl border border-white/10 bg-background-elev/80 shadow-inner md:w-auto md:min-w-0"
+                    href={produtoHref}
+                    className="group relative aspect-[3/4] w-[min(72vw,16.5rem)] shrink-0 snap-center overflow-hidden rounded-2xl border border-white/10 bg-background-elev/80 shadow-inner touch-manipulation md:w-auto md:min-w-0"
                   >
                     <Image
                       src={item.src}
@@ -110,12 +129,12 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
                       quality={92}
                     />
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-                    <figcaption className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+                    <figcaption className="pointer-events-none absolute bottom-0 left-0 right-0 p-3 md:p-4">
                       <span className="inline-block max-w-full rounded-lg bg-black/55 px-2.5 py-1 font-display text-[10px] uppercase leading-snug tracking-[0.16em] text-white/95 backdrop-blur-sm md:text-[11px] md:tracking-[0.2em]">
                         {item.legenda}
                       </span>
                     </figcaption>
-                  </figure>
+                  </Link>
                 ))}
               </div>
             </motion.div>
@@ -131,9 +150,11 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
             transition={{ duration: 0.22 }}
             className="mt-5 min-w-0 md:mt-8"
           >
-            <h2 className="font-display text-xl leading-tight tracking-tight text-balance text-foreground sm:text-2xl md:text-3xl lg:text-[1.85rem]">
-              {produto.nome}
-            </h2>
+            <Link href={produtoHref} className="block touch-manipulation">
+              <h2 className="font-display text-xl leading-tight tracking-tight text-balance text-foreground transition-colors hover:text-brand-yellow sm:text-2xl md:text-3xl lg:text-[1.85rem]">
+                {produto.nome}
+              </h2>
+            </Link>
             <div className="mt-3 flex flex-wrap items-baseline gap-2 md:mt-4 md:gap-3">
               <span className="font-display text-3xl gradient-text sm:text-4xl">
                 {formatBRL(salePrice)}
@@ -148,10 +169,10 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
               {produto.descricao}
             </p>
             <Link
-              href={`/produto/${produto.slug}`}
-              className="btn-primary mt-5 inline-flex w-full justify-center sm:mt-6 sm:w-auto"
+              href={produtoHref}
+              className="btn-primary relative z-[1] mt-5 inline-flex w-full touch-manipulation justify-center sm:mt-6 sm:w-auto"
             >
-              Ver promoção e escolher tamanho
+              {ctaLabel}
             </Link>
           </motion.div>
         </AnimatePresence>
@@ -168,7 +189,7 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
 
           <div className="flex min-w-0 flex-1 justify-center overflow-x-auto px-1 scrollbar-none sm:max-w-[min(100%,20rem)] sm:flex-none sm:px-2">
             <div className="flex gap-1.5 sm:gap-2">
-              {pacotes.map((p, i) => (
+              {pacotesExibiveis.map((p, i) => (
                 <button
                   key={p.id}
                   type="button"

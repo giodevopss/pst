@@ -1085,6 +1085,20 @@ export function comAnuncioPrioritarioPrimeiro(produtos: Produto[]): Produto[] {
   return [anuncio, ...rest];
 }
 
+/** Só reordena se o anúncio prioritário já estiver na lista (não injeta SKU de outra categoria). */
+export function comAnuncioPrioritarioSePresente(produtos: Produto[]): Produto[] {
+  const anuncio = getProdutoAnuncioPrioritario();
+  if (!anuncio) return produtos;
+  if (!produtos.some((p) => p.id === anuncio.id)) return produtos;
+  return comAnuncioPrioritarioPrimeiro(produtos);
+}
+
+export function hrefProduto(produto: Produto): string {
+  return produto.categoria === "camiseta"
+    ? `/camisetas/${produto.slug}`
+    : `/produto/${produto.slug}`;
+}
+
 export function produtosPorCategoria(cat: ProdutoCategoria) {
   const list = PRODUTOS.filter((p) => p.categoria === cat);
   if (cat === "camiseta") return list;
@@ -1092,18 +1106,16 @@ export function produtosPorCategoria(cat: ProdutoCategoria) {
 }
 
 export function produtosPacotes() {
-  return comAnuncioPrioritarioPrimeiro(PRODUTOS.filter((p) => p.categoria === "pacote"));
+  return PRODUTOS.filter((p) => p.categoria === "pacote");
 }
 
 /** Pacotes com envelopes de figurinhas Copa 2026™ (não inclui linha Adrenalyn no slug). */
 export function produtosPacotesFigurinhas() {
-  return comAnuncioPrioritarioPrimeiro(
-    PRODUTOS.filter(
-      (p) =>
-        p.categoria === "pacote" &&
-        !p.slug.includes("-adrenalyn-") &&
-        !isComboFigurinhasAtualizado(p),
-    ),
+  return PRODUTOS.filter(
+    (p) =>
+      p.categoria === "pacote" &&
+      !p.slug.includes("-adrenalyn-") &&
+      !isComboFigurinhasAtualizado(p),
   );
 }
 
@@ -1124,9 +1136,7 @@ export function produtosAlbumFigurinhasAtualizado(): Produto[] {
 
 /** Pacotes que somam envelopes Adrenalyn XL™ além do álbum figurinhas e da camisa. */
 export function produtosPacotesAdrenalyn() {
-  return comAnuncioPrioritarioPrimeiro(
-    PRODUTOS.filter((p) => p.categoria === "pacote" && p.slug.includes("-adrenalyn-")),
-  );
+  return PRODUTOS.filter((p) => p.categoria === "pacote" && p.slug.includes("-adrenalyn-"));
 }
 
 /** Álbum: figurinhas, combos e avulsos (sem Adrenalyn nem caixas lojista). */

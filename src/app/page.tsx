@@ -4,7 +4,7 @@ import { ArrowRight, ShieldCheck, Sparkles, Star, Truck } from "lucide-react";
 import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
 import { SectionHeading } from "@/components/SectionHeading";
-import { produtosDestaque, produtosPacotes, getProduto } from "@/data/produtos";
+import { comAnuncioPrioritarioPrimeiro, produtosDestaque, produtosPacotes, getProduto } from "@/data/produtos";
 import { ProductImage } from "@/components/ProductImage";
 import { formatBRL, formatBRLExact } from "@/lib/utils";
 import {
@@ -37,7 +37,7 @@ const FEATURES = [
 
 export default function Home() {
   const destaques = produtosDestaque();
-  const combos = produtosPacotes().slice(0, 3);
+  const combos = comAnuncioPrioritarioPrimeiro(produtosPacotes()).slice(0, 3);
   const albumDuro = getProduto("album-fifa-world-cup-2026-capa-dura-ouro")!;
   const camisaBrasil = getProduto("camiseta-selecao-brasil")!;
   const albumSale = sitePromoUnitSale(albumDuro);

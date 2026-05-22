@@ -4,7 +4,6 @@ import { ArrowRight, Package } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ProductCard } from "@/components/ProductCard";
 import {
-  comAnuncioPrioritarioPrimeiro,
   produtosPacotesFigurinhas,
   produtosPacotesFigurinhasAtualizado,
   produtosPacotesAdrenalyn,
@@ -30,10 +29,8 @@ export const metadata: Metadata = {
 export default function PacotesPage() {
   const figurinhas = produtosPacotesFigurinhas();
   const pacotesFigurinhas = figurinhas.filter((p) => p.categoria === "pacote");
-  const figurinhasRandom = comAnuncioPrioritarioPrimeiro(pickRandom(pacotesFigurinhas, 10));
-  const figurinhasShuffled = comAnuncioPrioritarioPrimeiro(
-    pickRandom(pacotesFigurinhas, pacotesFigurinhas.length),
-  );
+  const figurinhasRandom = pickRandom(pacotesFigurinhas, 10);
+  const figurinhasShuffled = pickRandom(pacotesFigurinhas, pacotesFigurinhas.length);
   const adrenalyn = produtosPacotesAdrenalyn();
   const figurinhasAtualizado = produtosPacotesFigurinhasAtualizado();
   const destaquesTopo = produtosPacotesHeroDestaque();

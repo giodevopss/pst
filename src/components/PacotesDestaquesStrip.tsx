@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { Produto } from "@/data/produtos";
+import { hrefProduto } from "@/data/produtos";
 import { catalogStrikePrice, sitePromoUnitSale, PACOTES_DESTAQUE_EXTRA_DISCOUNT_PERCENT } from "@/lib/store-pricing";
 import { formatBRL, cn } from "@/lib/utils";
 
@@ -44,7 +45,7 @@ export function PacotesDestaquesStrip({ items, className }: Props) {
 
         <div className="mt-6 flex gap-4 overflow-x-auto pb-1 scrollbar-none md:grid md:grid-cols-2 md:overflow-visible lg:grid-cols-4">
           {items.map((produto) => {
-            const href = `/produto/${produto.slug}`;
+            const href = hrefProduto(produto);
             const sale = sitePromoUnitSale(produto);
             const strike = catalogStrikePrice(produto);
             const src = produto.imagemSrc ?? "/images/panini/album-capa-dura-ouro.jpg";
@@ -53,7 +54,7 @@ export function PacotesDestaquesStrip({ items, className }: Props) {
               <Link
                 key={produto.id}
                 href={href}
-                className="group flex min-w-[240px] shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-surface/45 transition hover:-translate-y-0.5 hover:border-brand-yellow/55 hover:shadow-glow-yellow md:min-w-0"
+                className="group relative z-[1] flex min-w-[240px] shrink-0 touch-manipulation flex-col overflow-hidden rounded-2xl border border-border bg-surface/45 transition hover:-translate-y-0.5 hover:border-brand-yellow/55 hover:shadow-glow-yellow md:min-w-0"
               >
                 <div className="relative aspect-[4/3] bg-background-elev/60">
                   <Image

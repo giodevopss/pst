@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Produto } from "@/data/produtos";
+import { hrefProduto } from "@/data/produtos";
 import { formatBRL, formatBRLExact } from "@/lib/utils";
 import { catalogStrikePrice, isPrecoFixoVitrineProdutoId, sitePromoUnitSale } from "@/lib/store-pricing";
 import { ProductImage } from "./ProductImage";
@@ -9,15 +10,10 @@ export function ProductCard({ produto }: { produto: Produto }) {
   const salePrice = sitePromoUnitSale(produto);
   const strikePrice = catalogStrikePrice(produto);
   const formatPrice = isPrecoFixoVitrineProdutoId(produto.id) ? formatBRLExact : formatBRL;
-  const href =
-    produto.categoria === "camiseta"
-      ? `/camisetas/${produto.slug}`
-      : `/produto/${produto.slug}`;
-
   return (
     <Link
-      href={href}
-      className="group block overflow-hidden rounded-2xl border border-border bg-surface/40 transition-all duration-300 hover:-translate-y-1 hover:border-brand-yellow/60 hover:shadow-glow-yellow"
+      href={hrefProduto(produto)}
+      className="group relative z-[1] block touch-manipulation overflow-hidden rounded-2xl border border-border bg-surface/40 transition-all duration-300 hover:-translate-y-1 hover:border-brand-yellow/60 hover:shadow-glow-yellow"
     >
       <ProductImage produto={produto} className="rounded-b-none" showBadges={false} showPromoBadges={false} />
 
