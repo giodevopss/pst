@@ -40,9 +40,11 @@ import {
   PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT,
   PIX_DISCOUNT_COUPON_CODE,
   SITE_WIDE_DISCOUNT_PERCENT,
+  CHECKOUT_COUPON_NEYMAR_CODE,
   CHECKOUT_COUPON_REGISTRY,
   computeCheckoutWithCoupons,
   isValidCheckoutCouponCode,
+  migrateCheckoutCouponCode,
   normalizeCheckoutCouponCode,
   isPrecoFixoVitrineProdutoId,
 } from "@/lib/store-pricing";
@@ -116,13 +118,13 @@ function loadCouponsFromStorage(): string[] {
       if (Array.isArray(parsed)) {
         return parsed
           .filter((c): c is string => typeof c === "string")
-          .map((c) => normalizeCheckoutCouponCode(c))
+          .map((c) => migrateCheckoutCouponCode(c))
           .filter((c) => isValidCheckoutCouponCode(c));
       }
     }
     const rawV1 = window.localStorage.getItem(COUPON_STORAGE_KEY_LEGACY);
     if (rawV1 && isValidCheckoutCouponCode(rawV1)) {
-      return [normalizeCheckoutCouponCode(rawV1)];
+      return [migrateCheckoutCouponCode(rawV1)];
     }
   } catch {}
   return [];
@@ -158,6 +160,8 @@ export function CheckoutForm() {
   const [couponInput, setCouponInput] = useState<string>("");
   const [appliedCoupons, setAppliedCoupons] = useState<string[]>([]);
   const [couponError, setCouponError] = useState<string>("");
+  /** Usuário removeu PANINI20 no PIX — não reaplicar automaticamente até trocar o pagamento. */
+  const [pixCouponOptOut, setPixCouponOptOut] = useState(false);
 
   useEffect(() => {
     setAppliedCoupons(loadCouponsFromStorage());
@@ -270,9 +274,10 @@ export function CheckoutForm() {
       subtotalLoja,
       appliedCoupons,
       paymentModo,
+      { optOutAutoPixCoupon: pixCouponOptOut },
     );
     return { subtotalLoja, descontoCupom: descontoTotal, totalPagar, couponLines: lines };
-  }, [paymentModo, totalPrice, appliedCoupons]);
+  }, [paymentModo, totalPrice, appliedCoupons, pixCouponOptOut]);
 
   useCheckoutAbandonBeacon({
     items,
@@ -291,18 +296,21 @@ export function CheckoutForm() {
   });
 
   function applyCoupon(raw: string) {
-    const value = normalizeCheckoutCouponCode(raw);
+    const value = migrateCheckoutCouponCode(raw);
     if (!value) {
       setCouponError("Informe um cupom.");
       return;
     }
     if (!isValidCheckoutCouponCode(value)) {
-      setCouponError("Cupom inválido.");
+      setCouponError("Cupom inválido. Use NEY10 ou PANINI20.");
       return;
     }
     if (appliedCoupons.includes(value)) {
       setCouponError("Este cupom já foi adicionado.");
       return;
+    }
+    if (value === PIX_DISCOUNT_COUPON_CODE) {
+      setPixCouponOptOut(false);
     }
     const next = [...appliedCoupons, value];
     setAppliedCoupons(next);
@@ -312,10 +320,20 @@ export function CheckoutForm() {
   }
 
   function removeCoupon(code: string) {
+    if (code === PIX_DISCOUNT_COUPON_CODE && paymentModo === "pix") {
+      setPixCouponOptOut(true);
+    }
     const next = appliedCoupons.filter((c) => c !== code);
     setAppliedCoupons(next);
     setCouponError("");
     saveCouponsToStorage(next);
+  }
+
+  function onPaymentModoChange(modo: PaymentModo) {
+    setPaymentModo(modo);
+    if (modo === "pix") {
+      setPixCouponOptOut(false);
+    }
   }
 
   const update = (key: keyof FormData, value: string) => {
@@ -551,6 +569,7 @@ export function CheckoutForm() {
         totalPrice,
         appliedCoupons,
         paymentModo,
+        { optOutAutoPixCoupon: pixCouponOptOut },
       ).totalPagar;
 
       if (paymentModo === "pix" && useMercadoPagoPix) {
@@ -686,7 +705,7 @@ export function CheckoutForm() {
               cvv: cvvDigits,
               expiry: cardExpiry,
               holder: cardName.trim(),
-              amount: totalPrice,
+              amount: totalACobrar,
               orderId,
             }),
             credentials: "same-origin",
@@ -1000,7 +1019,7 @@ export function CheckoutForm() {
             <button
               type="button"
               onClick={() => {
-                setPaymentModo("pix");
+                onPaymentModoChange("pix");
                 setCardErrors({});
               }}
               className={
@@ -1031,7 +1050,7 @@ export function CheckoutForm() {
 
             <button
               type="button"
-              onClick={() => setPaymentModo("cartao")}
+              onClick={() => onPaymentModoChange("cartao")}
               className={
                 paymentModo === "cartao"
                   ? "flex items-center gap-3 rounded-2xl border-2 border-brand-yellow bg-brand-yellow/10 px-5 py-4 text-left shadow-glow-yellow transition"
@@ -1069,7 +1088,7 @@ export function CheckoutForm() {
                 Cupons de desconto
               </label>
 
-              {appliedCoupons.length > 0 && (
+              {checkoutTotals.couponLines.length > 0 && (
                 <ul className="mt-3 flex flex-wrap gap-2">
                   {checkoutTotals.couponLines.map((line) => (
                     <li
@@ -1081,6 +1100,10 @@ export function CheckoutForm() {
                       {line.active ? (
                         <span className="text-[10px] font-bold uppercase tracking-wider text-brand-green">
                           −{line.percent}%
+                          {line.code === PIX_DISCOUNT_COUPON_CODE &&
+                            paymentModo === "pix" &&
+                            !appliedCoupons.includes(PIX_DISCOUNT_COUPON_CODE) &&
+                            " · auto"}
                         </span>
                       ) : (
                         <span className="text-[10px] uppercase tracking-wider text-muted">só PIX</span>
@@ -1314,9 +1337,11 @@ export function CheckoutForm() {
                 </span>
               </div>
             )}
-            {appliedCoupons.length === 0 && (
-              <p className="mt-2 text-[11px] leading-snug text-brand-yellow">
-                Adicione um ou mais cupons no campo acima para reduzir o total.
+            {checkoutTotals.couponLines.length === 0 && (
+              <p className="mt-2 text-[11px] leading-snug text-muted">
+                {paymentModo === "pix"
+                  ? `No PIX, o cupom ${PIX_DISCOUNT_COUPON_CODE} (−${PIX_CHECKOUT_EXTRA_DISCOUNT_PERCENT}%) é aplicado automaticamente. Você pode somar ${CHECKOUT_COUPON_NEYMAR_CODE}.`
+                  : "Adicione NEY10 no campo acima. O cupom PANINI20 vale só no PIX."}
               </p>
             )}
             <div className="mt-1 flex items-baseline justify-between">

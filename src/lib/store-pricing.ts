@@ -1,4 +1,4 @@
-import { precoCharmDezena99 } from "@/lib/utils";
+import { precoCharmDezena99, roundBRLCents } from "@/lib/utils";
 
 /** Caixas atacado (lojistas): preço de tabela fixo, sem −30% vitrine. */
 const LOJISTA_CAIXA_IDS = new Set<string>(["lojista-caixa-1000-envelopes", "lojista-caixa-100-envelopes"]);
@@ -64,6 +64,9 @@ export const PIX_DISCOUNT_COUPON_CODE = "PANINI20";
 /** Cupom +10% no checkout (PIX ou cartão). */
 export const CHECKOUT_COUPON_NEYMAR_CODE = "NEY10";
 
+/** Código antigo ainda aceito no checkout (alias de NEY10). */
+const CHECKOUT_COUPON_NEYMAR_LEGACY = "NEYMARNACOPA10";
+
 export const CHECKOUT_NEYMAR_DISCOUNT_FRACTION = 0.1;
 
 export const CHECKOUT_NEYMAR_DISCOUNT_PERCENT = Math.round(
@@ -102,12 +105,46 @@ export function normalizeCheckoutCouponCode(raw: string | null | undefined): str
   return (raw ?? "").trim().toUpperCase().replace(/\s+/g, "");
 }
 
+/** Normaliza e migra códigos legados para o registro atual. */
+export function migrateCheckoutCouponCode(raw: string | null | undefined): string {
+  const code = normalizeCheckoutCouponCode(raw);
+  if (code === CHECKOUT_COUPON_NEYMAR_LEGACY) return CHECKOUT_COUPON_NEYMAR_CODE;
+  return code;
+}
+
 export function resolveCheckoutCoupon(
   raw: string | null | undefined,
 ): CheckoutCouponConfig | null {
-  const code = normalizeCheckoutCouponCode(raw);
+  const code = migrateCheckoutCouponCode(raw);
   if (!code) return null;
   return CHECKOUT_COUPON_REGISTRY.find((c) => c.code === code) ?? null;
+}
+
+/**
+ * Cupons efetivos no checkout: válidos + PANINI20 automático no PIX (salvo opt-out).
+ */
+export function getEffectiveCheckoutCouponCodes(
+  appliedCodes: string[],
+  paymentModo: "pix" | "cartao",
+  options?: { optOutAutoPixCoupon?: boolean },
+): string[] {
+  const unique = [
+    ...new Set(
+      appliedCodes
+        .map((c) => migrateCheckoutCouponCode(c))
+        .filter((c) => isValidCheckoutCouponCode(c)),
+    ),
+  ];
+
+  if (
+    paymentModo === "pix" &&
+    !options?.optOutAutoPixCoupon &&
+    !unique.includes(PIX_DISCOUNT_COUPON_CODE)
+  ) {
+    return [...unique, PIX_DISCOUNT_COUPON_CODE];
+  }
+
+  return unique;
 }
 
 export function isValidCheckoutCouponCode(raw: string | null | undefined): boolean {
@@ -140,30 +177,27 @@ export function computeCheckoutWithCoupons(
   subtotal: number,
   rawCodes: string[],
   paymentModo: "pix" | "cartao",
+  options?: { optOutAutoPixCoupon?: boolean },
 ): { totalPagar: number; descontoTotal: number; lines: CheckoutCouponLine[] } {
-  const unique = [
-    ...new Set(
-      rawCodes.map((c) => normalizeCheckoutCouponCode(c)).filter((c) => c.length > 0),
-    ),
-  ];
+  const unique = getEffectiveCheckoutCouponCodes(rawCodes, paymentModo, options);
   const coupons = unique
     .map((code) => resolveCheckoutCoupon(code))
     .filter((c): c is CheckoutCouponConfig => c != null)
     .sort((a, b) => Number(a.pixOnly) - Number(b.pixOnly));
 
-  let running = subtotal;
+  let running = roundBRLCents(subtotal);
   const lines: CheckoutCouponLine[] = [];
 
   for (const coupon of coupons) {
     const active = checkoutCouponApplies(coupon, paymentModo);
     const before = running;
     if (active) {
-      running = precoCharmDezena99(running * (1 - coupon.fraction));
+      running = roundBRLCents(running * (1 - coupon.fraction));
     }
     lines.push({
       code: coupon.code,
       percent: coupon.percent,
-      discountAmount: active ? Math.round((before - running) * 100) / 100 : 0,
+      discountAmount: active ? roundBRLCents(before - running) : 0,
       active,
       pixOnly: coupon.pixOnly,
     });
@@ -171,7 +205,7 @@ export function computeCheckoutWithCoupons(
 
   return {
     totalPagar: running,
-    descontoTotal: Math.round((subtotal - running) * 100) / 100,
+    descontoTotal: roundBRLCents(subtotal - running),
     lines,
   };
 }

@@ -6,7 +6,12 @@ import { ProductCard } from "@/components/ProductCard";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ProductAlbumAddZone } from "@/components/ProductAlbumAddZone";
 import { HeroAlbum3D } from "@/components/HeroAlbum3D";
-import { getProduto, produtosAlbumAdrenalyn, produtosAlbumFigurinhas } from "@/data/produtos";
+import {
+  getProduto,
+  produtosAlbumAdrenalyn,
+  produtosAlbumFigurinhas,
+  produtosAlbumFigurinhasAtualizado,
+} from "@/data/produtos";
 import { formatBRL } from "@/lib/utils";
 import { PromoBadgesPair } from "@/components/PromoPriceBadges";
 import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
@@ -27,6 +32,7 @@ export default function AlbumPage() {
   const albumSale = sitePromoUnitSale(albumDuro);
   const albumStrike = catalogStrikePrice(albumDuro);
   const figurinhas = produtosAlbumFigurinhas();
+  const figurinhasAtualizado = produtosAlbumFigurinhasAtualizado();
   const adrenalynLinha = produtosAlbumAdrenalyn();
 
   return (
@@ -95,6 +101,25 @@ export default function AlbumPage() {
         <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 md:px-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)] lg:py-24">
           <PaniniAlbumIntro />
           <PaniniEditionHighlights />
+        </div>
+      </section>
+
+      <section
+        id="album-figurinhas-atualizado"
+        className="border-b border-border bg-gradient-to-b from-brand-green/8 via-transparent to-brand-yellow/6"
+      >
+        <div className="mx-auto max-w-7xl px-4 py-24 md:px-8">
+          <SectionHeading
+            eyebrow="Novidade"
+            title="Combos com figurinhas atualizadas"
+            description="Kits de 12, 24 ou 50 pacotes atualizados e combos com álbum Panini — linha renovada da Copa 2026™ (7 cromos por pacote)."
+            cta={{ href: "/pacotes#pacotes-figurinhas-atualizado", label: "Ver com camisa Brasil" }}
+          />
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {figurinhasAtualizado.map((produto) => (
+              <ProductCard key={produto.id} produto={produto} />
+            ))}
+          </div>
         </div>
       </section>
 

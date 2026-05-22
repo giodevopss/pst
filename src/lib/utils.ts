@@ -19,6 +19,11 @@ export function precoCharmDezena99(value: number): number {
   return Math.round((d - 0.01) * 100) / 100;
 }
 
+/** Arredondamento em centavos (checkout, cupons, totais). */
+export function roundBRLCents(value: number): number {
+  return Math.max(0, Math.round(value * 100) / 100);
+}
+
 export function formatBRL(value: number) {
   const v = precoCharmDezena99(value);
   return new Intl.NumberFormat("pt-BR", {

@@ -45,6 +45,11 @@ const FIGURINHAS: PacoteSlideItem = {
   legenda: "Pacotes envelopes figurinha",
 };
 
+const FIGURINHAS_ATUALIZADO: PacoteSlideItem = {
+  src: "/images/panini/envelope-figurinhas-atualizado.png",
+  legenda: "Pacotes figurinhas atualizados",
+};
+
 const ADRENALYN: PacoteSlideItem = {
   src: "/images/panini/adrenalyn-xl-envelope.jpg",
   legenda: "Envelopes Adrenalyn XL™",
@@ -56,6 +61,17 @@ function terceiroPanFigurinha(produto: Produto): PacoteSlideItem {
   return n
     ? { ...FIGURINHAS, legenda: `${n} pacotes envelopes figurinha` }
     : FIGURINHAS;
+}
+
+function terceiroPanFigurinhaAtualizado(produto: Produto): PacoteSlideItem {
+  const m =
+    produto.nome.match(/(\d+)\s+figurinhas\s+atualiz/i) ??
+    produto.slug.match(/atualizado-f(\d+)/) ??
+    produto.slug.match(/figurinhas-atualizado-f(\d+)/);
+  const n = m?.[1];
+  return n
+    ? { ...FIGURINHAS_ATUALIZADO, legenda: `${n} pacotes figurinhas atualizados` }
+    : FIGURINHAS_ATUALIZADO;
 }
 
 function terceiroPanAdrenalyn(produto: Produto): PacoteSlideItem {
@@ -81,6 +97,18 @@ export function visualSlidePacote(produto: Produto): PacoteSlideVisual | null {
 
   const { slug } = produto;
   const camisa = slug.includes("camisa-ii") ? CAMISA_II : CAMISA;
+
+  if (slug.includes("figurinhas-atualizado")) {
+    let album = ALBUM_OURO;
+    if (slug.includes("capa-cartao")) album = ALBUM_CARTAO;
+    else if (slug.includes("capa-dura-") && !slug.includes("ouro")) album = ALBUM_DURA;
+    else if (slug.includes("ouro")) album = ALBUM_OURO;
+
+    return {
+      tipo: "Figurinhas Copa 2026™",
+      itens: [camisa, album, terceiroPanFigurinhaAtualizado(produto)],
+    };
+  }
 
   if (slug.includes("-adrenalyn-")) {
     const album = slug.includes("prata-adrenalyn") ? ALBUM_PRATA : ALBUM_DURA;

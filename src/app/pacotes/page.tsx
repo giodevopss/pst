@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import {
   comAnuncioPrioritarioPrimeiro,
   produtosPacotesFigurinhas,
+  produtosPacotesFigurinhasAtualizado,
   produtosPacotesAdrenalyn,
   produtosPacotesHeroDestaque,
 } from "@/data/produtos";
@@ -34,6 +35,7 @@ export default function PacotesPage() {
     pickRandom(pacotesFigurinhas, pacotesFigurinhas.length),
   );
   const adrenalyn = produtosPacotesAdrenalyn();
+  const figurinhasAtualizado = produtosPacotesFigurinhasAtualizado();
   const destaquesTopo = produtosPacotesHeroDestaque();
 
   return (
@@ -75,6 +77,24 @@ export default function PacotesPage() {
             <div className="min-w-0">
               <PacotesOfertasSlider pacotes={figurinhasRandom} />
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="pacotes-figurinhas-atualizado"
+        className="border-b border-border bg-gradient-to-b from-brand-green/8 via-transparent to-brand-yellow/6"
+      >
+        <div className="mx-auto max-w-7xl px-4 py-20 md:px-8 md:py-24">
+          <SectionHeading
+            eyebrow="Linha atualizada · Neymar Jr."
+            title="Combos com figurinhas atualizadas"
+            description="Pacotes renovados da coleção FIFA World Cup 2026™ (7 cromos cada, a partir de R$ 7,00 avulso). Monte com álbum e camisa oficial do Brasil."
+          />
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {figurinhasAtualizado.map((produto) => (
+              <ProductCard key={produto.id} produto={produto} />
+            ))}
           </div>
         </div>
       </section>

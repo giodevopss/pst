@@ -140,6 +140,105 @@ export const PRODUTOS: Produto[] = [
     estoque: "em_estoque",
     badge: "Novo",
   },
+  // Combos com pacotes de figurinhas atualizados (Neymar Jr. / linha atualizada · R$ 7,00 cada)
+  {
+    id: "kit-atualizado-f12",
+    slug: "copa-2026-kit-12-figurinhas-atualizado-fifa-world-cup-2026",
+    nome: "Copa 2026 — Kit 12 Figurinhas Atualizado — FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/panini/envelope-figurinhas-atualizado.png",
+    preco: 79.9,
+    precoOriginal: 84,
+    descricao:
+      "12 pacotes oficiais atualizados da coleção FIFA World Cup 2026™ (7 cromos cada) — ideal para completar a atualização da seleção brasileira e repor figurinhas.",
+    destaques: ["12 pacotes atualizados", "7 cromos por pacote", "Preço combinado na loja"],
+    estoque: "em_estoque",
+    badge: "Kit · 12",
+  },
+  {
+    id: "kit-atualizado-f24",
+    slug: "copa-2026-kit-24-figurinhas-atualizado-fifa-world-cup-2026",
+    nome: "Copa 2026 — Kit 24 Figurinhas Atualizado — FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/panini/envelope-figurinhas-atualizado.png",
+    preco: 154.9,
+    precoOriginal: 168,
+    descricao:
+      "Volume intermediário: 24 pacotes de figurinhas atualizados Panini Copa 2026™ para acelerar a coleção com a linha renovada.",
+    destaques: ["24 pacotes atualizados", "7 cromos por pacote", "Melhor custo por pacote"],
+    estoque: "em_estoque",
+    badge: "Kit · 24",
+  },
+  {
+    id: "kit-atualizado-f50",
+    slug: "copa-2026-kit-50-figurinhas-atualizado-fifa-world-cup-2026",
+    nome: "Copa 2026 — Kit 50 Figurinhas Atualizado — FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/panini/envelope-figurinhas-atualizado.png",
+    preco: 319.9,
+    precoOriginal: 350,
+    descricao:
+      "Alto volume: 50 pacotes de figurinhas atualizados oficiais — para colecionadores que querem fechar a atualização da Copa de uma vez.",
+    destaques: ["50 pacotes atualizados", "7 cromos por pacote", "Máximo volume"],
+    estoque: "em_estoque",
+    badge: "Kit · 50",
+  },
+  {
+    id: "album-cartao-atualizado-f12",
+    slug: "album-fifa-world-cup-2026-capa-cartao-mais-12-figurinhas-atualizado",
+    nome: "Copa 2026 — Álbum Capa Cartão + 12 Figurinhas Atualizado — FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/panini/album-capa-cartao-mais-12-envelopes.png",
+    preco: 104.9,
+    precoOriginal: 108.9,
+    descricao:
+      "Entrada oficial: álbum capa cartão Panini FIFA 2026™ com 12 pacotes de figurinhas atualizados (7 cromos cada) no mesmo pedido.",
+    destaques: ["Álbum capa cartão", "12 pacotes atualizados", "Linha renovada Copa 2026™"],
+    estoque: "em_estoque",
+    badge: "Cartão · 12",
+  },
+  {
+    id: "album-cartao-atualizado-f24",
+    slug: "album-fifa-world-cup-2026-capa-cartao-mais-24-figurinhas-atualizado",
+    nome: "Copa 2026 — Álbum Capa Cartão + 24 Figurinhas Atualizado — FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/panini/album-capa-cartao-mais-24-envelopes.png",
+    preco: 189.9,
+    precoOriginal: 192.9,
+    descricao:
+      "Álbum capa cartão e 24 pacotes de figurinhas atualizados — mais volume para preencher o álbum com a coleção renovada.",
+    destaques: ["Álbum capa cartão", "24 pacotes atualizados", "Combo econômico"],
+    estoque: "em_estoque",
+    badge: "Cartão · 24",
+  },
+  {
+    id: "album-dura-atualizado-f12",
+    slug: "album-fifa-world-cup-2026-capa-dura-mais-12-figurinhas-atualizado",
+    nome: "Copa 2026 — Álbum Capa Dura + 12 Figurinhas Atualizado — FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/panini/album-capa-dura.jpg",
+    preco: 149.9,
+    precoOriginal: 158.9,
+    descricao:
+      "Álbum capa dura oficial Panini Copa 2026™ com 12 pacotes de figurinhas atualizados para quem já tem o porta-figurinhas resistente.",
+    destaques: ["Capa dura oficial", "12 pacotes atualizados", "7 cromos por pacote"],
+    estoque: "em_estoque",
+    badge: "Dura · 12",
+  },
+  {
+    id: "album-ouro-atualizado-f12",
+    slug: "album-fifa-world-cup-2026-capa-dura-ouro-mais-12-figurinhas-atualizado",
+    nome: "Copa 2026 — Álbum Capa Dura Ouro + 12 Figurinhas Atualizado — FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/panini/album-capa-dura-ouro.jpg",
+    preco: 154.9,
+    precoOriginal: 163.9,
+    descricao:
+      "Edição capa dura ouro com 12 pacotes de figurinhas atualizados — álbum premium e linha renovada da Copa em um único pedido.",
+    destaques: ["Álbum capa ouro", "12 pacotes atualizados", "Coleção FIFA 2026™"],
+    estoque: "em_estoque",
+    badge: "Ouro · 12",
+  },
   {
     id: "box-luva-premium-torcida",
     slug: "copa-2026-box-luva-premium-torcida-ouro-40-envelopes",
@@ -268,6 +367,71 @@ export const PRODUTOS: Produto[] = [
     ],
     estoque: "em_estoque",
     badge: "Lojista · 100",
+  },
+  // Pacotes Brasil: camisa + álbum + figurinhas atualizadas
+  {
+    id: "pacote-br-cartao-atualizado-f12",
+    slug: "pacote-brasil-camisa-capa-cartao-12-figurinhas-atualizado",
+    nome: "Brasil — Camisa + Álbum cartão + 12 figurinhas atualizado",
+    categoria: "pacote",
+    imagemSrc: "/images/panini/envelope-figurinhas-atualizado.png",
+    preco: 379.9,
+    precoOriginal: 388.8,
+    selecaoSlug: brasil.slug,
+    descricao:
+      "Camisa oficial Brasil, álbum capa cartão Panini FIFA 2026™ e 12 pacotes de figurinhas atualizados (7 cromos cada) — kit completo com a linha renovada da Copa.",
+    destaques: ["Camisa Brasil (P a XGG)", "Álbum capa cartão", "12 pacotes atualizados"],
+    tamanhos: TAMANHOS,
+    estoque: "em_estoque",
+    badge: "Atualizado · 12",
+  },
+  {
+    id: "pacote-br-dura-atualizado-f12",
+    slug: "pacote-brasil-camisa-capa-dura-12-figurinhas-atualizado",
+    nome: "Brasil — Camisa + Álbum capa dura + 12 figurinhas atualizado",
+    categoria: "pacote",
+    imagemSrc: "/images/panini/envelope-figurinhas-atualizado.png",
+    preco: 429.9,
+    precoOriginal: 438.8,
+    selecaoSlug: brasil.slug,
+    descricao:
+      "Camisa oficial com álbum capa dura padrão Panini Copa 2026™ e 12 pacotes de figurinhas atualizados para colecionar com proteção reforçada ao álbum.",
+    destaques: ["Camisa oficial", "Álbum capa dura", "12 pacotes atualizados"],
+    tamanhos: TAMANHOS,
+    estoque: "em_estoque",
+    badge: "Dura · Atual. 12",
+  },
+  {
+    id: "pacote-br-ouro-atualizado-f12",
+    slug: "pacote-brasil-camisa-ouro-12-figurinhas-atualizado",
+    nome: "Brasil — Camisa + Álbum ouro + 12 figurinhas atualizado",
+    categoria: "pacote",
+    imagemSrc: "/images/panini/envelope-figurinhas-atualizado.png",
+    preco: 429.9,
+    precoOriginal: 443.8,
+    selecaoSlug: brasil.slug,
+    descricao:
+      "Camisa oficial da seleção, álbum capa dura ouro FIFA World Cup 2026™ e 12 pacotes de figurinhas atualizados — combo premium com a atualização da coleção.",
+    destaques: ["Camisa Brasil", "Álbum capa ouro", "12 pacotes atualizados"],
+    tamanhos: TAMANHOS,
+    estoque: "em_estoque",
+    badge: "Ouro · Atual. 12",
+  },
+  {
+    id: "pacote-br-ouro-atualizado-f24",
+    slug: "pacote-brasil-camisa-ouro-24-figurinhas-atualizado",
+    nome: "Brasil — Camisa + Álbum ouro + 24 figurinhas atualizado",
+    categoria: "pacote",
+    imagemSrc: "/images/panini/envelope-figurinhas-atualizado.png",
+    preco: 509.9,
+    precoOriginal: 527.8,
+    selecaoSlug: brasil.slug,
+    descricao:
+      "Mesma camisa e álbum ouro Panini FIFA 2026™, com o dobro de pacotes de figurinhas atualizados para acelerar a coleção renovada.",
+    destaques: ["Camisa oficial", "Álbum ouro", "24 pacotes atualizados"],
+    tamanhos: TAMANHOS,
+    estoque: "em_estoque",
+    badge: "Ouro · Atual. 24",
   },
   // Pacotes Brasil: camisa + álbum Panini + N pacotes envelopes figurinhas (ref. préço público figurinhas)
   {
@@ -898,6 +1062,13 @@ export const PRODUTOS: Produto[] = [
 
 export const PRODUTO_ANUNCIO_PRIORITARIO_ID = "envelope-figurinhas-atualizado";
 
+export function isComboFigurinhasAtualizado(produto: Pick<Produto, "id" | "slug">): boolean {
+  return (
+    produto.id !== PRODUTO_ANUNCIO_PRIORITARIO_ID &&
+    produto.slug.includes("figurinhas-atualizado")
+  );
+}
+
 export function getProduto(slug: string) {
   return PRODUTOS.find((p) => p.slug === slug);
 }
@@ -927,8 +1098,28 @@ export function produtosPacotes() {
 /** Pacotes com envelopes de figurinhas Copa 2026™ (não inclui linha Adrenalyn no slug). */
 export function produtosPacotesFigurinhas() {
   return comAnuncioPrioritarioPrimeiro(
-    PRODUTOS.filter((p) => p.categoria === "pacote" && !p.slug.includes("-adrenalyn-")),
+    PRODUTOS.filter(
+      (p) =>
+        p.categoria === "pacote" &&
+        !p.slug.includes("-adrenalyn-") &&
+        !isComboFigurinhasAtualizado(p),
+    ),
   );
+}
+
+/** Combos com pacotes de figurinhas atualizados (kits álbum + camisa Brasil). */
+export function produtosCombosFigurinhasAtualizado(): Produto[] {
+  return comAnuncioPrioritarioPrimeiro(PRODUTOS.filter(isComboFigurinhasAtualizado));
+}
+
+/** Combos camisa + álbum + figurinhas atualizadas (promoções Brasil). */
+export function produtosPacotesFigurinhasAtualizado(): Produto[] {
+  return produtosCombosFigurinhasAtualizado().filter((p) => p.categoria === "pacote");
+}
+
+/** Kits e combos álbum + figurinhas atualizadas (sem camisa). */
+export function produtosAlbumFigurinhasAtualizado(): Produto[] {
+  return produtosCombosFigurinhasAtualizado().filter((p) => p.categoria === "album");
 }
 
 /** Pacotes que somam envelopes Adrenalyn XL™ além do álbum figurinhas e da camisa. */
@@ -945,7 +1136,8 @@ export function produtosAlbumFigurinhas() {
       (p) =>
         p.categoria === "album" &&
         !p.id.startsWith("adrenalyn-xl-") &&
-        !p.id.startsWith("lojista-caixa-"),
+        !p.id.startsWith("lojista-caixa-") &&
+        !isComboFigurinhasAtualizado(p),
     ),
   );
 }
@@ -978,6 +1170,7 @@ export function produtosDestaque(): Produto[] {
       PRODUTOS.find((p) => p.id === "album-capa-dura-ouro"),
       PRODUTOS.find((p) => p.id === "album-capa-cartao"),
       PRODUTOS.find((p) => p.id === "album-capa-cartao-mais-12-envelopes"),
+      PRODUTOS.find((p) => p.id === "album-cartao-atualizado-f12"),
       PRODUTOS.find((p) => p.id === "adrenalyn-xl-starter-pack"),
       PRODUTOS.find((p) => p.id === "pacote-br-ouro-f12"),
       PRODUTOS.find((p) => p.id === "camiseta-brasil"),
