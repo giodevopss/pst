@@ -12,6 +12,7 @@ import {
   CHECKOUT_COUPON_NEYMAR_CODE,
   CHECKOUT_NEYMAR_DISCOUNT_PERCENT,
   PIX_DISCOUNT_COUPON_CODE,
+  isPrecoFixoVitrineProdutoId,
   SITE_WIDE_DISCOUNT_PERCENT,
 } from "@/lib/store-pricing";
 
@@ -140,13 +141,13 @@ export function CartDrawer() {
                               {item.precoCatalogoLoja != null &&
                                 item.precoCatalogoLoja > item.preco + 1e-9 && (
                                   <span className="mr-2 text-xs text-muted line-through">
-                                    {(item.categoria === "camiseta" ? formatBRLExact : formatBRL)(
+                                    {(isPrecoFixoVitrineProdutoId(item.produtoId) ? formatBRLExact : formatBRL)(
                                       item.precoCatalogoLoja * item.quantidade,
                                     )}
                                   </span>
                                 )}
                               <span className="font-display text-base tracking-wide tabular-nums gradient-text">
-                                {(item.categoria === "camiseta" ? formatBRLExact : formatBRL)(
+                                {(isPrecoFixoVitrineProdutoId(item.produtoId) ? formatBRLExact : formatBRL)(
                                   item.preco * item.quantidade,
                                 )}
                               </span>

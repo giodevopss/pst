@@ -44,6 +44,7 @@ import {
   computeCheckoutWithCoupons,
   isValidCheckoutCouponCode,
   normalizeCheckoutCouponCode,
+  isPrecoFixoVitrineProdutoId,
 } from "@/lib/store-pricing";
 import {
   REMARKETING_CHECKOUT_CONVERTIDO_KEY,
@@ -1254,7 +1255,9 @@ export function CheckoutForm() {
                   </p>
                 </div>
                 <span className="shrink-0 font-display text-base font-medium tabular-nums gradient-text">
-                  {(i.categoria === "camiseta" ? formatBRLExact : formatBRL)(i.preco * i.quantidade)}
+                  {(isPrecoFixoVitrineProdutoId(i.produtoId) ? formatBRLExact : formatBRL)(
+                    i.preco * i.quantidade,
+                  )}
                 </span>
               </li>
             ))}

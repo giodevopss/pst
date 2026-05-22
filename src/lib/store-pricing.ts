@@ -7,9 +7,13 @@ function isLojistaCaixaProdutoId(id: string | undefined): boolean {
   return id != null && LOJISTA_CAIXA_IDS.has(id);
 }
 
-/** Camisetas avulsas: preço fixo de vitrine, sem −30% da loja. */
-function isCamisetaProdutoId(id: string | undefined): boolean {
-  return id != null && id.startsWith("camiseta-");
+/** SKUs com preço de vitrine fixo (sem −30% da loja). */
+const PRECO_FIXO_VITRINE_IDS = new Set(["envelope-figurinhas-atualizado"]);
+
+/** Camisetas e itens avulsos com preço fechado (ex.: pacote figurinhas R$ 7,00). */
+export function isPrecoFixoVitrineProdutoId(id: string | undefined): boolean {
+  if (id == null) return false;
+  return id.startsWith("camiseta-") || PRECO_FIXO_VITRINE_IDS.has(id);
 }
 
 /** Desconto fixo de vitrine/carrinho sobre o valor de lista (strike Panini/catálogo). */
@@ -203,7 +207,7 @@ export function sitePromoUnitSaleStoreOnly(produto: {
   preco: number;
   precoOriginal?: number;
 }): number {
-  if (isLojistaCaixaProdutoId(produto.id) || isCamisetaProdutoId(produto.id)) {
+  if (isLojistaCaixaProdutoId(produto.id) || isPrecoFixoVitrineProdutoId(produto.id)) {
     return Math.round(produto.preco * 100) / 100;
   }
   return priceAfterSiteDiscount(catalogStrikePrice(produto));

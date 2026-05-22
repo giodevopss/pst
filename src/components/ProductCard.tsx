@@ -1,14 +1,14 @@
 import Link from "next/link";
 import type { Produto } from "@/data/produtos";
 import { formatBRL, formatBRLExact } from "@/lib/utils";
-import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
+import { catalogStrikePrice, isPrecoFixoVitrineProdutoId, sitePromoUnitSale } from "@/lib/store-pricing";
 import { ProductImage } from "./ProductImage";
 import { ArrowUpRight } from "lucide-react";
 
 export function ProductCard({ produto }: { produto: Produto }) {
   const salePrice = sitePromoUnitSale(produto);
   const strikePrice = catalogStrikePrice(produto);
-  const formatPrice = produto.categoria === "camiseta" ? formatBRLExact : formatBRL;
+  const formatPrice = isPrecoFixoVitrineProdutoId(produto.id) ? formatBRLExact : formatBRL;
   const href =
     produto.categoria === "camiseta"
       ? `/camisetas/${produto.slug}`

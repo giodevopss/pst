@@ -6,11 +6,11 @@ import { ProductImage } from "@/components/ProductImage";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductAlbumAddZone } from "@/components/ProductAlbumAddZone";
 import { SectionHeading } from "@/components/SectionHeading";
-import { getProduto, PRODUTOS } from "@/data/produtos";
+import { comAnuncioPrioritarioPrimeiro, getProduto, PRODUTOS } from "@/data/produtos";
 import { PacoteDetalheClient } from "@/components/PacoteDetalheClient";
 import { formatBRL, formatBRLExact } from "@/lib/utils";
 import { PromoBadgesPair } from "@/components/PromoPriceBadges";
-import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
+import { catalogStrikePrice, isPrecoFixoVitrineProdutoId, sitePromoUnitSale } from "@/lib/store-pricing";
 
 type Params = { slug: string };
 
@@ -33,12 +33,16 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
   if (!produto || produto.categoria === "camiseta") notFound();
 
   const isLojistaCaixa = produto.id.startsWith("lojista-caixa-");
+  const precoFixo = isPrecoFixoVitrineProdutoId(produto.id);
+  const formatPrice = precoFixo || isLojistaCaixa ? formatBRLExact : formatBRL;
 
-  const relacionados = PRODUTOS.filter(
-    (p) =>
-      p.categoria === produto.categoria &&
-      p.id !== produto.id &&
-      !(isLojistaCaixa && p.id.startsWith("lojista-caixa-")),
+  const relacionados = comAnuncioPrioritarioPrimeiro(
+    PRODUTOS.filter(
+      (p) =>
+        p.categoria === produto.categoria &&
+        p.id !== produto.id &&
+        !(isLojistaCaixa && p.id.startsWith("lojista-caixa-")),
+    ),
   ).slice(0, 4);
 
   const voltarHref = isLojistaCaixa
@@ -83,15 +87,11 @@ export default async function ProdutoDetalhe({ params }: { params: Promise<Param
           </h1>
 
           <div className="mt-5 flex flex-wrap items-baseline gap-3">
-            <span className="font-display text-4xl gradient-text">
-              {isLojistaCaixa ? formatBRLExact(salePrice) : formatBRL(salePrice)}
-            </span>
+            <span className="font-display text-4xl gradient-text">{formatPrice(salePrice)}</span>
             {strikePrice > salePrice + 1e-9 && (
-              <span className="text-base text-muted line-through">
-                {isLojistaCaixa ? formatBRLExact(strikePrice) : formatBRL(strikePrice)}
-              </span>
+              <span className="text-base text-muted line-through">{formatPrice(strikePrice)}</span>
             )}
-            {!isLojistaCaixa && <PromoBadgesPair badgeClassName="px-3 py-1 text-xs" />}
+            {!isLojistaCaixa && !precoFixo && <PromoBadgesPair badgeClassName="px-3 py-1 text-xs" />}
           </div>
 
           <p className="mt-5 text-base leading-relaxed text-muted">{produto.descricao}</p>

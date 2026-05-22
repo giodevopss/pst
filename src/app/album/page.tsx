@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ProductAlbumAddZone } from "@/components/ProductAlbumAddZone";
 import { HeroAlbum3D } from "@/components/HeroAlbum3D";
-import { getProduto, produtosPorCategoria } from "@/data/produtos";
+import { getProduto, produtosAlbumAdrenalyn, produtosAlbumFigurinhas } from "@/data/produtos";
 import { formatBRL } from "@/lib/utils";
 import { PromoBadgesPair } from "@/components/PromoPriceBadges";
 import { catalogStrikePrice, sitePromoUnitSale } from "@/lib/store-pricing";
@@ -26,11 +26,8 @@ export default function AlbumPage() {
   const albumDuro = getProduto("album-fifa-world-cup-2026-capa-dura-ouro")!;
   const albumSale = sitePromoUnitSale(albumDuro);
   const albumStrike = catalogStrikePrice(albumDuro);
-  const produtosAlbum = produtosPorCategoria("album");
-  const figurinhas = produtosAlbum.filter(
-    (p) => !p.id.startsWith("adrenalyn-xl-") && !p.id.startsWith("lojista-caixa-"),
-  );
-  const adrenalynLinha = produtosAlbum.filter((p) => p.id.startsWith("adrenalyn-xl-"));
+  const figurinhas = produtosAlbumFigurinhas();
+  const adrenalynLinha = produtosAlbumAdrenalyn();
 
   return (
     <>

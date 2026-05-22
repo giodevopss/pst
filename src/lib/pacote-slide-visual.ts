@@ -70,6 +70,13 @@ function terceiroPanAdrenalyn(produto: Produto): PacoteSlideItem {
  * Imagens e legendas para o carrossel de pacotes (camisa + o que entra na oferta).
  */
 export function visualSlidePacote(produto: Produto): PacoteSlideVisual | null {
+  if (produto.id === "envelope-figurinhas-atualizado" && produto.imagemSrc) {
+    return {
+      tipo: "Figurinhas Copa 2026™",
+      itens: [{ src: produto.imagemSrc, legenda: "Pacote atualizado · 7 cromos" }],
+    };
+  }
+
   if (produto.categoria !== "pacote") return null;
 
   const { slug } = produto;

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { PRODUTOS } from "@/data/produtos";
+import { comAnuncioPrioritarioPrimeiro, PRODUTOS } from "@/data/produtos";
 import { resolvePublicSiteOrigin } from "@/lib/public-site";
 
 const BASE = resolvePublicSiteOrigin();
@@ -15,7 +15,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  const outros = PRODUTOS.filter((p) => p.categoria !== "camiseta").map((p) => ({
+  const outros = comAnuncioPrioritarioPrimeiro(
+    PRODUTOS.filter((p) => p.categoria !== "camiseta"),
+  ).map((p) => ({
     url: `${BASE}/produto/${p.slug}`,
     lastModified: now,
     changeFrequency: "weekly" as const,

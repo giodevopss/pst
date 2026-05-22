@@ -123,6 +123,24 @@ export const PRODUTOS: Produto[] = [
     badge: "Kit",
   },
   {
+    id: "envelope-figurinhas-atualizado",
+    slug: "copa-2026-pacote-figurinhas-atualizado-fifa-world-cup-2026",
+    nome: "Copa 2026 — Pacote de figurinhas atualizado — FIFA World Cup 2026™",
+    categoria: "album",
+    imagemSrc: "/images/panini/envelope-figurinhas-atualizado.png",
+    preco: 7,
+    descricao:
+      "Pacote oficial atualizado da coleção de figurinhas FIFA World Cup 2026™: 7 cromos por envelope, no padrão Panini — inclui a atualização da seleção brasileira com Neymar Jr.",
+    destaques: [
+      "7 figurinhas por pacote",
+      "Coleção oficial Panini",
+      "Pacote atualizado Copa 2026™",
+      "Preço promocional na loja",
+    ],
+    estoque: "em_estoque",
+    badge: "Novo",
+  },
+  {
     id: "box-luva-premium-torcida",
     slug: "copa-2026-box-luva-premium-torcida-ouro-40-envelopes",
     nome:
@@ -878,33 +896,73 @@ export const PRODUTOS: Produto[] = [
   },
 ];
 
+export const PRODUTO_ANUNCIO_PRIORITARIO_ID = "envelope-figurinhas-atualizado";
+
 export function getProduto(slug: string) {
   return PRODUTOS.find((p) => p.slug === slug);
 }
 
+export function getProdutoAnuncioPrioritario(): Produto | undefined {
+  return PRODUTOS.find((p) => p.id === PRODUTO_ANUNCIO_PRIORITARIO_ID);
+}
+
+/** Coloca o pacote de figurinhas atualizado no topo (insere se ainda não estiver na lista). */
+export function comAnuncioPrioritarioPrimeiro(produtos: Produto[]): Produto[] {
+  const anuncio = getProdutoAnuncioPrioritario();
+  if (!anuncio) return produtos;
+  const rest = produtos.filter((p) => p.id !== anuncio.id);
+  return [anuncio, ...rest];
+}
+
 export function produtosPorCategoria(cat: ProdutoCategoria) {
-  return PRODUTOS.filter((p) => p.categoria === cat);
+  const list = PRODUTOS.filter((p) => p.categoria === cat);
+  if (cat === "camiseta") return list;
+  return comAnuncioPrioritarioPrimeiro(list);
 }
 
 export function produtosPacotes() {
-  return PRODUTOS.filter((p) => p.categoria === "pacote");
+  return comAnuncioPrioritarioPrimeiro(PRODUTOS.filter((p) => p.categoria === "pacote"));
 }
 
 /** Pacotes com envelopes de figurinhas Copa 2026™ (não inclui linha Adrenalyn no slug). */
 export function produtosPacotesFigurinhas() {
-  return produtosPacotes().filter((p) => !p.slug.includes("-adrenalyn-"));
+  return comAnuncioPrioritarioPrimeiro(
+    PRODUTOS.filter((p) => p.categoria === "pacote" && !p.slug.includes("-adrenalyn-")),
+  );
 }
 
 /** Pacotes que somam envelopes Adrenalyn XL™ além do álbum figurinhas e da camisa. */
 export function produtosPacotesAdrenalyn() {
-  return produtosPacotes().filter((p) => p.slug.includes("-adrenalyn-"));
+  return comAnuncioPrioritarioPrimeiro(
+    PRODUTOS.filter((p) => p.categoria === "pacote" && p.slug.includes("-adrenalyn-")),
+  );
+}
+
+/** Álbum: figurinhas, combos e avulsos (sem Adrenalyn nem caixas lojista). */
+export function produtosAlbumFigurinhas() {
+  return comAnuncioPrioritarioPrimeiro(
+    PRODUTOS.filter(
+      (p) =>
+        p.categoria === "album" &&
+        !p.id.startsWith("adrenalyn-xl-") &&
+        !p.id.startsWith("lojista-caixa-"),
+    ),
+  );
+}
+
+/** Linha Adrenalyn XL™ na página do álbum. */
+export function produtosAlbumAdrenalyn() {
+  return comAnuncioPrioritarioPrimeiro(
+    PRODUTOS.filter((p) => p.id.startsWith("adrenalyn-xl-")),
+  );
 }
 
 /** Barra “Destaques” em `/pacotes`: combos álbum + envelopes (sem camisa), ordem em `PACOTES_PAGINA_DESTAQUE_IDS`. */
 export function produtosPacotesHeroDestaque(): Produto[] {
-  return PACOTES_PAGINA_DESTAQUE_IDS.map((id) => PRODUTOS.find((p) => p.id === id)).filter(
+  const kits = PACOTES_PAGINA_DESTAQUE_IDS.map((id) => PRODUTOS.find((p) => p.id === id)).filter(
     Boolean,
   ) as Produto[];
+  return comAnuncioPrioritarioPrimeiro(kits);
 }
 
 /** Caixas atacado (seção Lojistas em `/pacotes`). */
@@ -915,12 +973,14 @@ export function produtosLojistasCaixas(): Produto[] {
 }
 
 export function produtosDestaque(): Produto[] {
-  return [
-    PRODUTOS.find((p) => p.id === "album-capa-dura-ouro"),
-    PRODUTOS.find((p) => p.id === "album-capa-cartao"),
-    PRODUTOS.find((p) => p.id === "album-capa-cartao-mais-12-envelopes"),
-    PRODUTOS.find((p) => p.id === "adrenalyn-xl-starter-pack"),
-    PRODUTOS.find((p) => p.id === "pacote-br-ouro-f12"),
-    PRODUTOS.find((p) => p.id === "camiseta-brasil"),
-  ].filter(Boolean) as Produto[];
+  return comAnuncioPrioritarioPrimeiro(
+    [
+      PRODUTOS.find((p) => p.id === "album-capa-dura-ouro"),
+      PRODUTOS.find((p) => p.id === "album-capa-cartao"),
+      PRODUTOS.find((p) => p.id === "album-capa-cartao-mais-12-envelopes"),
+      PRODUTOS.find((p) => p.id === "adrenalyn-xl-starter-pack"),
+      PRODUTOS.find((p) => p.id === "pacote-br-ouro-f12"),
+      PRODUTOS.find((p) => p.id === "camiseta-brasil"),
+    ].filter(Boolean) as Produto[],
+  );
 }

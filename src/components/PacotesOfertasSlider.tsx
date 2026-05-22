@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,6 +17,7 @@ type Props = {
 
 export function PacotesOfertasSlider({ pacotes, className }: Props) {
   const [index, setIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
   const total = pacotes.length;
   const produto = pacotes[index];
   const visual = produto ? visualSlidePacote(produto) : null;
@@ -38,118 +39,158 @@ export function PacotesOfertasSlider({ pacotes, className }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [go]);
 
-  if (total === 0 || !produto || !visual) return null;
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0]?.clientX ?? null;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStartX.current;
+    touchStartX.current = null;
+    if (start == null) return;
+    const end = e.changedTouches[0]?.clientX;
+    if (end == null) return;
+    const delta = end - start;
+    if (Math.abs(delta) < 48) return;
+    go(delta < 0 ? 1 : -1);
+  };
+
+  if (total === 0 || !produto) return null;
+  if (!visual) return null;
+
+  const salePrice = sitePromoUnitSale(produto);
+  const strikePrice = catalogStrikePrice(produto);
 
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[1.75rem] border border-border bg-surface/40 shadow-2xl backdrop-blur-sm",
+        "relative min-w-0 overflow-hidden rounded-[1.75rem] border border-border bg-surface/40 shadow-2xl backdrop-blur-sm",
         className,
       )}
       role="region"
       aria-roledescription="carousel"
       aria-label="Ofertas em destaque"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-green/10 via-transparent to-brand-yellow/10" />
 
-      <div className="relative p-4 md:p-8">
+      <div className="relative min-w-0 p-4 md:p-8">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <span className="rounded-full border border-brand-yellow/35 bg-brand-yellow/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-yellow">
             {visual.tipo}
           </span>
-          <span className="text-xs text-muted">
+          <span className="text-xs text-muted tabular-nums">
             {index + 1} / {total}
           </span>
         </div>
 
+        <div className="min-w-0 overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={produto.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              className="min-w-0"
+            >
+              {/* Mobile: carrossel horizontal das 3 peças do combo */}
+              <div className="-mx-1 flex gap-3 overflow-x-auto overscroll-x-contain px-1 pb-2 scrollbar-none snap-x snap-mandatory md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0 md:snap-none">
+                {visual.itens.map((item) => (
+                  <figure
+                    key={`${produto.id}-${item.src}`}
+                    className="group relative aspect-[3/4] w-[min(72vw,16.5rem)] shrink-0 snap-center overflow-hidden rounded-2xl border border-white/10 bg-background-elev/80 shadow-inner md:w-auto md:min-w-0"
+                  >
+                    <Image
+                      src={item.src}
+                      alt={item.legenda}
+                      fill
+                      className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                      sizes="(max-width: 768px) 72vw, (max-width: 1200px) 30vw, 360px"
+                      quality={92}
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+                    <figcaption className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+                      <span className="inline-block max-w-full rounded-lg bg-black/55 px-2.5 py-1 font-display text-[10px] uppercase leading-snug tracking-[0.16em] text-white/95 backdrop-blur-sm md:text-[11px] md:tracking-[0.2em]">
+                        {item.legenda}
+                      </span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            key={produto.id}
-            initial={{ opacity: 0, x: 28 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -28 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="grid gap-3 md:grid-cols-3 md:gap-4"
+            key={`meta-${produto.id}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            className="mt-5 min-w-0 md:mt-8"
           >
-            {visual.itens.map((item) => (
-              <figure
-                key={`${produto.id}-${item.src}`}
-                className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/10 bg-background-elev/80 shadow-inner"
-              >
-                <Image
-                  src={item.src}
-                  alt={item.legenda}
-                  fill
-                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 360px"
-                  quality={92}
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-                <figcaption className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
-                  <span className="inline-block rounded-lg bg-black/55 px-2.5 py-1 font-display text-[10px] uppercase tracking-[0.2em] text-white/95 backdrop-blur-sm md:text-[11px]">
-                    {item.legenda}
-                  </span>
-                </figcaption>
-              </figure>
-            ))}
+            <h2 className="font-display text-xl leading-tight tracking-tight text-balance text-foreground sm:text-2xl md:text-3xl lg:text-[1.85rem]">
+              {produto.nome}
+            </h2>
+            <div className="mt-3 flex flex-wrap items-baseline gap-2 md:mt-4 md:gap-3">
+              <span className="font-display text-3xl gradient-text sm:text-4xl">
+                {formatBRL(salePrice)}
+              </span>
+              {strikePrice > salePrice + 1e-9 && (
+                <span className="text-sm text-muted line-through sm:text-base">
+                  {formatBRL(strikePrice)}
+                </span>
+              )}
+            </div>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted md:mt-4">
+              {produto.descricao}
+            </p>
+            <Link
+              href={`/produto/${produto.slug}`}
+              className="btn-primary mt-5 inline-flex w-full justify-center sm:mt-6 sm:w-auto"
+            >
+              Ver promoção e escolher tamanho
+            </Link>
           </motion.div>
         </AnimatePresence>
 
-        <motion.div
-          key={`meta-${produto.id}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.08 }}
-          className="mt-6 md:mt-8"
-        >
-          <h2 className="font-display text-2xl leading-tight tracking-tight text-foreground md:text-3xl lg:text-[1.85rem]">
-            {produto.nome}
-          </h2>
-          <div className="mt-4 flex flex-wrap items-baseline gap-3">
-            <span className="font-display text-4xl gradient-text">{formatBRL(sitePromoUnitSale(produto))}</span>
-            {catalogStrikePrice(produto) > sitePromoUnitSale(produto) + 1e-9 && (
-              <span className="text-base text-muted line-through">{formatBRL(catalogStrikePrice(produto))}</span>
-            )}
-          </div>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">{produto.descricao}</p>
-          <Link href={`/produto/${produto.slug}`} className="btn-primary mt-6 inline-flex">
-            Ver promoção e escolher tamanho
-          </Link>
-        </motion.div>
-
-        <div className="mt-8 flex items-center justify-center gap-4">
+        <div className="mt-6 flex min-w-0 items-center justify-between gap-2 sm:mt-8 sm:justify-center sm:gap-4">
           <button
             type="button"
             onClick={() => go(-1)}
-            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface/70 text-foreground shadow-lg transition hover:border-brand-yellow hover:text-brand-yellow"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface/70 text-foreground shadow-lg transition hover:border-brand-yellow hover:text-brand-yellow sm:h-12 sm:w-12"
             aria-label="Oferta anterior"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
 
-          <div className="flex max-w-[min(100%,280px)] flex-wrap justify-center gap-2 px-2">
-            {pacotes.map((_, i) => (
-              <button
-                key={pacotes[i]!.id}
-                type="button"
-                onClick={() => setIndex(i)}
-                className={cn(
-                  "h-2.5 rounded-full transition-all duration-300",
-                  i === index ? "w-10 bg-brand-yellow" : "w-2.5 bg-border hover:bg-muted-foreground/50",
-                )}
-                aria-label={`Ir para oferta ${i + 1}`}
-                aria-current={i === index}
-              />
-            ))}
+          <div className="flex min-w-0 flex-1 justify-center overflow-x-auto px-1 scrollbar-none sm:max-w-[min(100%,20rem)] sm:flex-none sm:px-2">
+            <div className="flex gap-1.5 sm:gap-2">
+              {pacotes.map((p, i) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  className={cn(
+                    "h-2 shrink-0 rounded-full transition-all duration-300",
+                    i === index ? "w-8 bg-brand-yellow sm:w-10" : "w-2 bg-border hover:bg-muted-foreground/50",
+                  )}
+                  aria-label={`Ir para oferta ${i + 1}`}
+                  aria-current={i === index}
+                />
+              ))}
+            </div>
           </div>
 
           <button
             type="button"
             onClick={() => go(1)}
-            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface/70 text-foreground shadow-lg transition hover:border-brand-yellow hover:text-brand-yellow"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface/70 text-foreground shadow-lg transition hover:border-brand-yellow hover:text-brand-yellow sm:h-12 sm:w-12"
             aria-label="Próxima oferta"
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </div>
       </div>

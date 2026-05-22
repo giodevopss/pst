@@ -4,6 +4,7 @@ import { ArrowRight, Package } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ProductCard } from "@/components/ProductCard";
 import {
+  comAnuncioPrioritarioPrimeiro,
   produtosPacotesFigurinhas,
   produtosPacotesAdrenalyn,
   produtosPacotesHeroDestaque,
@@ -27,8 +28,11 @@ export const metadata: Metadata = {
 
 export default function PacotesPage() {
   const figurinhas = produtosPacotesFigurinhas();
-  const figurinhasRandom = pickRandom(figurinhas, 10);
-  const figurinhasShuffled = pickRandom(figurinhas, figurinhas.length);
+  const pacotesFigurinhas = figurinhas.filter((p) => p.categoria === "pacote");
+  const figurinhasRandom = comAnuncioPrioritarioPrimeiro(pickRandom(pacotesFigurinhas, 10));
+  const figurinhasShuffled = comAnuncioPrioritarioPrimeiro(
+    pickRandom(pacotesFigurinhas, pacotesFigurinhas.length),
+  );
   const adrenalyn = produtosPacotesAdrenalyn();
   const destaquesTopo = produtosPacotesHeroDestaque();
 
@@ -49,7 +53,7 @@ export default function PacotesPage() {
 
           <div className="mt-8 grid min-w-0 items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
             <div className="min-w-0">
-              <h1 className="max-w-xl font-display text-5xl leading-[0.95] tracking-tight md:text-6xl lg:text-7xl">
+              <h1 className="max-w-xl font-display text-[2.35rem] leading-[0.95] tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl">
                 COMBOS ESPECIAIS
               </h1>
               <p className="mt-6 max-w-lg text-base text-muted md:text-lg">
