@@ -135,7 +135,7 @@ export const PRODUTOS: Produto[] = [
       "7 figurinhas por pacote",
       "Coleção oficial Panini",
       "Pacote atualizado Copa 2026™",
-      "Preço promocional na loja",
+      "Lançamento linha atualizada",
     ],
     estoque: "em_estoque",
     badge: "Novo",

@@ -42,7 +42,8 @@ import {
   SITE_WIDE_DISCOUNT_PERCENT,
   CHECKOUT_COUPON_NEYMAR_CODE,
   CHECKOUT_COUPON_REGISTRY,
-  computeCheckoutWithCoupons,
+  checkoutSubtotalCupomElegivel,
+  checkoutTotalComCupons,
   isValidCheckoutCouponCode,
   migrateCheckoutCouponCode,
   normalizeCheckoutCouponCode,
@@ -270,14 +271,16 @@ export function CheckoutForm() {
 
   const checkoutTotals = useMemo(() => {
     const subtotalLoja = totalPrice;
-    const { totalPagar, descontoTotal, lines } = computeCheckoutWithCoupons(
+    const subtotalCupom = checkoutSubtotalCupomElegivel(items);
+    const { totalPagar, descontoTotal, lines } = checkoutTotalComCupons(
       subtotalLoja,
+      subtotalCupom,
       appliedCoupons,
       paymentModo,
       { optOutAutoPixCoupon: pixCouponOptOut },
     );
     return { subtotalLoja, descontoCupom: descontoTotal, totalPagar, couponLines: lines };
-  }, [paymentModo, totalPrice, appliedCoupons, pixCouponOptOut]);
+  }, [paymentModo, totalPrice, items, appliedCoupons, pixCouponOptOut]);
 
   useCheckoutAbandonBeacon({
     items,
@@ -565,8 +568,9 @@ export function CheckoutForm() {
         }
       }
 
-      const totalACobrar = computeCheckoutWithCoupons(
+      const totalACobrar = checkoutTotalComCupons(
         totalPrice,
+        checkoutSubtotalCupomElegivel(items),
         appliedCoupons,
         paymentModo,
         { optOutAutoPixCoupon: pixCouponOptOut },

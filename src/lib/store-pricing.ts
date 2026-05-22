@@ -10,10 +10,33 @@ function isLojistaCaixaProdutoId(id: string | undefined): boolean {
 /** SKUs com preço de vitrine fixo (sem −30% da loja). */
 const PRECO_FIXO_VITRINE_IDS = new Set(["envelope-figurinhas-atualizado"]);
 
+/** Pacote avulso de figurinhas atualizado: sem cupons no checkout (desconto fica zerado). */
+const CHECKOUT_CUPOM_EXCLUIDO_IDS = new Set(["envelope-figurinhas-atualizado"]);
+
 /** Camisetas e itens avulsos com preço fechado (ex.: pacote figurinhas R$ 7,00). */
 export function isPrecoFixoVitrineProdutoId(id: string | undefined): boolean {
   if (id == null) return false;
   return id.startsWith("camiseta-") || PRECO_FIXO_VITRINE_IDS.has(id);
+}
+
+export function isCheckoutCupomExcluidoProdutoId(id: string | undefined): boolean {
+  return id != null && CHECKOUT_CUPOM_EXCLUIDO_IDS.has(id);
+}
+
+export type CheckoutCartLine = {
+  produtoId: string;
+  preco: number;
+  quantidade: number;
+};
+
+/** Subtotal sobre o qual cupons (NEY10, PANINI20, etc.) podem incidir. */
+export function checkoutSubtotalCupomElegivel(items: CheckoutCartLine[]): number {
+  return roundBRLCents(
+    items.reduce((sum, i) => {
+      if (isCheckoutCupomExcluidoProdutoId(i.produtoId)) return sum;
+      return sum + i.preco * i.quantidade;
+    }, 0),
+  );
 }
 
 /** Desconto fixo de vitrine/carrinho sobre o valor de lista (strike Panini/catálogo). */
@@ -206,6 +229,30 @@ export function computeCheckoutWithCoupons(
   return {
     totalPagar: running,
     descontoTotal: roundBRLCents(subtotal - running),
+    lines,
+  };
+}
+
+/**
+ * Total do pedido: parte sem cupom (ex.: figurinhas atualizado avulso) + elegível já com cupons.
+ */
+export function checkoutTotalComCupons(
+  subtotalLoja: number,
+  subtotalCupomElegivel: number,
+  rawCodes: string[],
+  paymentModo: "pix" | "cartao",
+  options?: { optOutAutoPixCoupon?: boolean },
+): { totalPagar: number; descontoTotal: number; lines: CheckoutCouponLine[] } {
+  const parteSemCupom = roundBRLCents(Math.max(0, subtotalLoja - subtotalCupomElegivel));
+  const { totalPagar: elegivelComCupom, descontoTotal, lines } = computeCheckoutWithCoupons(
+    subtotalCupomElegivel,
+    rawCodes,
+    paymentModo,
+    options,
+  );
+  return {
+    totalPagar: roundBRLCents(parteSemCupom + elegivelComCupom),
+    descontoTotal,
     lines,
   };
 }
