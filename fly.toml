@@ -1,14 +1,16 @@
-# fly.toml — app pst-gs1z4w (região gru)
-# https://fly.io/docs/reference/configuration/
+# fly.toml app configuration file generated for pst2-rxovda on 2026-05-23T01:33:21Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = 'pst-gs1z4w'
+app = 'pst2-rxovda'
 primary_region = 'gru'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [http_service]
-  internal_port = 3000
+  internal_port = 8080
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
@@ -19,3 +21,4 @@ primary_region = 'gru'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 256
