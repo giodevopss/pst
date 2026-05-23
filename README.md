@@ -1,7 +1,7 @@
 # Copa 2026 Store
 
 Loja temática para a Copa do Mundo FIFA 2026 — álbum oficial, caixinhas de figurinhas e
-camisetas das seleções classificadas. MVP em Next.js + Tailwind, deploy em Railway.
+camisetas das seleções classificadas. MVP em Next.js + Tailwind, deploy em Fly.io.
 
 ## Stack
 
@@ -72,21 +72,38 @@ Tudo o que muda no dia a dia está em arquivos simples:
 
 > Stripe: webhook em `/api/stripe/webhook` para acompanhar confirmação de PIX onde aplicável.
 
-## Deploy no Railway
+## Deploy no Fly.io
 
-O app usa **`output: "standalone"`** no Next.js, imagem **Docker** multi-stage (`Dockerfile`) e **`sharp`** como dependência (otimização de imagens em Linux). O comando de produção é `node server.js` (Railway define `PORT` automaticamente).
+O app usa **`output: "standalone"`** no Next.js, imagem **Docker** multi-stage (`Dockerfile`) e **`sharp`**. Produção: `node server.js` na porta **3000** (`internal_port` no `fly.toml` deve ser **3000**).
 
 ### Passo a passo
 
-1. Crie um serviço: <https://railway.com/new> → **Empty project** ou **Deploy from GitHub repo**.
-2. Se for por GitHub, conecte o repositório e escolha a branch. O arquivo **`railway.json`** define builder **DOCKERFILE**.
-3. Em **Variables** (mesmo antes do primeiro deploy bem-sucedido), configure pelo menos:
-   - **`NEXT_PUBLIC_SITE_URL`** — URL canônica pública, ex.: `https://seudominio.up.railway.app` (sem barra final). Usada em `metadataBase`, `sitemap` e `robots`.
-   - Opcional: **`NEXT_PUBLIC_HERO_MODEL_URL`** — `.glb` ou caminho sob `/public` (ex.: `/models/album-copa-2026.glb`). Deixe sem definir se quiser usar o arquivo padrão no repositório.
-4. **Networking → Generate Domain** (ou domínio customizado).
-5. Faça um **Redeploy** após mudar qualquer `NEXT_PUBLIC_*`, pois são embutidas no bundle no **`next build`**.
+1. Instale o [flyctl](https://fly.io/docs/flyctl/install/) e faça login: `fly auth login`.
+2. O app está em **`fly.toml`** (`app = pst-gs1z4w`, região **`gru`**).
+3. **Secrets** (runtime — servidor):
+   ```bash
+   fly secrets set \
+     MONGODB_URI="mongodb+srv://..." \
+     ADMIN_PASSWORD="..." \
+     ADMIN_PANEL_SECRET="..." \
+     USER_SESSION_SECRET="..." \
+     MERCADOPAGO_ACCESS_TOKEN="..." \
+     -a pst-gs1z4w
+   ```
+4. **Deploy** com build args para `NEXT_PUBLIC_*` (entram no bundle no build):
+   ```bash
+   fly deploy -a pst-gs1z4w \
+     --build-arg NEXT_PUBLIC_SITE_URL=https://pst-gs1z4w.fly.dev \
+     --build-arg NEXT_PUBLIC_META_PIXEL_ID=2545916985811236
+   ```
+5. Domínio customizado: `fly certs add seudominio.com` e atualize `NEXT_PUBLIC_SITE_URL` + redeploy.
+6. Webhooks MP/Stripe: apontar para `https://SEU_DOMINIO/api/mercadopago/webhook` e `/api/stripe/webhook`.
 
-Consulte modelo de variáveis em [`.env.example`](.env.example).
+Consulte todas as variáveis em [`.env.example`](.env.example).
+
+### Falha comum: porta
+
+Se os logs mostram `listening on 0.0.0.0:8080` mas o Next sobe em **3000**, ajuste `internal_port = 3000` em `fly.toml` e rode `fly deploy` de novo.
 
 ### Testar a imagem localmente
 
@@ -112,9 +129,10 @@ node server.js
 
 ### Saúde e falhas comuns
 
-- Healthcheck configurado para **`/`** em `railway.json` (`healthcheckTimeout` 120s para cold start).
-- Se o deploy reiniciar em loop: veja logs de build (**Build Logs**) e garanta **`package-lock.json`** commitado junto ao `package.json`.
-- Imagens CDN: garanta **`sharp`** instalado (`package.json`) — já incluído.
+- Logs: `fly logs -a pst-gs1z4w`
+- Com `min_machines_running = 0`, a máquina **para quando ociosa** (cold start na primeira visita).
+- VM recomendada: **1 GB** RAM (`[[vm]]` no `fly.toml`).
+- Garanta **`package-lock.json`** commitado junto ao `package.json`.
 
 ## Roadmap pós-MVP
 

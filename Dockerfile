@@ -1,5 +1,5 @@
-# Build e produção Next.js standalone — otimizado para Railway (Docker)
-# Railway injeta PORT em tempo de execução; NEXT_PUBLIC_* vêm das variáveis do projeto no build.
+# Build e produção Next.js standalone — Fly.io / Docker
+# Fly/Railway injetam PORT em runtime; NEXT_PUBLIC_* devem existir no build (fly deploy --build-arg).
 
 # --- deps + build ---
 FROM node:20-alpine AS builder
@@ -14,13 +14,17 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Railway envia variáveis do serviço como build args; exportamos pra `next build` ler.
+# Build args (Fly: fly deploy --build-arg NEXT_PUBLIC_SITE_URL=https://...)
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_HERO_MODEL_URL
 ARG NEXT_PUBLIC_META_PIXEL_ID
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_PIX_PROVIDER
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 ENV NEXT_PUBLIC_HERO_MODEL_URL=${NEXT_PUBLIC_HERO_MODEL_URL}
 ENV NEXT_PUBLIC_META_PIXEL_ID=${NEXT_PUBLIC_META_PIXEL_ID}
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+ENV NEXT_PUBLIC_PIX_PROVIDER=${NEXT_PUBLIC_PIX_PROVIDER}
 
 RUN npm run build
 
@@ -44,7 +48,7 @@ USER nextjs
 
 EXPOSE 3000
 
-# Railway define PORT; mantém default local
+# Fly define PORT; default 3000 (deve coincidir com internal_port no fly.toml)
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 

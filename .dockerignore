@@ -13,7 +13,7 @@ npm-debug.log*
 coverage
 .turbo
 
-# Secrets (use variáveis do Railway)
+# Secrets (use fly secrets / variáveis de ambiente no deploy)
 .env
 .env.*
 !.env.example
