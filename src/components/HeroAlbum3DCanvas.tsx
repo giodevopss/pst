@@ -5,16 +5,11 @@ import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } fr
 import * as THREE from "three";
 import { Canvas, useThree } from "@react-three/fiber";
 import { Bounds, ContactShadows, Float, OrbitControls, useGLTF } from "@react-three/drei";
+import { HERO_ALBUM_MODEL_URL } from "@/lib/hero-album-model";
+import { HeroAlbum3DLoading } from "./HeroAlbum3DLoading";
 
-function resolveHeroModelUrl(): string {
-  const fallback = "/models/album-copa-2026.glb";
-  const raw = process.env.NEXT_PUBLIC_HERO_MODEL_URL?.trim();
-  if (!raw) return fallback;
-  if (/^https?:\/\//i.test(raw)) return raw;
-  return raw.startsWith("/") ? raw : `/${raw}`;
-}
+useGLTF.preload(HERO_ALBUM_MODEL_URL);
 
-const HERO_ALBUM_MODEL_URL = resolveHeroModelUrl();
 const FALLBACK_VIEWER = "https://www.meshy.ai/s/HWk5NQ";
 
 function WebglContextGuard({ onContextLost }: { onContextLost: () => void }) {
@@ -59,21 +54,11 @@ function AlbumModel() {
   );
 }
 
-function LoadingOverlay() {
-  return (
-    <div className="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center">
-      <span className="rounded-full border border-border bg-surface/85 px-4 py-2 font-display text-sm tracking-[0.2em] text-muted backdrop-blur-sm">
-        Carregando 3D…
-      </span>
-    </div>
-  );
-}
-
 function ModelErrorOverlay({ onRetry }: { onRetry?: () => void }) {
   return (
     <div className="pointer-events-none absolute inset-0 z-[3] flex flex-col justify-end bg-gradient-to-t from-background/95 via-background/40 to-transparent p-4 text-center md:p-6">
       <p className="text-xs text-foreground/90 md:text-sm">
-        O modelo 3D não carregou (rede ou arquivo). A imagem do álbum continua visível acima.
+        O modelo 3D não carregou (rede ou arquivo). Tente novamente ou abra no visualizador externo.
       </p>
       <div className="pointer-events-auto mt-3 flex flex-wrap items-center justify-center gap-3">
         {onRetry && (
@@ -99,10 +84,18 @@ function ModelErrorOverlay({ onRetry }: { onRetry?: () => void }) {
 }
 
 class ModelErrorBoundary extends React.Component<
-  { children: React.ReactNode; onRetry?: () => void },
+  {
+    children: React.ReactNode;
+    onRetry?: () => void;
+    onModelError?: () => void;
+  },
   { hasError: boolean }
 > {
-  constructor(props: { children: React.ReactNode; onRetry?: () => void }) {
+  constructor(props: {
+    children: React.ReactNode;
+    onRetry?: () => void;
+    onModelError?: () => void;
+  }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -112,7 +105,7 @@ class ModelErrorBoundary extends React.Component<
   }
 
   componentDidCatch() {
-    // noop
+    this.props.onModelError?.();
   }
 
   render() {
@@ -151,9 +144,16 @@ export type HeroAlbum3DCanvasProps = {
   onModelReady?: () => void;
   /** Remontar cena / tentar de novo. */
   onRemount?: () => void;
+  /** Chamar quando o carregamento do modelo falhar. */
+  onModelError?: () => void;
 };
 
-export function HeroAlbum3DCanvas({ className, onModelReady, onRemount }: HeroAlbum3DCanvasProps) {
+export function HeroAlbum3DCanvas({
+  className,
+  onModelReady,
+  onRemount,
+  onModelError,
+}: HeroAlbum3DCanvasProps) {
   const [webglCrashed, setWebglCrashed] = useState(false);
   const [sceneKey, setSceneKey] = useState(0);
 
@@ -172,8 +172,8 @@ export function HeroAlbum3DCanvas({ className, onModelReady, onRemount }: HeroAl
       {webglCrashed && <WebglCrashedOverlay onRetry={bumpRemount} />}
       <div key={sceneKey} className="absolute inset-0">
         {webglCrashed ? null : (
-          <ModelErrorBoundary onRetry={bumpRemount}>
-            <Suspense fallback={<LoadingOverlay />}>
+          <ModelErrorBoundary onRetry={bumpRemount} onModelError={onModelError}>
+            <Suspense fallback={<HeroAlbum3DLoading />}>
               <Canvas
                 className="touch-none absolute inset-0 z-[1] !bg-transparent"
                 dpr={[1, 1.35]}

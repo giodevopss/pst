@@ -14,6 +14,7 @@ import { getMetaPixelId } from "@/lib/meta-pixel";
 import { AttributionCaptureRoot } from "@/components/AttributionCaptureRoot";
 import { ThemeInitScript } from "@/components/ThemeInitScript";
 import { ThemeColorMeta } from "@/components/ThemeColorMeta";
+import { HERO_ALBUM_MODEL_URL } from "@/lib/hero-album-model";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -79,6 +80,14 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${bebas.variable}`}
     >
+      <head>
+        <link
+          rel="preload"
+          href={HERO_ALBUM_MODEL_URL}
+          as="fetch"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="flex min-h-screen min-w-0 flex-col overflow-x-hidden">
         <ThemeInitScript />
         <ThemeColorMeta />

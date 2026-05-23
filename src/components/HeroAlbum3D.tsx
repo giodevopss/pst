@@ -1,16 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-
-/** Imagem do catálogo — aparece na hora enquanto o GLB / WebGL carregam. */
-const STATIC_ALBUM_IMG = "/images/panini/album-capa-dura-ouro.jpg";
+import { HeroAlbum3DLoading } from "./HeroAlbum3DLoading";
 
 const HeroAlbum3DCanvas = dynamic(
   () => import("./HeroAlbum3DCanvas").then((m) => m.HeroAlbum3DCanvas),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => <HeroAlbum3DLoading /> },
 );
 
 type HeroAlbum3DProps = {
@@ -19,28 +16,11 @@ type HeroAlbum3DProps = {
 
 export function HeroAlbum3D({ className }: HeroAlbum3DProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
-  const [mountCanvas, setMountCanvas] = useState(false);
   const [modelReady, setModelReady] = useState(false);
 
   useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) setInView(true);
-      },
-      { rootMargin: "200px", threshold: 0.04 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
+    void import("./HeroAlbum3DCanvas");
   }, []);
-
-  useEffect(() => {
-    if (!inView) return;
-    const t = window.setTimeout(() => setMountCanvas(true), 100);
-    return () => window.clearTimeout(t);
-  }, [inView]);
 
   const onModelReady = useCallback(() => setModelReady(true), []);
   const onRemount = useCallback(() => setModelReady(false), []);
@@ -53,28 +33,15 @@ export function HeroAlbum3D({ className }: HeroAlbum3DProps) {
         className,
       )}
     >
-      <Image
-        src={STATIC_ALBUM_IMG}
-        alt="Álbum oficial FIFA World Cup 2026™ — capa dura"
-        fill
+      {!modelReady && <HeroAlbum3DLoading />}
+      <HeroAlbum3DCanvas
         className={cn(
-          "object-contain transition-opacity duration-700 ease-out",
-          modelReady ? "opacity-0" : "opacity-100",
+          "absolute inset-0 z-[1] transition-opacity duration-700 ease-out",
+          modelReady ? "opacity-100" : "opacity-0",
         )}
-        sizes="(max-width: 768px) 92vw, 520px"
-        priority
-        draggable={false}
+        onModelReady={onModelReady}
+        onRemount={onRemount}
       />
-      {mountCanvas && (
-        <HeroAlbum3DCanvas
-          className={cn(
-            "absolute inset-0 z-[1] transition-opacity duration-700 ease-out",
-            modelReady ? "opacity-100" : "opacity-0",
-          )}
-          onModelReady={onModelReady}
-          onRemount={onRemount}
-        />
-      )}
     </div>
   );
 }

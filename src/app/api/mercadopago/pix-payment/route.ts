@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
-import { getMercadoPagoPayment } from "@/lib/mercadopago-server";
-import { resolvePublicSiteOrigin } from "@/lib/public-site";
+import {
+  formatMercadoPagoApiError,
+  validateMercadoPagoAccessToken,
+} from "@/lib/mercadopago-errors";
+import { buildMercadoPagoNotificationUrl } from "@/lib/mercadopago-notify-url";
+import { getMercadoPagoAccessToken, getMercadoPagoPayment } from "@/lib/mercadopago-server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +19,19 @@ function splitPayerName(full: string): { first_name: string; last_name: string }
 }
 
 export async function POST(req: Request) {
+  const accessToken = getMercadoPagoAccessToken();
+  if (!accessToken) {
+    return NextResponse.json(
+      { error: "Mercado Pago não configurado. Defina MERCADOPAGO_ACCESS_TOKEN." },
+      { status: 503 },
+    );
+  }
+
+  const tokenError = validateMercadoPagoAccessToken(accessToken);
+  if (tokenError) {
+    return NextResponse.json({ error: tokenError }, { status: 503 });
+  }
+
   const client = getMercadoPagoPayment();
   if (!client) {
     return NextResponse.json(
@@ -59,11 +76,7 @@ export async function POST(req: Request) {
   const amount = Math.round(amountRaw * 100) / 100;
   const payer = splitPayerName(customerName);
 
-  const origin = resolvePublicSiteOrigin();
-  const notificationUrl =
-    origin && !origin.includes("localhost")
-      ? `${origin.replace(/\/$/, "")}/api/mercadopago/webhook`
-      : undefined;
+  const notificationUrl = buildMercadoPagoNotificationUrl(req);
 
   try {
     const result = await client.create({
@@ -115,13 +128,7 @@ export async function POST(req: Request) {
       expiresAt: result.date_of_expiration ?? null,
     });
   } catch (e: unknown) {
-    const msg =
-      e && typeof e === "object" && "message" in e && typeof (e as { message: unknown }).message === "string"
-        ? (e as { message: string }).message
-        : "Erro Mercado Pago";
-    if (process.env.NODE_ENV === "development") {
-      console.error("[mercadopago/pix-payment]", e);
-    }
-    return NextResponse.json({ error: msg }, { status: 502 });
+    console.error("[mercadopago/pix-payment]", formatMercadoPagoApiError(e));
+    return NextResponse.json({ error: formatMercadoPagoApiError(e) }, { status: 502 });
   }
 }
