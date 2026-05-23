@@ -1,46 +1,50 @@
-import { getDb } from "./mongodb";
+import { getSqlite } from "./db";
 import type { Usuario } from "@/types/usuario";
 
-const COLLECTION = "usuarios";
-
 export async function findByEmail(email: string): Promise<Usuario | null> {
-  const db = await getDb();
+  const db = getSqlite();
   const normalized = email.trim().toLowerCase();
-  const doc = await db.collection(COLLECTION).findOne({ email: normalized });
-  if (!doc) return null;
-  const { _id, ...rest } = doc;
-  return rest as unknown as Usuario;
+  const row = db.prepare(`SELECT payload FROM usuarios WHERE email = ?`).get(normalized) as
+    | { payload: string }
+    | undefined;
+  if (!row) return null;
+  return JSON.parse(row.payload) as Usuario;
 }
 
 export async function createUsuario(user: Usuario): Promise<void> {
-  const db = await getDb();
-  await db.collection(COLLECTION).insertOne({ ...user });
+  const db = getSqlite();
+  db.prepare(
+    `INSERT INTO usuarios (id, email, criado_em, payload) VALUES (?, ?, ?, ?)`,
+  ).run(user.id, user.email.trim().toLowerCase(), user.criadoEm, JSON.stringify(user));
 }
 
 export async function updateUsuario(
   email: string,
   patch: Partial<Omit<Usuario, "id" | "email" | "senhaHash" | "criadoEm">>,
 ): Promise<Usuario | null> {
-  const db = await getDb();
-  const normalized = email.trim().toLowerCase();
-  const result = await db.collection(COLLECTION).findOneAndUpdate(
-    { email: normalized },
-    { $set: { ...patch, atualizadoEm: new Date().toISOString() } },
-    { returnDocument: "after" },
+  const existing = await findByEmail(email);
+  if (!existing) return null;
+
+  const updated: Usuario = {
+    ...existing,
+    ...patch,
+    atualizadoEm: new Date().toISOString(),
+  };
+
+  const db = getSqlite();
+  db.prepare(`UPDATE usuarios SET payload = ? WHERE email = ?`).run(
+    JSON.stringify(updated),
+    email.trim().toLowerCase(),
   );
-  if (!result) return null;
-  const { _id, ...rest } = result;
-  return rest as unknown as Usuario;
+  return updated;
 }
 
 export async function listUsuarios(limit = 300): Promise<Usuario[]> {
-  const db = await getDb();
-  const docs = await db
-    .collection(COLLECTION)
-    .find({})
-    .sort({ criadoEm: -1 })
-    .limit(limit)
-    .toArray();
+  const db = getSqlite();
+  const safeLimit = Math.max(1, Math.min(1000, Math.floor(limit)));
+  const rows = db
+    .prepare(`SELECT payload FROM usuarios ORDER BY criado_em DESC LIMIT ?`)
+    .all(safeLimit) as { payload: string }[];
 
-  return docs.map(({ _id, ...rest }) => rest as unknown as Usuario);
+  return rows.map((row) => JSON.parse(row.payload) as Usuario);
 }

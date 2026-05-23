@@ -14,8 +14,8 @@ export function Hero() {
       <div className="pointer-events-none absolute -right-32 top-40 h-96 w-96 rounded-full bg-brand-yellow/30 blur-[140px]" />
       <div className="pointer-events-none absolute bottom-0 left-1/2 h-72 w-[60vw] -translate-x-1/2 rounded-full bg-brand-blue/30 blur-[140px]" />
 
-      <div className="relative mx-auto grid min-w-0 max-w-7xl items-center gap-10 px-4 py-20 md:px-8 md:py-28 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <div className="min-w-0">
+      <div className="relative mx-auto grid min-w-0 max-w-7xl items-center gap-6 px-4 py-12 md:gap-10 md:px-8 md:py-28 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <motion.div className="order-2 min-w-0 lg:order-1">
           <motion.div
             initial={false}
             animate={{ opacity: 1, y: 0 }}
@@ -32,7 +32,7 @@ export function Hero() {
             initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05 }}
-            className="mt-6 font-display text-[2.65rem] leading-[0.95] tracking-tight text-foreground sm:text-5xl md:text-7xl lg:text-8xl"
+            className="mt-4 font-display text-[2.65rem] leading-[0.95] tracking-tight text-foreground sm:mt-6 sm:text-5xl md:text-7xl lg:text-8xl"
           >
             VIVA A COPA<br />
             <span className="gradient-text">DO MUNDO 2026</span>
@@ -75,13 +75,13 @@ export function Hero() {
           >
             <CountdownCopa />
           </motion.div>
-        </div>
+        </motion.div>
 
         <motion.div
           initial={false}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="relative mx-auto flex aspect-square w-full max-w-[min(100%,17.5rem)] min-w-0 items-center justify-center perspective-1000 sm:max-w-[20rem] md:max-w-[36.25rem] md:aspect-auto md:h-[580px] md:w-[580px]"
+          className="relative order-1 mx-auto flex aspect-square w-full max-w-[min(100%,20rem)] min-w-0 items-center justify-center perspective-1000 sm:max-w-[22rem] lg:order-2 md:max-w-[36.25rem] md:aspect-auto md:h-[580px] md:w-[580px]"
         >
           <div className="absolute inset-0 animate-spin-slow gradient-conic opacity-30 blur-3xl" />
           <div className="absolute left-4 top-12 h-8 w-8 rounded-full bg-brand-yellow/80 blur-[2px] shadow-[0_0_40px_rgba(255,214,10,0.9)] md:left-6 md:top-16 md:h-10 md:w-10" />

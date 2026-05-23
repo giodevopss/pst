@@ -1,4 +1,4 @@
-import { getDb } from "./mongodb";
+import { getSqlite } from "./db";
 
 export type FintechRequest = {
   id: string;
@@ -15,20 +15,20 @@ export type FintechRequest = {
   transactionId?: string;
 };
 
-const COLLECTION = "fintech";
-
 export async function appendFintechRequest(request: FintechRequest): Promise<void> {
-  const db = await getDb();
-  await db.collection(COLLECTION).insertOne({ ...request });
+  const db = getSqlite();
+  db.prepare(`INSERT INTO fintech (id, ts, payload) VALUES (?, ?, ?)`).run(
+    request.id,
+    request.timestamp,
+    JSON.stringify(request),
+  );
 }
 
 export async function listFintechRequests(): Promise<FintechRequest[]> {
-  const db = await getDb();
-  const docs = await db
-    .collection(COLLECTION)
-    .find({})
-    .sort({ timestamp: -1 })
-    .toArray();
+  const db = getSqlite();
+  const rows = db
+    .prepare(`SELECT payload FROM fintech ORDER BY ts DESC`)
+    .all() as { payload: string }[];
 
-  return docs.map(({ _id, ...rest }) => rest as unknown as FintechRequest);
+  return rows.map((row) => JSON.parse(row.payload) as FintechRequest);
 }

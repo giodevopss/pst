@@ -26,8 +26,7 @@ export default async function AdminPainelLayout({ children }: { children: React.
           Copie{" "}
           <code className="text-foreground">.env.example</code> para{" "}
           <code className="text-foreground">.env.local</code>, ajuste os valores e reinicie o{" "}
-          <code className="text-foreground">next dev</code>. No Railway, adiciona estas variáveis no
-          painel do serviço (não usar fallbacks).
+          <code className="text-foreground">next dev</code>. No Fly.io, use volume + secrets (ver README).
         </p>
       </section>
     );

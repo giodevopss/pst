@@ -1,25 +1,25 @@
-import { getDb } from "./mongodb";
+import { getSqlite } from "./db";
 import type { LojistaPedidoPersonalizadoRegistro } from "@/types/lojista-pedido-personalizado";
-
-const COLLECTION = "lojista_pedidos_personalizados";
 
 export async function appendLojistaPedidoPersonalizado(
   registro: LojistaPedidoPersonalizadoRegistro,
 ): Promise<void> {
-  const db = await getDb();
-  await db.collection(COLLECTION).insertOne({ ...registro });
+  const db = getSqlite();
+  db.prepare(
+    `INSERT INTO lojista_pedidos_personalizados (id, criado_em, payload) VALUES (?, ?, ?)`,
+  ).run(registro.id, registro.criadoEm, JSON.stringify(registro));
 }
 
 export async function listLojistaPedidosPersonalizadosRecent(
   limit = 200,
 ): Promise<LojistaPedidoPersonalizadoRegistro[]> {
-  const db = await getDb();
-  const docs = await db
-    .collection(COLLECTION)
-    .find({})
-    .sort({ criadoEm: -1 })
-    .limit(limit)
-    .toArray();
+  const db = getSqlite();
+  const safeLimit = Math.max(1, Math.min(1000, Math.floor(limit)));
+  const rows = db
+    .prepare(
+      `SELECT payload FROM lojista_pedidos_personalizados ORDER BY criado_em DESC LIMIT ?`,
+    )
+    .all(safeLimit) as { payload: string }[];
 
-  return docs.map(({ _id, ...rest }) => rest as unknown as LojistaPedidoPersonalizadoRegistro);
+  return rows.map((row) => JSON.parse(row.payload) as LojistaPedidoPersonalizadoRegistro);
 }

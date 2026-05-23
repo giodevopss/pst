@@ -34,7 +34,10 @@ yarn-error.log*
 .env*
 !.env.example
 
-# pedidos gravados localmente (painel admin)
+# SQLite local (dev — DATA_DIR=./data)
+/data/
+
+# pedidos legado
 /.data/
 
 # vercel

@@ -93,11 +93,11 @@ export default async function AdminPedidosPage() {
   try {
     [pedidos, usuarios] = await Promise.all([listPedidosRecent(350), listUsuarios(1000)]);
   } catch (err) {
-    console.error("[admin/pedidos] MongoDB:", err);
+    console.error("[admin/pedidos] SQLite:", err);
     dbError =
       err instanceof Error
         ? err.message
-        : "Não foi possível consultar o MongoDB.";
+        : "Não foi possível consultar o banco de dados.";
   }
 
   const emailsCadastrados = new Set(usuarios.map((u) => u.email));
@@ -132,16 +132,15 @@ export default async function AdminPedidosPage() {
 
       {dbError ? (
         <div className="mt-10 rounded-3xl border border-brand-red/35 bg-brand-red/10 px-6 py-6 md:px-8">
-          <p className="font-display text-xl text-foreground">Não conseguimos falar com o MongoDB</p>
+          <p className="font-display text-xl text-foreground">Não conseguimos abrir o banco de dados</p>
           <p className="mt-2 font-mono text-xs text-muted break-all">{dbError}</p>
           <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted">
-            Em produção, confira <code className="text-foreground">MONGODB_URI</code> ou (Railway plugin){" "}
-            <code className="text-foreground">MONGO_URL</code>, e{" "}
-            <code className="text-foreground">MONGODB_DB</code> na hospedeira. No Atlas, libere o acesso de
-            rede (IP público ou <code className="text-foreground">0.0.0.0/0</code> em testes) e confirme usuário/senha
-            na URI. Erros tipo <strong className="text-foreground/90">&quot;socket timed out&quot;</strong> ou{" "}
-            <strong className="text-foreground/90">&quot;Server selection timed out&quot;</strong> são quase sempre
-            firewall ou URI incorreta.
+            Em produção no Fly.io, confira o volume montado em{" "}
+            <code className="text-foreground">/data</code> e a variável{" "}
+            <code className="text-foreground">DATA_DIR</code>. Crie o volume com{" "}
+            <code className="text-foreground">fly volumes create copa_data --region gru -a NOME_DO_APP</code>{" "}
+            antes do deploy. O arquivo SQLite fica em{" "}
+            <code className="text-foreground">/data/copa2026.db</code>.
           </p>
         </div>
       ) : pedidos.length === 0 ? (
@@ -149,9 +148,8 @@ export default async function AdminPedidosPage() {
           <Package className="h-12 w-12 text-muted" />
           <p className="font-display text-2xl tracking-wide">Nenhum pedido ainda</p>
           <p className="max-w-md text-sm text-muted">
-            Quando alguém concluir o checkout, o pedido aparece aqui (MongoDB —
-            variável <code className="text-foreground">MONGODB_URI</code> ou{" "}
-            <code className="text-foreground">MONGO_URL</code> no Railway).
+            Quando alguém concluir o checkout, o pedido aparece aqui (SQLite em{" "}
+            <code className="text-foreground">DATA_DIR/copa2026.db</code>).
           </p>
           <Link href="/" className="text-sm text-brand-yellow hover:underline">
             Voltar à loja

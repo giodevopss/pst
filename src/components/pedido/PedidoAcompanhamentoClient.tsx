@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -63,7 +63,6 @@ export function PedidoAcompanhamentoClient({
   initialPedido = null,
   timelineSlot,
 }: Props) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const idParam = (orderIdProp || searchParams.get("id") || "").trim();
   const [pedido, setPedido] = useState<PedidoView | null>(() =>
@@ -106,7 +105,6 @@ export function PedidoAcompanhamentoClient({
         if (data.pedido) {
           setPedido(mergeFromStorage(normalizePedidoView(data.pedido)));
           setLoading(false);
-          router.refresh();
           return;
         }
       }
@@ -121,7 +119,7 @@ export function PedidoAcompanhamentoClient({
       }
     } catch {}
     setLoading(false);
-  }, [idParam, mergeFromStorage, router]);
+  }, [idParam, mergeFromStorage]);
 
   useEffect(() => {
     void fetchPedido();

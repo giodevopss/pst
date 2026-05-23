@@ -1,8 +1,9 @@
-# fly.toml — app pst-gs1z4w (região gru)
-# Volume: fly volumes create copa_data --size 1 --region gru -a pst-gs1z4w
-# Deploy: fly deploy -a pst-gs1z4w --config fly.toml ...
+# fly.pst2.toml — app pst2-rxovda (banco SQLite separado do pst-gs1z4w)
+# Volume: fly volumes create copa_data --size 1 --region gru -a pst2-rxovda
+# Deploy: fly deploy -a pst2-rxovda --config fly.pst2.toml \
+#   --build-arg NEXT_PUBLIC_SITE_URL=https://pst2-rxovda.fly.dev ...
 
-app = 'pst-gs1z4w'
+app = 'pst2-rxovda'
 primary_region = 'gru'
 
 [build]

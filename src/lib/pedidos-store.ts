@@ -1,25 +1,29 @@
-import { getDb } from "./mongodb";
+import { getSqlite } from "./db";
 import type { EtapaPedido, PedidoRegistro, StatusPagamentoPedido } from "@/types/pedido-store";
 
-const COLLECTION = "pedidos";
-
 export async function appendPedido(registro: PedidoRegistro): Promise<void> {
-  const db = await getDb();
+  const db = getSqlite();
   const now = new Date().toISOString();
-  await db.collection(COLLECTION).insertOne({
+  const full: PedidoRegistro = {
     ...registro,
     statusPagamento: registro.statusPagamento ?? "pendente",
     etapa: registro.etapa ?? "pedido_feito",
     atualizadoEm: registro.atualizadoEm ?? now,
-  });
+  };
+  db.prepare(`INSERT INTO pedidos (id, criado_em, payload) VALUES (?, ?, ?)`).run(
+    full.id,
+    full.criadoEm,
+    JSON.stringify(full),
+  );
 }
 
 export async function getPedidoById(id: string): Promise<PedidoRegistro | null> {
-  const db = await getDb();
-  const doc = await db.collection(COLLECTION).findOne({ id });
-  if (!doc) return null;
-  const { _id, ...rest } = doc;
-  return rest as unknown as PedidoRegistro;
+  const db = getSqlite();
+  const row = db.prepare(`SELECT payload FROM pedidos WHERE id = ?`).get(id) as
+    | { payload: string }
+    | undefined;
+  if (!row) return null;
+  return JSON.parse(row.payload) as PedidoRegistro;
 }
 
 export async function updatePedido(
@@ -29,27 +33,28 @@ export async function updatePedido(
     etapa?: EtapaPedido;
   },
 ): Promise<boolean> {
-  const db = await getDb();
-  const result = await db.collection(COLLECTION).updateOne(
-    { id },
-    {
-      $set: {
-        ...patch,
-        atualizadoEm: new Date().toISOString(),
-      },
-    },
-  );
-  return result.matchedCount > 0;
+  const existing = await getPedidoById(id);
+  if (!existing) return false;
+
+  const updated: PedidoRegistro = {
+    ...existing,
+    ...patch,
+    atualizadoEm: new Date().toISOString(),
+  };
+
+  const db = getSqlite();
+  const result = db
+    .prepare(`UPDATE pedidos SET payload = ? WHERE id = ?`)
+    .run(JSON.stringify(updated), id);
+  return result.changes > 0;
 }
 
 export async function listPedidosRecent(limit = 300): Promise<PedidoRegistro[]> {
-  const db = await getDb();
-  const docs = await db
-    .collection(COLLECTION)
-    .find({})
-    .sort({ criadoEm: -1 })
-    .limit(limit)
-    .toArray();
+  const db = getSqlite();
+  const safeLimit = Math.max(1, Math.min(1000, Math.floor(limit)));
+  const rows = db
+    .prepare(`SELECT payload FROM pedidos ORDER BY criado_em DESC LIMIT ?`)
+    .all(safeLimit) as { payload: string }[];
 
-  return docs.map(({ _id, ...rest }) => rest as unknown as PedidoRegistro);
+  return rows.map((row) => JSON.parse(row.payload) as PedidoRegistro);
 }

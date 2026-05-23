@@ -67,7 +67,7 @@ Tudo o que muda no dia a dia está em arquivos simples:
 
 1. Cliente monta o carrinho (persistido em `localStorage`).
 2. Em `/checkout` preenche dados e escolhe **PIX** (chave da loja ou **Stripe**, se configurado) ou **cartão**.
-3. O pedido é enviado à API (`/api/pedidos`) para registro no MongoDB.
+3. O pedido é enviado à API (`/api/pedidos`) e gravado em **SQLite** (`DATA_DIR/copa2026.db`).
 4. Redirecionamento para `/pedido/sucesso?id=...` com QR/copia-e-cola (PIX), resumo do pedido e frete **grátis** anunciado no site.
 
 > Stripe: webhook em `/api/stripe/webhook` para acompanhar confirmação de PIX onde aplicável.
@@ -79,25 +79,47 @@ O app usa **`output: "standalone"`** no Next.js, imagem **Docker** multi-stage (
 ### Passo a passo
 
 1. Instale o [flyctl](https://fly.io/docs/flyctl/install/) e faça login: `fly auth login`.
-2. O app está em **`fly.toml`** (`app = pst-gs1z4w`, região **`gru`**).
-3. **Secrets** (runtime — servidor):
+2. **Dois apps** (bancos SQLite **separados** — um volume por app):
+   | App | Config | URL exemplo |
+   |-----|--------|-------------|
+   | `pst-gs1z4w` | `fly.toml` | https://pst-gs1z4w.fly.dev |
+   | `pst2-rxovda` | `fly.pst2.toml` | https://pst2-rxovda.fly.dev |
+3. **Volume** (uma vez por app, região `gru`):
+   ```bash
+   fly volumes create copa_data --size 1 --region gru -a pst-gs1z4w
+   fly volumes create copa_data --size 1 --region gru -a pst2-rxovda
+   ```
+4. **Secrets** (runtime — **sem** `MONGODB_URI`):
    ```bash
    fly secrets set \
-     MONGODB_URI="mongodb+srv://..." \
      ADMIN_PASSWORD="..." \
      ADMIN_PANEL_SECRET="..." \
      USER_SESSION_SECRET="..." \
      MERCADOPAGO_ACCESS_TOKEN="..." \
      -a pst-gs1z4w
    ```
-4. **Deploy** com build args para `NEXT_PUBLIC_*` (entram no bundle no build):
+   Repita para `-a pst2-rxovda` (mesmos ou outros valores).
+5. **Deploy** (`DATA_DIR=/data` já está no `fly.toml`; volume monta em `/data`):
    ```bash
-   fly deploy -a pst-gs1z4w \
+   ./scripts/deploy-fly-pst1.sh
+   ./scripts/deploy-fly-pst2.sh
+   ```
+   Ou manualmente:
+   ```bash
+   fly deploy -a pst-gs1z4w --config fly.toml \
      --build-arg NEXT_PUBLIC_SITE_URL=https://pst-gs1z4w.fly.dev \
      --build-arg NEXT_PUBLIC_META_PIXEL_ID=2545916985811236
+
+   fly deploy -a pst2-rxovda --config fly.pst2.toml \
+     --build-arg NEXT_PUBLIC_SITE_URL=https://pst2-rxovda.fly.dev \
+     --build-arg NEXT_PUBLIC_META_PIXEL_ID=2545916985811236
    ```
-5. Domínio customizado: `fly certs add seudominio.com` e atualize `NEXT_PUBLIC_SITE_URL` + redeploy.
-6. Webhooks MP/Stripe: apontar para `https://SEU_DOMINIO/api/mercadopago/webhook` e `/api/stripe/webhook`.
+6. Domínio customizado: `fly certs add seudominio.com -a NOME_DO_APP` e redeploy com `NEXT_PUBLIC_SITE_URL` correto.
+7. Webhooks MP/Stripe: URL de **cada** domínio → `/api/mercadopago/webhook` e `/api/stripe/webhook`.
+8. **Backup** ocasional do SQLite:
+   ```bash
+   fly ssh console -a pst-gs1z4w -C "cat /data/copa2026.db" > backup-pst1-$(date +%F).db
+   ```
 
 Consulte todas as variáveis em [`.env.example`](.env.example).
 

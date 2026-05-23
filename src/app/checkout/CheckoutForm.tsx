@@ -188,6 +188,9 @@ export function CheckoutForm() {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginError, setLoginError] = useState("");
   const [checkoutBusy, setCheckoutBusy] = useState(false);
+  /** Evita flash de “carrinho vazio” entre gravar pedido e ir para /pedido/sucesso. */
+  const [finalizingOrderId, setFinalizingOrderId] = useState<string | null>(null);
+  const redirectingAfterOrderRef = useRef(false);
   /** `null` = ainda não consultámos o servidor; `true` = MERCADOPAGO_ACCESS_TOKEN definido. */
   const [mercadoPagoBackendOk, setMercadoPagoBackendOk] = useState<boolean | null>(null);
 
@@ -420,6 +423,9 @@ export function CheckoutForm() {
   }
 
   async function persistOrderAndRedirect(pagamento: PagamentoPersistidoSeguro, totalPagar: number) {
+    redirectingAfterOrderRef.current = true;
+    setFinalizingOrderId(orderId);
+
     try {
       try {
         sessionStorage.setItem(REMARKETING_CHECKOUT_CONVERTIDO_KEY, "1");
@@ -485,10 +491,8 @@ export function CheckoutForm() {
       }).catch(() => {});
     }
 
-    setTimeout(() => {
-      clear();
-      router.push(`/pedido/sucesso?id=${encodeURIComponent(orderId)}`);
-    }, 400);
+    clear();
+    router.replace(`/pedido/sucesso?id=${encodeURIComponent(orderId)}`);
   }
 
   async function handleLoginInline() {
@@ -755,8 +759,26 @@ export function CheckoutForm() {
 
       await persistOrderAndRedirect(pagamento, totalACobrar);
     } finally {
-      setCheckoutBusy(false);
+      if (!redirectingAfterOrderRef.current) {
+        setCheckoutBusy(false);
+      }
     }
+  }
+
+  if (finalizingOrderId) {
+    return (
+      <div
+        className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-3xl border border-border bg-surface/40 p-10 text-center"
+        role="status"
+        aria-live="polite"
+      >
+        <Loader2 className="h-10 w-10 animate-spin text-brand-yellow" aria-hidden />
+        <p className="font-display text-2xl tracking-wide">Finalizando pedido…</p>
+        <p className="text-sm text-muted">
+          Gerando {paymentModo === "pix" ? "seu PIX" : "a confirmação"} — aguarde um instante.
+        </p>
+      </div>
+    );
   }
 
   if (isEmpty) {

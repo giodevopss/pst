@@ -30,11 +30,11 @@ export default async function AdminLojistasMensagensPage() {
   try {
     mensagens = await listLojistaPedidosPersonalizadosRecent(250);
   } catch (err) {
-    console.error("[admin/lojistas-mensagens] MongoDB:", err);
+    console.error("[admin/lojistas-mensagens] SQLite:", err);
     dbError =
       err instanceof Error
         ? err.message
-        : "Não foi possível consultar o MongoDB.";
+        : "Não foi possível consultar o banco de dados.";
   }
 
   return (
@@ -70,7 +70,7 @@ export default async function AdminLojistasMensagensPage() {
 
       {dbError ? (
         <div className="mt-10 rounded-3xl border border-brand-red/35 bg-brand-red/10 px-6 py-6 md:px-8">
-          <p className="font-display text-xl text-foreground">Não conseguimos falar com o MongoDB</p>
+          <p className="font-display text-xl text-foreground">Não conseguimos abrir o banco de dados</p>
           <p className="mt-2 font-mono text-xs text-muted break-all">{dbError}</p>
         </div>
       ) : mensagens.length === 0 ? (
